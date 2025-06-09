@@ -10,10 +10,9 @@
         body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
         .bg-primary { background-color: #f37324; }
         .text-primary { color: #f37324; }
-        .btn-primary { background-color: #f37324; color: white; transition: background-color 0.3s; }
+        .btn-primary { background-color: #f37324; color: white; transition: all 0.3s ease; }
         .btn-primary:hover { background-color: #e46314; }
         .input-field { margin-top: 0.25rem; border-radius: 0.5rem; width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; }
-        .input-field:focus { outline: none; --tw-ring-color: #f37324; border-color: #f37324; box-shadow: 0 0 0 2px var(--tw-ring-color); }
         .form-section { display: none; }
     </style>
 </head>
@@ -76,7 +75,7 @@
                 </form>
                 <div id="message-box" class="mt-4 text-center text-sm font-medium"></div>
                  <div class="mt-6 text-center text-sm">
-                    <a href="login.html" class="font-medium text-primary hover:text-secondary">
+                    <a href="index.html" class="font-medium text-primary hover:text-gray-700">
                         Already have an account? Login here &rarr;
                     </a>
                 </div>
@@ -85,7 +84,7 @@
     </div>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbws8S8vbGeamIPWcRiAcH0o1awq6aSZkCLOWb1_Tng4/dev';
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwxTuijwVgy2JliZRnhxm8hIP5ro5YRbcyVdBksAxvIuSGzcheYyZvPbmgJXMUam50i/exec';
         
         const roleSelect = document.getElementById('role');
         const submitButton = document.getElementById('submit-button');
@@ -153,10 +152,7 @@
 
         function displayMessage(message, type) {
             messageBox.textContent = message;
-            messageBox.className = 'mt-4 text-center text-sm font-medium ';
-            if (type === 'success') messageBox.classList.add('text-green-600');
-            else if (type === 'error') messageBox.classList.add('text-red-600');
-            else messageBox.classList.add('text-gray-600');
+            messageBox.className = `mt-4 text-center text-sm font-medium ${type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-gray-600'}`;
         }
 
     </script>
