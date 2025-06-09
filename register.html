@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Kamus Catur Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .bg-primary { background-color: #f37324; }
+        .text-primary { color: #f37324; }
+        .btn-primary { background-color: #f37324; color: white; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: #e46314; }
+        .input-field { margin-top: 0.25rem; border-radius: 0.5rem; width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; }
+        .input-field:focus { outline: none; --tw-ring-color: #f37324; border-color: #f37324; box-shadow: 0 0 0 2px var(--tw-ring-color); }
+        .form-section { display: none; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-xl w-full space-y-8">
+            <div>
+                <img class="mx-auto h-20 w-auto" src="Asset 28.png" alt="Kamus Catur Logo">
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    Create Your Account
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                   Join the Kamus Catur Portal today!
+                </p>
+            </div>
+            <div class="rounded-2xl bg-white p-8 shadow-xl">
+                <form id="register-form" class="space-y-6">
+                    <!-- Role Selection -->
+                    <div>
+                        <label for="role" class="text-sm font-medium text-gray-700">I am a...</label>
+                        <select id="role" name="role" required class="input-field">
+                            <option value="" disabled selected>Select your role...</option>
+                            <option value="student">Student</option>
+                            <option value="parent">Parent</option>
+                            <option value="trainer">Trainer</option>
+                        </select>
+                    </div>
+
+                    <!-- Common Fields -->
+                    <div id="common-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="text-sm">Full Name</label><input required name="name" class="input-field"></div>
+                        <div><label class="text-sm">Email</label><input required name="email" type="email" class="input-field"></div>
+                        <div><label class="text-sm">Password</label><input required name="password" type="password" class="input-field"></div>
+                        <div><label class="text-sm">Confirm Password</label><input required name="confirmPassword" type="password" class="input-field"></div>
+                    </div>
+                    
+                    <!-- Student Specific Fields -->
+                    <div id="student-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div><label class="text-sm">Student ID</label><input required name="studentId" class="input-field" placeholder="e.g., S001"></div>
+                         <div><label class="text-sm">School Name</label><input name="schoolName" class="input-field"></div>
+                    </div>
+
+                    <!-- Parent Specific Fields -->
+                     <div id="parent-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div><label class="text-sm">Parent ID</label><input required name="parentId" class="input-field" placeholder="e.g., P001"></div>
+                         <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
+                    </div>
+
+                     <!-- Trainer Specific Fields -->
+                     <div id="trainer-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div><label class="text-sm">Trainer ID</label><input required name="trainerId" class="input-field" placeholder="e.g., T001"></div>
+                         <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
+                    </div>
+
+                    <div>
+                        <button type="submit" id="submit-button" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg btn-primary disabled:opacity-50" disabled>
+                           Register
+                        </button>
+                    </div>
+                </form>
+                <div id="message-box" class="mt-4 text-center text-sm font-medium"></div>
+                 <div class="mt-6 text-center text-sm">
+                    <a href="login.html" class="font-medium text-primary hover:text-secondary">
+                        Already have an account? Login here &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbws8S8vbGeamIPWcRiAcH0o1awq6aSZkCLOWb1_Tng4/dev';
+        
+        const roleSelect = document.getElementById('role');
+        const submitButton = document.getElementById('submit-button');
+        const formSections = document.querySelectorAll('.form-section');
+        const messageBox = document.getElementById('message-box');
+        
+        roleSelect.addEventListener('change', (e) => {
+            const selectedRole = e.target.value;
+            formSections.forEach(s => s.style.display = 'none');
+            
+            if (selectedRole) {
+                document.getElementById('common-fields').style.display = 'grid';
+                document.getElementById(`${selectedRole}-fields`).style.display = 'grid';
+                submitButton.disabled = false;
+            } else {
+                 submitButton.disabled = true;
+            }
+        });
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const password = form.querySelector('[name="password"]').value;
+            const confirmPassword = form.querySelector('[name="confirmPassword"]').value;
+
+            if (password !== confirmPassword) {
+                displayMessage('Passwords do not match.', 'error');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Registering...';
+            displayMessage('Creating your account...', 'info');
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            const payload = {
+                action: 'register',
+                sheetName: data.role,
+                data: data
+            };
+
+            try {
+                const response = await fetch(googleAppScriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    displayMessage('Registration successful! You can now log in.', 'success');
+                    form.reset();
+                    formSections.forEach(s => s.style.display = 'none');
+                    submitButton.disabled = true;
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                displayMessage(`Registration failed: ${error.message}`, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Register';
+            }
+        });
+
+        function displayMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = 'mt-4 text-center text-sm font-medium ';
+            if (type === 'success') messageBox.classList.add('text-green-600');
+            else if (type === 'error') messageBox.classList.add('text-red-600');
+            else messageBox.classList.add('text-gray-600');
+        }
+
+    </script>
+</body>
+</html>
