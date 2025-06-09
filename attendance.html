@@ -86,14 +86,14 @@
             const userRole = sessionStorage.getItem('userRole');
 
             if (!userId || userRole !== 'trainer') {
-                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Access Denied. Please <a href="login.html" class="font-bold text-primary">log in</a> as a trainer.</p>`;
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Access Denied. Please <a href="index.html" class="font-bold text-primary">log in</a> as a trainer.</p>`;
             } else {
                 setupFilters();
                 fetchTrainerStudents(userId);
             }
             document.getElementById('logout-button').addEventListener('click', () => {
                 sessionStorage.clear();
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             });
         };
 
@@ -102,7 +102,6 @@
             const sessionSelect = document.getElementById('session-select');
             const levelFilter = document.getElementById('level-filter');
             
-            // Populate months
             const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             months.forEach(month => {
                 const option = new Option(month, month);
@@ -110,7 +109,6 @@
             });
             monthSelect.value = months[new Date().getMonth()];
 
-            // Populate sessions
             for(let i = 1; i <= 8; i++) {
                 sessionSelect.add(new Option(`Session ${i}`, `Session ${i}`));
             }
