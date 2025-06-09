@@ -79,14 +79,16 @@
         window.onload = () => {
             const userId = sessionStorage.getItem('userId');
             const userRole = sessionStorage.getItem('userRole');
+
             if (!userId || userRole !== 'parent') {
-                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Access Denied. Please <a href="login.html" class="font-bold text-primary">log in</a> as a parent.</p>`;
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Access Denied. Please <a href="index.html" class="font-bold text-primary">log in</a> as a parent.</p>`;
             } else {
                 fetchParentData(userId);
             }
+
             document.getElementById('logout-button').addEventListener('click', () => {
                 sessionStorage.clear();
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             });
         };
 
@@ -111,7 +113,7 @@
             }
         }
 
-        function populateParentProfile(profile) { /* ... same as before ... */ 
+        function populateParentProfile(profile) {
             if(!profile) return;
             document.getElementById('parent-name-header').textContent = profile.name || 'Parent';
             if (profile.profilePhotos && profile.profilePhotos.startsWith('http')) { document.getElementById('profile-photo').src = profile.profilePhotos; }
