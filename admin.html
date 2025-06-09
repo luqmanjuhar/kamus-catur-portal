@@ -47,7 +47,7 @@
     </main>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwxTuijwVgy2JliZRnhxm8hIP5ro5YRbcyVdBksAxvIuSGzcheYyZvPbmgJXMUam50i/exec'; 
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbws8S8vbGeamIPWcRiAcH0o1awq6aSZkCLOWb1_Tng4/dev'; 
         
         const forms = {
             student: `
@@ -70,6 +70,12 @@
                         <div><label class="text-sm">Profile Photo URL</label><input name="profilePhotos" type="url" class="input-field"></div>
                         <input type="hidden" name="role" value="student">
                     </div>
+                    <!-- Moved Admin Fields and Button Inside Form -->
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input id="admin-password" name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div id="admin-message-box" class="mt-4 text-center text-sm font-medium"></div>
                 </form>
             `,
             parent: `
@@ -86,6 +92,12 @@
                         <div><label class="text-sm">Email</label><input name="email" type="email" class="input-field"></div>
                         <input type="hidden" name="role" value="parent">
                     </div>
+                     <!-- Moved Admin Fields and Button Inside Form -->
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input id="admin-password" name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div id="admin-message-box" class="mt-4 text-center text-sm font-medium"></div>
                 </form>
             `,
             trainer: `
@@ -102,6 +114,12 @@
                         <div><label class="text-sm">Account Info</label><input name="accountInfo" placeholder="Number & Name" class="input-field"></div>
                         <input type="hidden" name="role" value="trainer">
                     </div>
+                     <!-- Moved Admin Fields and Button Inside Form -->
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input id="admin-password" name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div id="admin-message-box" class="mt-4 text-center text-sm font-medium"></div>
                 </form>
             `,
             tournament: `
@@ -116,6 +134,12 @@
                         <div><label class="text-sm">Date End</label><input name="dateEnd" type="date" class="input-field"></div>
                         <div class="md:col-span-2"><label class="text-sm">Chess Result Link</label><input name="chessResultLink" type="url" class="input-field"></div>
                     </div>
+                     <!-- Moved Admin Fields and Button Inside Form -->
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input id="admin-password" name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div id="admin-message-box" class="mt-4 text-center text-sm font-medium"></div>
                 </form>
             `
         };
@@ -123,33 +147,26 @@
         const tabContent = document.getElementById('tab-content');
 
         function renderForm(tabName) {
-            tabContent.innerHTML = forms[tabName] + `
-                <div class="mt-8 pt-6 border-t flex items-center justify-between">
-                    <div>
-                        <label class="text-sm">Admin Password</label>
-                        <input id="admin-password" type="password" required class="input-field w-auto">
-                    </div>
-                    <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
-                </div>
-                <div id="admin-message-box" class="mt-4 text-center text-sm font-medium"></div>
-            `;
+            tabContent.innerHTML = forms[tabName];
             
-            // Re-attach event listener to the new form
+            // Attach event listener directly to the new form
             const form = tabContent.querySelector('form');
-            form.parentElement.addEventListener('submit', handleFormSubmit);
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+            }
         }
         
         async function handleFormSubmit(e) {
             e.preventDefault();
-            const form = e.target.querySelector('form');
-            const messageBox = document.getElementById('admin-message-box');
+            const form = e.target; // The form is now the event target
+            const messageBox = form.querySelector('#admin-message-box'); // Find message box inside the form
             
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             const payload = {
                 action: 'addData',
                 sheetName: form.dataset.sheet,
-                adminPassword: e.target.querySelector('#admin-password').value,
+                adminPassword: data.adminPassword, // Get password from form data
                 data: data
             };
             
@@ -184,7 +201,6 @@
                     renderForm(tab.dataset.tab);
                 });
             });
-            // Load initial form
             renderForm('student');
         };
     </script>
