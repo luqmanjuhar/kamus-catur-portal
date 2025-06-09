@@ -23,8 +23,8 @@
                 <h1 class="text-xl md:text-2xl font-bold text-gray-800">Tournament Schedule</h1>
             </div>
              <div class="flex items-center space-x-4">
-                <!-- This link can be adjusted to go back to the most relevant dashboard -->
-                <a href="student_dashboard.html" class="text-sm font-medium text-gray-600 hover:text-primary">Back to Dashboard</a>
+                <!-- This link can be adjusted to go back to the most relevant dashboard, e.g., student_dashboard.html -->
+                <a href="index.html" class="text-sm font-medium text-gray-600 hover:text-primary">Back to Portal</a>
             </div>
         </div>
     </header>
@@ -54,6 +54,8 @@
         };
 
         async function fetchTournamentsData() {
+            const container = document.getElementById('tournament-table-container');
+            const spinner = document.getElementById('loading-spinner');
             try {
                 const response = await fetch(googleAppScriptURL, {
                     method: 'POST',
@@ -63,12 +65,12 @@
                 const result = await response.json();
                 if (result.success) {
                     populateTournaments(result.data);
-                    document.getElementById('loading-spinner').classList.add('hidden');
+                    spinner.classList.add('hidden');
                 } else { 
                     throw new Error(result.message); 
                 }
             } catch (error) {
-                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 p-6">Could not load tournaments: ${error.message}</p>`;
+                spinner.innerHTML = `<p class="text-red-500 p-6">Could not load tournaments: ${error.message}</p>`;
             }
         }
 
@@ -79,7 +81,6 @@
                 return;
             }
             
-            // Sort by start date, most recent first
             records.sort((a, b) => new Date(b.dateStart) - new Date(a.dateStart));
             
             let tableHTML = `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>
