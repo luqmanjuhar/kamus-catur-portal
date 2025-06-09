@@ -84,14 +84,14 @@
             const userRole = sessionStorage.getItem('userRole');
 
             if (!userId || userRole !== 'trainer') {
-                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Access Denied. Please <a href="login.html" class="font-bold text-primary">log in</a> as a trainer.</p>`;
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Access Denied. Please <a href="index.html" class="font-bold text-primary">log in</a> as a trainer.</p>`;
             } else {
                 fetchTrainerData(userId);
             }
 
             document.getElementById('logout-button').addEventListener('click', () => {
                 sessionStorage.clear();
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             });
         };
 
@@ -139,7 +139,7 @@
             students.forEach(student => {
                 studentsHTML += `
                     <div class="p-4 border border-gray-200 rounded-lg flex items-center space-x-4 hover:bg-gray-50 transition-colors">
-                        <img src="${student.profilePhotos || 'https://placehold.co/100x100/f37324/white?text='+student.name.charAt(0)}" class="w-12 h-12 rounded-full object-cover">
+                        <img src="${student.profilePhotos || 'https://placehold.co/100x100/f37324/white?text='+(student.name ? student.name.charAt(0) : 'S')}" class="w-12 h-12 rounded-full object-cover">
                         <div class="flex-grow">
                             <p class="font-bold text-gray-800">${student.name || 'N/A'}</p>
                             <p class="text-sm text-gray-500">${student.studentId || '-'}</p>
