@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Kamus Catur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .bg-primary { background-color: #f37324; }
+        .bg-secondary { background-color: #dc3c2c; }
+        .text-primary { color: #f37324; }
+        .text-secondary { color: #dc3c2c; }
+        .border-primary { border-color: #f37324; }
+        .btn-secondary {
+            background-color: #dc3c2c;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #c82c1c;
+        }
+        .tab {
+            padding: 1rem 0.5rem;
+            margin-bottom: -1px;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .tab-active {
+            border-bottom-color: #f37324;
+            color: #f37324;
+            font-weight: 600;
+        }
+        .tab:hover {
+            border-bottom-color: #fbd3b5;
+            color: #b95618;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <img class="h-12 w-auto" src="Asset 28.png" alt="Kamus Catur Logo">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Student Portal</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-600 hidden sm:block">Welcome, <span id="student-name-header" class="font-semibold">Student</span>!</span>
+                <button id="logout-button" class="btn-secondary rounded-md px-4 py-2 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        <div id="loading-spinner" class="text-center py-10">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p class="mt-4 text-gray-600">Loading your profile...</p>
+        </div>
+
+        <div id="dashboard-content" class="hidden">
+            <!-- Profile and Class Info Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column: Student Profile -->
+                <div class="lg:col-span-1 bg-white rounded-lg shadow p-6 self-start">
+                    <div class="flex flex-col items-center text-center">
+                        <img id="profile-photo" class="h-32 w-32 rounded-full object-cover ring-4 ring-orange-100" src="https://placehold.co/200x200/cccccc/ffffff?text=?" alt="Profile Photo">
+                        <h2 id="student-name" class="mt-4 text-2xl font-bold text-gray-900">-</h2>
+                        <p id="student-id" class="text-sm text-gray-500">-</p>
+                        <span id="status" class="mt-2 text-xs font-semibold px-3 py-1 rounded-full">-</span>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Profile Details</h3>
+                        <dl class="space-y-3">
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">Lichess/Chess.com</dt><dd id="lichess-username" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">Identity No.</dt><dd id="identity-no" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">Email</dt><dd id="email" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">Contact</dt><dd id="contact-no" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">School</dt><dd id="school-name" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Right Column: Class and Performance -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Class Information -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                         <h3 class="text-lg font-medium text-gray-900 mb-4">Class Details</h3>
+                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div><p class="text-sm text-gray-500">Day</p><p id="day-of-class" class="text-lg font-bold text-primary mt-1">-</p></div>
+                            <div><p class="text-sm text-gray-500">Type</p><p id="type-of-class" class="text-lg font-bold text-primary mt-1">-</p></div>
+                            <div><p class="text-sm text-gray-500">Level</p><p id="level" class="text-lg font-bold text-primary mt-1">-</p></div>
+                            <div><p class="text-sm text-gray-500">Coach</p><p id="assigned-coach" class="text-lg font-bold text-primary mt-1">-</p></div>
+                         </div>
+                    </div>
+                    
+                    <!-- Performance Tabs -->
+                    <div class="bg-white rounded-lg shadow">
+                         <div class="border-b border-gray-200">
+                            <nav id="tabs-nav" class="flex space-x-4 px-6" aria-label="Tabs">
+                                <button data-tab="attendance" class="tab tab-active">Attendance</button>
+                                <button data-tab="performance" class="tab">Performance</button>
+                                <button data-tab="tournaments" class="tab">Tournaments</button>
+                            </nav>
+                        </div>
+                        <div id="tab-content" class="p-6">
+                            <!-- Content will be injected here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbws8S8vbGeamIPWcRiAcH0o1awq6aSZkCLOWb1_Tng4/dev'; 
+
+        window.onload = () => {
+            const userId = sessionStorage.getItem('userId');
+            const userRole = sessionStorage.getItem('userRole');
+
+            if (!userId || userRole !== 'student') {
+                document.getElementById('loading-spinner').innerHTML = '<p class="text-red-500">Access Denied. Please <a href="login.html" class="font-bold text-primary">log in</a> as a student.</p>';
+                // In a live environment, this would redirect:
+                // window.location.href = 'login.html'; 
+            } else {
+                fetchStudentData(userId);
+                setupTabEvents(userId);
+            }
+
+            document.getElementById('logout-button').addEventListener('click', () => {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            });
+        };
+
+        async function fetchStudentData(studentId) {
+            try {
+                const response = await fetch(googleAppScriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getProfile', userId: studentId, role: 'student' }),
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    populateProfile(result.data);
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                    document.getElementById('dashboard-content').classList.remove('hidden');
+                } else {
+                    throw new Error(result.message || 'Could not retrieve profile.');
+                }
+            } catch (error) {
+                console.error('Failed to fetch student data:', error);
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Error loading profile: ${error.message}. Please try logging in again.</p>`;
+            }
+        }
+
+        function populateProfile(data) {
+            document.getElementById('student-name-header').textContent = data.name || 'Student';
+            
+            if (data.profilePhotos && data.profilePhotos.startsWith('http')) {
+                document.getElementById('profile-photo').src = data.profilePhotos;
+            }
+            document.getElementById('student-name').textContent = data.name || '-';
+            document.getElementById('student-id').textContent = `ID: ${data.studentId || '-'}`;
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = data.status || 'Unknown';
+            if (data.status && data.status.toLowerCase() === 'active') {
+                statusEl.className = 'mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-800';
+            } else {
+                 statusEl.className = 'mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-red-100 text-red-800';
+            }
+            document.getElementById('lichess-username').textContent = data.lichessUsername || '-';
+            document.getElementById('identity-no').textContent = data.identityNo || '-';
+            document.getElementById('email').textContent = data.email || '-';
+            document.getElementById('contact-no').textContent = data.contactNo || '-';
+            document.getElementById('school-name').textContent = data.schoolName || '-';
+            document.getElementById('day-of-class').textContent = data.dayOfClass || '-';
+            document.getElementById('type-of-class').textContent = data.typeOfClass || '-';
+            document.getElementById('level').textContent = data.level || '-';
+            document.getElementById('assigned-coach').textContent = data.assignedCoach || '-';
+        }
+        
+        function setupTabEvents(studentId) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContent = document.getElementById('tab-content');
+            
+            // Load initial tab content
+            tabContent.innerHTML = `<p class="text-gray-600">Select a tab to view details.</p>`;
+            document.querySelector('.tab[data-tab="attendance"]').click();
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('tab-active'));
+                    tab.classList.add('tab-active');
+                    const tabName = tab.dataset.tab;
+                    tabContent.innerHTML = `<div class="text-center py-5"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div></div>`;
+                    
+                    if (tabName === 'attendance') {
+                        // We will add the function to fetch attendance data later
+                        tabContent.innerHTML = `<p class="text-gray-600">Attendance records will be displayed here.</p>`;
+                    } else if (tabName === 'performance') {
+                        tabContent.innerHTML = `<p class="text-gray-600">Performance records will be displayed here.</p>`;
+                    } else if (tabName === 'tournaments') {
+                        tabContent.innerHTML = `<p class="text-gray-600">Tournament records will be displayed here.</p>`;
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

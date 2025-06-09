@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournaments - Kamus Catur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .bg-primary { background-color: #f37324; }
+        .text-primary { color: #f37324; }
+        .btn-secondary { background-color: #dc3c2c; color: white; transition: background-color 0.3s; }
+        .btn-secondary:hover { background-color: #c82c1c; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <img class="h-12 w-auto" src="Asset 28.png" alt="Kamus Catur Logo">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Tournament Schedule</h1>
+            </div>
+             <div class="flex items-center space-x-4">
+                <!-- This link can be adjusted to go back to the most relevant dashboard -->
+                <a href="student_dashboard.html" class="text-sm font-medium text-gray-600 hover:text-primary">Back to Dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+         <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-900">Upcoming & Past Tournaments</h2>
+                <p class="mt-1 text-sm text-gray-600">Here is a list of all registered tournaments.</p>
+            </div>
+            <div id="loading-spinner" class="text-center py-10">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p class="mt-4 text-gray-600">Loading tournaments...</p>
+            </div>
+            <div id="tournament-table-container">
+                <!-- The tournament table will be injected here by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbyBEQPvJ47E4ffySp65u9WBa9tnllHvqYCgeqNF-2LyTNztn9WQCQqNHgbxlCgCz3TH_w/exec'; 
+
+        window.onload = () => {
+            fetchTournamentsData();
+        };
+
+        async function fetchTournamentsData() {
+            try {
+                const response = await fetch(googleAppScriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getTournaments' }),
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const result = await response.json();
+                if (result.success) {
+                    populateTournaments(result.data);
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                } else { 
+                    throw new Error(result.message); 
+                }
+            } catch (error) {
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 p-6">Could not load tournaments: ${error.message}</p>`;
+            }
+        }
+
+        function populateTournaments(records) {
+            const container = document.getElementById('tournament-table-container');
+            if (!records || records.length === 0) {
+                container.innerHTML = `<div class="text-center p-10 bg-gray-50"><p class="text-gray-500">No tournaments found.</p></div>`;
+                return;
+            }
+            
+            // Sort by start date, most recent first
+            records.sort((a, b) => new Date(b.dateStart) - new Date(a.dateStart));
+            
+            let tableHTML = `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tournament Name</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Results Link</th>
+                </tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+            
+            records.forEach(record => {
+                const startDate = record.dateStart ? new Date(record.dateStart).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'TBA';
+                const endDate = record.dateEnd ? new Date(record.dateEnd).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+                const dateRange = endDate && startDate !== endDate ? `${startDate} to ${endDate}` : startDate;
+                
+                tableHTML += `<tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${record.tournamentName || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dateRange}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.typeOfTournament || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.state || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${record.chessResultLink ? `<a href="${record.chessResultLink}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 hover:underline">View Results</a>` : '<span class="text-gray-400">Not available</span>'}
+                    </td>
+                    </tr>`;
+            });
+            tableHTML += `</tbody></table></div>`;
+            container.innerHTML = tableHTML;
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Dashboard - Kamus Catur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .bg-primary { background-color: #f37324; }
+        .text-primary { color: #f37324; }
+        .btn-secondary { background-color: #dc3c2c; color: white; transition: background-color 0.3s; }
+        .btn-secondary:hover { background-color: #c82c1c; }
+        .details-view {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <img class="h-12 w-auto" src="Asset 28.png" alt="Kamus Catur Logo">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Parent Portal</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-600 hidden sm:block">Welcome, <span id="parent-name-header" class="font-semibold">Parent</span>!</span>
+                <button id="logout-button" class="btn-secondary rounded-md px-4 py-2 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        <div id="loading-spinner" class="text-center py-10">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p class="mt-4 text-gray-600">Loading your information...</p>
+        </div>
+
+        <div id="dashboard-content" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column: Parent Profile -->
+                <div class="lg:col-span-1 bg-white rounded-lg shadow p-6 self-start">
+                    <div class="flex flex-col items-center text-center">
+                        <img id="profile-photo" class="h-32 w-32 rounded-full object-cover ring-4 ring-orange-100" src="https://placehold.co/200x200/cccccc/ffffff?text=?" alt="Profile Photo">
+                        <h2 id="parent-name" class="mt-4 text-2xl font-bold text-gray-900">-</h2>
+                        <p id="parent-id" class="text-sm text-gray-500">-</p>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Your Information</h3>
+                        <dl class="space-y-3">
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">Email</dt><dd id="email" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">Contact</dt><dd id="contact-no" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                            <div class="flex justify-between"><dt class="text-sm text-gray-500">Address</dt><dd id="address" class="text-sm font-semibold text-gray-800 text-right">-</dd></div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Right Column: Linked Students List -->
+                <div class="lg:col-span-2 space-y-4">
+                     <div class="bg-white rounded-lg shadow p-6">
+                         <h3 class="text-lg font-medium text-gray-900 mb-4">Your Children</h3>
+                         <div id="student-list" class="space-y-4">
+                            <!-- Student list will be populated here -->
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbyBEQPvJ47E4ffySp65u9WBa9tnllHvqYCgeqNF-2LyTNztn9WQCQqNHgbxlCgCz3TH_w/exec'; 
+
+        window.onload = () => {
+            const userId = sessionStorage.getItem('userId');
+            const userRole = sessionStorage.getItem('userRole');
+            if (!userId || userRole !== 'parent') {
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Access Denied. Please <a href="login.html" class="font-bold text-primary">log in</a> as a parent.</p>`;
+            } else {
+                fetchParentData(userId);
+            }
+            document.getElementById('logout-button').addEventListener('click', () => {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            });
+        };
+
+        async function fetchParentData(parentId) {
+            try {
+                const response = await fetch(googleAppScriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getParentData', userId: parentId }),
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const result = await response.json();
+                if (result.success && result.data) {
+                    populateParentProfile(result.data.parentProfile);
+                    populateStudentList(result.data.studentDetails);
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                    document.getElementById('dashboard-content').classList.remove('hidden');
+                } else {
+                    throw new Error(result.message || 'Could not fetch parent data.');
+                }
+            } catch (error) {
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500">Error loading dashboard: ${error.message}</p>`;
+            }
+        }
+
+        function populateParentProfile(profile) { /* ... same as before ... */ 
+            if(!profile) return;
+            document.getElementById('parent-name-header').textContent = profile.name || 'Parent';
+            if (profile.profilePhotos && profile.profilePhotos.startsWith('http')) { document.getElementById('profile-photo').src = profile.profilePhotos; }
+            document.getElementById('parent-name').textContent = profile.name || '-';
+            document.getElementById('parent-id').textContent = `ID: ${profile.parentId || '-'}`;
+            document.getElementById('email').textContent = profile.email || '-';
+            document.getElementById('contact-no').textContent = profile.contactNo || '-';
+            document.getElementById('address').textContent = profile.address || '-';
+        }
+
+        function populateStudentList(students) {
+            const container = document.getElementById('student-list');
+            if (!students || students.length === 0) {
+                container.innerHTML = `<div class="text-center p-6 bg-gray-50 rounded-lg"><p class="text-gray-500">No linked students found.</p></div>`;
+                return;
+            }
+
+            let studentsHTML = '';
+            students.forEach(student => {
+                const profile = student.profile;
+                studentsHTML += `
+                    <div class="border border-gray-200 rounded-lg">
+                        <div class="p-4 flex items-center space-x-4 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleDetails(this)">
+                            <img src="${profile.profilePhotos || 'https://placehold.co/100x100/f37324/white?text='+(profile.name ? profile.name.charAt(0) : 'S')}" class="w-12 h-12 rounded-full object-cover">
+                            <div class="flex-grow">
+                                <p class="font-bold text-gray-800">${profile.name || 'N/A'}</p>
+                                <p class="text-sm text-gray-500">School: ${profile.schoolName || '-'}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500">Level</p>
+                                <p class="font-semibold text-primary">${profile.level || '-'}</p>
+                            </div>
+                            <div class="text-right">
+                                 <span class="px-3 py-1 text-xs font-semibold rounded-full ${profile.status && profile.status.toLowerCase() === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${profile.status || 'Unknown'}
+                                 </span>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                        <div class="details-view bg-gray-50 border-t border-gray-200">
+                             <div class="p-6 space-y-6">
+                                <div>
+                                    <h4 class="font-semibold mb-2">Attendance</h4>
+                                    ${generateAttendanceHTML(student.attendance)}
+                                </div>
+                                 <div>
+                                    <h4 class="font-semibold mb-2">Performance</h4>
+                                    ${generatePerformanceHTML(student.performance)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = studentsHTML;
+        }
+        
+        function toggleDetails(element) {
+            const detailsView = element.nextElementSibling;
+            const icon = element.querySelector('svg');
+            if (detailsView.style.maxHeight && detailsView.style.maxHeight !== '0px') {
+                detailsView.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                detailsView.style.maxHeight = detailsView.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function generateAttendanceHTML(records) {
+            if (!records || records.length === 0) return `<p class="text-sm text-gray-500">No attendance records found.</p>`;
+            let table = `<div class="overflow-x-auto text-sm"><table class="w-full"><thead><tr class="text-left text-gray-500"><th class="py-2 px-3">Date</th><th>Month</th><th>Session</th><th>Task/Status</th></tr></thead><tbody>`;
+            records.forEach(r => {
+                table += `<tr class="border-t"><td class="py-2 px-3">${r.timestamp ? new Date(r.timestamp).toLocaleDateString('en-GB') : '-'}</td><td>${r.month || '-'}</td><td>${r.session || '-'}</td><td>${r.task || '-'}</td></tr>`;
+            });
+            return table + `</tbody></table></div>`;
+        }
+
+        function generatePerformanceHTML(records) {
+            if (!records || records.length === 0) return `<p class="text-sm text-gray-500">No performance records found.</p>`;
+            let cards = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">';
+            records.forEach(r => {
+                cards += `<div class="border rounded-md p-3"><p class="font-bold text-primary">${r.achievement || 'Achievement'}</p><p class="text-sm font-semibold">${r.tournament || 'Event'}</p><p class="text-xs text-gray-500">${r.remarks || ''}</p></div>`;
+            });
+            return cards + `</div>`;
+        }
+    </script>
+</body>
+</html>
