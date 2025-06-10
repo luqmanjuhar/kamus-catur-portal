@@ -10,9 +10,10 @@
         body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
         .bg-primary { background-color: #f37324; }
         .text-primary { color: #f37324; }
-        .btn-primary { background-color: #f37324; color: white; transition: all 0.3s ease; }
+        .btn-primary { background-color: #f37324; color: white; transition: background-color 0.3s; }
         .btn-primary:hover { background-color: #e46314; }
         .input-field { margin-top: 0.25rem; border-radius: 0.5rem; width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; }
+        .input-field:focus { outline: none; --tw-ring-color: #f37324; border-color: #f37324; box-shadow: 0 0 0 2px var(--tw-ring-color); }
         .form-section { display: none; }
     </style>
 </head>
@@ -69,7 +70,7 @@
 
                     <div>
                         <button type="submit" id="submit-button" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg btn-primary disabled:opacity-50" disabled>
-                           Register
+                           Select a role to start
                         </button>
                     </div>
                 </form>
@@ -99,8 +100,10 @@
                 document.getElementById('common-fields').style.display = 'grid';
                 document.getElementById(`${selectedRole}-fields`).style.display = 'grid';
                 submitButton.disabled = false;
+                submitButton.textContent = 'Register'; // Change button text
             } else {
                  submitButton.disabled = true;
+                 submitButton.textContent = 'Select a role to start'; // Guide user
             }
         });
 
@@ -135,18 +138,22 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    displayMessage('Registration successful! You can now log in.', 'success');
+                    displayMessage('Registration successful! A welcome email has been sent. You can now log in.', 'success');
                     form.reset();
                     formSections.forEach(s => s.style.display = 'none');
                     submitButton.disabled = true;
+                    submitButton.textContent = 'Select a role to start';
                 } else {
                     throw new Error(result.message);
                 }
             } catch (error) {
                 displayMessage(`Registration failed: ${error.message}`, 'error');
             } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Register';
+                // Re-enable the button only if a role is still selected.
+                if (roleSelect.value) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Register';
+                }
             }
         });
 
