@@ -47,7 +47,7 @@
     </main>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbyiwH8IeOpkChOaHo6ahKR7mdvnRXb_Y6eYJWmOO0TPb18KThyNAf7aL9Ib-zjoCHdE1Q/exec'; 
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwxTuijwVgy2JliZRnhxm8hIP5ro5YRbcyVdBksAxvIuSGzcheYyZvPbmgJXMUam50i/exec'; 
         
         const forms = {
             student: `
@@ -141,51 +141,54 @@
         };
 
         const tabContent = document.getElementById('tab-content');
+        const tabsNav = document.getElementById('tabs-nav');
+
+        // NEW: More robust way to handle form submissions using event delegation
+        tabContent.addEventListener('submit', async (e) => {
+            if (e.target && e.target.tagName === 'FORM') {
+                e.preventDefault();
+                const form = e.target;
+                const messageBox = form.querySelector('.admin-message-box');
+                
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                const payload = {
+                    action: 'addData',
+                    sheetName: form.dataset.sheet,
+                    adminPassword: data.adminPassword,
+                    data: data
+                };
+                
+                messageBox.textContent = 'Submitting...';
+                messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-gray-600';
+
+                try {
+                    const response = await fetch(googleAppScriptURL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        messageBox.textContent = 'Record added successfully!';
+                        messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-green-600';
+                        form.reset();
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    messageBox.textContent = `Error: ${error.message}`;
+                    messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-red-600';
+                }
+            }
+        });
 
         function renderForm(tabName) {
             tabContent.innerHTML = forms[tabName];
-            const form = tabContent.querySelector('form');
-            if (form) {
-                form.addEventListener('submit', handleFormSubmit);
-            }
         }
         
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const form = e.target;
-            const messageBox = form.querySelector('.admin-message-box');
-            
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            const payload = {
-                action: 'addData',
-                sheetName: form.dataset.sheet,
-                adminPassword: data.adminPassword,
-                data: data
-            };
-            
-            messageBox.textContent = 'Submitting...';
-            messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-gray-600';
-
-            try {
-                const response = await fetch(googleAppScriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (result.success) {
-                    messageBox.textContent = 'Record added successfully!';
-                    messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-green-600';
-                    form.reset();
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (error) {
-                messageBox.textContent = `Error: ${error.message}`;
-                messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-red-600';
-            }
-        }
-
         window.onload = () => {
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => {
