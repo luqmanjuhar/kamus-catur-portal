@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Kamus Catur Portal</title>
+    <title>Admin Panel - Kamus Catur</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -12,158 +12,193 @@
         .text-primary { color: #f37324; }
         .btn-primary { background-color: #f37324; color: white; transition: background-color 0.3s; }
         .btn-primary:hover { background-color: #e46314; }
+        .tab { padding: 0.75rem 1rem; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .tab-active { border-bottom-color: #f37324; color: #f37324; font-weight: 600; }
         .input-field { margin-top: 0.25rem; border-radius: 0.5rem; width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; }
         .input-field:focus { outline: none; --tw-ring-color: #f37324; border-color: #f37324; box-shadow: 0 0 0 2px var(--tw-ring-color); }
-        .form-section { display: none; }
     </style>
 </head>
 <body>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-xl w-full space-y-8">
-            <div>
-                <img class="mx-auto h-20 w-auto" src="Asset 28.png" alt="Kamus Catur Logo" onerror="this.onerror=null;this.src='https://placehold.co/200x200/f37324/white?text=KC';">
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Create Your Account
-                </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
-                   Join the Kamus Catur Portal today!
-                </p>
-            </div>
-            <div class="rounded-2xl bg-white p-8 shadow-xl">
-                <form id="register-form" class="space-y-6">
-                    <!-- Role Selection -->
-                    <div>
-                        <label for="role" class="text-sm font-medium text-gray-700">I am a...</label>
-                        <select id="role" name="role" required class="input-field">
-                            <option value="" disabled selected>Select your role...</option>
-                            <option value="student">Student</option>
-                            <option value="parent">Parent</option>
-                            <option value="trainer">Trainer</option>
-                        </select>
-                    </div>
-
-                    <!-- Common Fields -->
-                    <div id="common-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label class="text-sm">Full Name</label><input required name="name" class="input-field"></div>
-                        <div><label class="text-sm">Email</label><input required name="email" type="email" class="input-field"></div>
-                        <div><label class="text-sm">Password</label><input required name="password" type="password" class="input-field"></div>
-                        <div><label class="text-sm">Confirm Password</label><input required name="confirmPassword" type="password" class="input-field"></div>
-                    </div>
-                    
-                    <!-- Student Specific Fields -->
-                    <div id="student-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div><label class="text-sm">Student ID</label><input required name="studentId" class="input-field" placeholder="e.g., S001"></div>
-                         <div><label class="text-sm">School Name</label><input name="schoolName" class="input-field"></div>
-                    </div>
-
-                    <!-- Parent Specific Fields -->
-                     <div id="parent-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div><label class="text-sm">Parent ID</label><input required name="parentId" class="input-field" placeholder="e.g., P001"></div>
-                         <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
-                    </div>
-
-                     <!-- Trainer Specific Fields -->
-                     <div id="trainer-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div><label class="text-sm">Trainer ID</label><input required name="trainerId" class="input-field" placeholder="e.g., T001"></div>
-                         <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
-                    </div>
-
-                    <div>
-                        <button type="submit" id="submit-button" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg btn-primary disabled:opacity-50" disabled>
-                           Select a role to start
-                        </button>
-                    </div>
-                </form>
-                <div id="message-box" class="mt-4 text-center text-sm font-medium"></div>
-                 <div class="mt-6 text-center text-sm">
-                    <a href="index.html" class="font-medium text-primary hover:text-gray-700">
-                        Already have an account? Login here &rarr;
-                    </a>
-                </div>
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+             <div class="flex items-center space-x-4">
+                <img class="h-12 w-auto" src="Asset 28.png" alt="Kamus Catur Logo">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Admin Panel</h1>
             </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto py-8 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow">
+            <div class="border-b border-gray-200">
+                <nav id="tabs-nav" class="flex space-x-4 px-6" aria-label="Tabs">
+                    <button data-tab="student" class="tab tab-active">Add Student</button>
+                    <button data-tab="parent" class="tab">Add Parent</button>
+                    <button data-tab="trainer" class="tab">Add Trainer</button>
+                    <button data-tab="tournament" class="tab">Add Tournament</button>
+                </nav>
+            </div>
+            <div id="tab-content" class="p-8">
+                <!-- Form content will be injected here -->
+            </div>
+        </div>
+    </main>
 
     <script>
         const googleAppScriptURL = 'YOUR_FINAL_EXEC_URL_HERE'; // <-- IMPORTANT: Replace this with your deployed script URL
         
-        const roleSelect = document.getElementById('role');
-        const submitButton = document.getElementById('submit-button');
-        const formSections = document.querySelectorAll('.form-section');
-        const messageBox = document.getElementById('message-box');
-        
-        roleSelect.addEventListener('change', (e) => {
-            const selectedRole = e.target.value;
-            formSections.forEach(s => s.style.display = 'none');
-            
-            if (selectedRole) {
-                document.getElementById('common-fields').style.display = 'grid';
-                document.getElementById(`${selectedRole}-fields`).style.display = 'grid';
-                submitButton.disabled = false;
-                submitButton.textContent = 'Register';
-            } else {
-                 submitButton.disabled = true;
-                 submitButton.textContent = 'Select a role to start';
+        const forms = {
+            student: `
+                <form data-sheet="student">
+                    <h3 class="text-lg font-bold mb-4">New Student Form</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="text-sm">Student ID</label><input required name="studentId" class="input-field"></div>
+                        <div><label class="text-sm">Password</label><input required name="password" type="password" class="input-field"></div>
+                        <div><label class="text-sm">Full Name</label><input required name="name" class="input-field"></div>
+                        <div><label class="text-sm">Lichess/Chess.com Username</label><input name="lichessUsername" class="input-field"></div>
+                        <div><label class="text-sm">Identity No.</label><input name="identityNo" class="input-field"></div>
+                        <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
+                        <div><label class="text-sm">School Name</label><input name="schoolName" class="input-field"></div>
+                        <div><label class="text-sm">Email</label><input name="email" type="email" class="input-field"></div>
+                        <div><label class="text-sm">Day of Class</label><input name="dayOfClass" class="input-field"></div>
+                        <div><label class="text-sm">Type of Class</label><input name="typeOfClass" class="input-field"></div>
+                        <div><label class="text-sm">Level</label><input name="level" class="input-field"></div>
+                        <div><label class="text-sm">Assigned Coach</label><input name="assignedCoach" class="input-field"></div>
+                        <div><label class="text-sm">Status</label><select name="status" class="input-field"><option>Active</option><option>Inactive</option></select></div>
+                        <div><label class="text-sm">Profile Photo URL</label><input name="profilePhotos" type="url" class="input-field"></div>
+                        <input type="hidden" name="role" value="student">
+                    </div>
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div class="admin-message-box mt-4 text-center text-sm font-medium"></div>
+                </form>
+            `,
+            parent: `
+                <form data-sheet="parent">
+                    <h3 class="text-lg font-bold mb-4">New Parent Form</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="text-sm">Parent ID</label><input required name="parentId" class="input-field"></div>
+                        <div><label class="text-sm">Password</label><input required name="password" type="password" class="input-field"></div>
+                        <div><label class="text-sm">Full Name</label><input required name="name" class="input-field"></div>
+                        <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
+                        <div class="md:col-span-2"><label class="text-sm">Address</label><input name="address" class="input-field"></div>
+                        <div><label class="text-sm">State</label><input name="state" class="input-field"></div>
+                        <div><label class="text-sm">Related Student ID(s)</label><input name="relatedStudentId" placeholder="e.g., S001,S002" class="input-field"></div>
+                        <div><label class="text-sm">Email</label><input name="email" type="email" class="input-field"></div>
+                        <input type="hidden" name="role" value="parent">
+                    </div>
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div class="admin-message-box mt-4 text-center text-sm font-medium"></div>
+                </form>
+            `,
+            trainer: `
+                <form data-sheet="trainer">
+                    <h3 class="text-lg font-bold mb-4">New Trainer Form</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="text-sm">Trainer ID</label><input required name="trainerId" class="input-field"></div>
+                        <div><label class="text-sm">Password</label><input required name="password" type="password" class="input-field"></div>
+                        <div><label class="text-sm">Full Name</label><input required name="name" class="input-field"></div>
+                        <div><label class="text-sm">Email</label><input name="email" type="email" class="input-field"></div>
+                        <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
+                        <div><label class="text-sm">Address</label><input name="address" class="input-field"></div>
+                        <div><label class="text-sm">Bank Name</label><input name="bankName" class="input-field"></div>
+                        <div><label class="text-sm">Account Info</label><input name="accountInfo" placeholder="Number & Name" class="input-field"></div>
+                        <input type="hidden" name="role" value="trainer">
+                    </div>
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div class="admin-message-box mt-4 text-center text-sm font-medium"></div>
+                </form>
+            `,
+            tournament: `
+                <form data-sheet="tournament">
+                    <h3 class="text-lg font-bold mb-4">New Tournament Form</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="text-sm">Tournament ID</label><input required name="tournamentId" class="input-field"></div>
+                        <div><label class="text-sm">Tournament Name</label><input required name="tournamentName" class="input-field"></div>
+                        <div><label class="text-sm">State</label><input name="state" class="input-field"></div>
+                        <div><label class="text-sm">Type of Tournament</label><input name="typeOfTournament" class="input-field"></div>
+                        <div><label class="text-sm">Date Start</label><input name="dateStart" type="date" class="input-field"></div>
+                        <div><label class="text-sm">Date End</label><input name="dateEnd" type="date" class="input-field"></div>
+                        <div class="md:col-span-2"><label class="text-sm">Chess Result Link</label><input name="chessResultLink" type="url" class="input-field"></div>
+                    </div>
+                    <div class="mt-8 pt-6 border-t flex items-center justify-between">
+                        <div><label class="text-sm font-medium text-gray-700">Admin Password</label><input name="adminPassword" type="password" required class="input-field w-auto"></div>
+                        <button type="submit" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">Add Record</button>
+                    </div>
+                    <div class="admin-message-box mt-4 text-center text-sm font-medium"></div>
+                </form>
+            `
+        };
+
+        const tabContent = document.getElementById('tab-content');
+        const tabsNav = document.getElementById('tabs-nav');
+
+        tabContent.addEventListener('submit', async (e) => {
+            if (e.target && e.target.tagName === 'FORM') {
+                e.preventDefault();
+                const form = e.target;
+                const messageBox = form.querySelector('.admin-message-box');
+                
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                const payload = {
+                    action: 'addData',
+                    sheetName: form.dataset.sheet,
+                    adminPassword: data.adminPassword,
+                    data: data
+                };
+                
+                messageBox.textContent = 'Submitting...';
+                messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-gray-600';
+
+                try {
+                    const response = await fetch(googleAppScriptURL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        messageBox.textContent = 'Record added successfully!';
+                        messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-green-600';
+                        form.reset();
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    messageBox.textContent = `Error: ${error.message}`;
+                    messageBox.className = 'admin-message-box mt-4 text-center text-sm font-medium text-red-600';
+                }
             }
         });
 
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const password = form.querySelector('[name="password"]').value;
-            const confirmPassword = form.querySelector('[name="confirmPassword"]').value;
-
-            if (password !== confirmPassword) {
-                displayMessage('Passwords do not match.', 'error');
-                return;
-            }
-
-            submitButton.disabled = true;
-            submitButton.textContent = 'Registering...';
-            displayMessage('Creating your account...', 'info');
-
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            const payload = {
-                action: 'register',
-                sheetName: data.role,
-                data: data
-            };
-
-            try {
-                const response = await fetch(googleAppScriptURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (result.success) {
-                    displayMessage('Registration successful! A welcome email has been sent. You can now log in.', 'success');
-                    form.reset();
-                    formSections.forEach(s => s.style.display = 'none');
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Select a role to start';
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (error) {
-                displayMessage(`Registration failed: ${error.message}`, 'error');
-            } finally {
-                if (roleSelect.value) {
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Register';
-                }
-            }
-        });
-
-        function displayMessage(message, type) {
-            messageBox.textContent = message;
-            messageBox.className = `mt-4 text-center text-sm font-medium ${type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-gray-600'}`;
+        function renderForm(tabName) {
+            tabContent.innerHTML = forms[tabName];
         }
-
+        
+        window.onload = () => {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('tab-active'));
+                    tab.classList.add('tab-active');
+                    renderForm(tab.dataset.tab);
+                });
+            });
+            renderForm('student');
+        };
     </script>
 </body>
 </html>
