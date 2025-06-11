@@ -12,7 +12,7 @@
         .text-primary { color: #f37324; }
         .btn-primary { background-color: #f37324; color: white; transition: background-color 0.3s; }
         .btn-primary:hover { background-color: #e46314; }
-        .btn-secondary { background-color: #dc3c2c; color: white; transition: background-color: 0.3s; }
+        .btn-secondary { background-color: #dc3c2c; color: white; transition: background-color 0.3s; }
         .btn-secondary:hover { background-color: #c82c1c; }
         .input-field {
              margin-top: 0.25rem; appearance: none; border-radius: 0.5rem; position: relative; display: block; width: 100%; padding: 0.75rem; border-width: 1px; border-color: #d1d5db; placeholder-color: #6b7280; color: #111827;
@@ -78,7 +78,7 @@
     </main>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbyiwH8IeOpkChOaHo6ahKR7mdvnRXb_Y6eYJWmOO0TPb18KThyNAf7aL9Ib-zjoCHdE1Q/exec'; 
+        const googleAppScriptURL = 'YOUR_FINAL_EXEC_URL_HERE'; // <-- IMPORTANT: Replace this with your deployed script URL
         let allStudents = [];
 
         window.onload = () => {
@@ -120,8 +120,8 @@
             try {
                 const response = await fetch(googleAppScriptURL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'getTrainerData', userId: trainerId }),
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getTrainerData', userId: trainerId }),
                 });
                 const result = await response.json();
                 if (result.success && result.data.assignedStudents) {
@@ -158,30 +158,32 @@
             }
 
             let studentsHTML = `
-                <div class="grid grid-cols-4 items-center px-4 py-2 font-bold text-sm text-gray-600 border-b">
+                <div class="grid grid-cols-5 items-center px-4 py-2 font-bold text-sm text-gray-600 border-b">
                     <div class="col-span-2">Student Name</div>
-                    <div class="text-center">Status</div>
+                    <div class="text-center">Type of Class</div>
                     <div class="text-center">Task</div>
+                    <div class="text-center">Status</div>
                 </div>
             `;
             filteredStudents.forEach(student => {
                 studentsHTML += `
-                    <div class="grid grid-cols-4 items-center p-4 border rounded-lg hover:bg-gray-50" data-student-id="${student.studentId}">
+                    <div class="grid grid-cols-5 items-center p-4 border rounded-lg hover:bg-gray-50" data-student-id="${student.studentId}" data-class-type="${student.typeOfClass}">
                         <div class="col-span-2 flex items-center space-x-3">
-                            <img src="${student.profilePhotos || 'https://placehold.co/100x100/f37324/white?text='+student.name.charAt(0)}" class="w-10 h-10 rounded-full object-cover">
+                            <img src="${student.profilePhotos || 'https://placehold.co/100x100/f37324/white?text='+(student.name ? student.name.charAt(0) : 'S')}" class="w-10 h-10 rounded-full object-cover">
                             <div>
                                 <p class="font-semibold">${student.name}</p>
                                 <p class="text-xs text-gray-500">${student.studentId}</p>
                             </div>
+                        </div>
+                        <div class="text-center text-sm text-gray-600">${student.typeOfClass || '-'}</div>
+                        <div class="text-center">
+                           <input type="text" class="task-input input-field !w-auto !py-1" placeholder="e.g., Puzzle Rush">
                         </div>
                         <div class="text-center">
                             <select class="status-select input-field !w-auto !py-1">
                                 <option value="Present">Present</option>
                                 <option value="Absent">Absent</option>
                             </select>
-                        </div>
-                        <div class="text-center">
-                           <input type="text" class="task-input input-field !w-auto !py-1" placeholder="e.g., Puzzle Rush">
                         </div>
                     </div>
                 `;
@@ -204,6 +206,7 @@
             studentRows.forEach(row => {
                 attendanceData.push({
                     studentId: row.dataset.studentId,
+                    typeOfClass: row.dataset.classType,
                     status: row.querySelector('.status-select').value,
                     task: row.querySelector('.task-input').value,
                     month: document.getElementById('month-select').value,
@@ -216,8 +219,8 @@
             try {
                 const response = await fetch(googleAppScriptURL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'submitAttendance', data: attendanceData }),
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'submitAttendance', data: attendanceData }),
                 });
                 const result = await response.json();
                 if(result.success) {
