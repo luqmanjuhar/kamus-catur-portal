@@ -85,7 +85,7 @@
     </div>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbyiwH8IeOpkChOaHo6ahKR7mdvnRXb_Y6eYJWmOO0TPb18KThyNAf7aL9Ib-zjoCHdE1Q/exec';
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwxTuijwVgy2JliZRnhxm8hIP5ro5YRbcyVdBksAxvIuSGzcheYyZvPbmgJXMUam50i/exec';
         
         const roleSelect = document.getElementById('role');
         const submitButton = document.getElementById('submit-button');
@@ -100,10 +100,10 @@
                 document.getElementById('common-fields').style.display = 'grid';
                 document.getElementById(`${selectedRole}-fields`).style.display = 'grid';
                 submitButton.disabled = false;
-                submitButton.textContent = 'Register'; // Change button text
+                submitButton.textContent = 'Register';
             } else {
                  submitButton.disabled = true;
-                 submitButton.textContent = 'Select a role to start'; // Guide user
+                 submitButton.textContent = 'Select a role to start';
             }
         });
 
@@ -134,6 +134,9 @@
             try {
                 const response = await fetch(googleAppScriptURL, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // <-- THIS IS THE FIX
+                    },
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
@@ -149,7 +152,6 @@
             } catch (error) {
                 displayMessage(`Registration failed: ${error.message}`, 'error');
             } finally {
-                // Re-enable the button only if a role is still selected.
                 if (roleSelect.value) {
                     submitButton.disabled = false;
                     submitButton.textContent = 'Register';
