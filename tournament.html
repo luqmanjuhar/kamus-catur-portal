@@ -47,7 +47,7 @@
     </main>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbyiwH8IeOpkChOaHo6ahKR7mdvnRXb_Y6eYJWmOO0TPb18KThyNAf7aL9Ib-zjoCHdE1Q/exec'; 
+        const googleAppScriptURL = 'YOUR_FINAL_EXEC_URL_HERE'; // <-- IMPORTANT: Replace this with your deployed script URL
 
         window.onload = () => {
             fetchTournamentsData();
@@ -59,8 +59,8 @@
             try {
                 const response = await fetch(googleAppScriptURL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'getTournaments' }),
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getTournaments' }),
                 });
                 const result = await response.json();
                 if (result.success) {
