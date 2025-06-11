@@ -97,6 +97,8 @@
     </div>
 
     <script>
+        const googleAppScriptURL = 'YOUR_FINAL_EXEC_URL_HERE'; // <-- IMPORTANT: Replace this with your deployed script URL
+
         const loginForm = document.getElementById('login-form');
         const messageBox = document.getElementById('message-box');
         const loginButton = document.getElementById('login-button');
@@ -105,9 +107,6 @@
         const eyeIconShow = document.getElementById('eye-icon-show');
         const eyeIconHide = document.getElementById('eye-icon-hide');
         
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbyiwH8IeOpkChOaHo6ahKR7mdvnRXb_Y6eYJWmOO0TPb18KThyNAf7aL9Ib-zjoCHdE1Q/exec'; 
-
-        // Event listener for the show/hide password button
         togglePasswordButton.addEventListener('click', () => {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
@@ -134,8 +133,8 @@
             try {
                 const response = await fetch(googleAppScriptURL, {
                     method: 'POST',
-                    body: JSON.stringify({ userId, password, role, action: 'login' }),
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, password, role, action: 'login' }),
                 });
 
                 const result = await response.json();
@@ -158,14 +157,7 @@
 
         function displayMessage(message, type) {
             messageBox.textContent = message;
-            messageBox.className = 'mt-4 text-center text-sm font-medium ';
-            if (type === 'success') {
-                messageBox.classList.add('text-green-600');
-            } else if (type === 'error') {
-                messageBox.classList.add('text-red-600');
-            } else {
-                messageBox.classList.add('text-gray-600');
-            }
+            messageBox.className = `mt-4 text-center text-sm font-medium ${type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-gray-600'}`;
         }
     </script>
 
