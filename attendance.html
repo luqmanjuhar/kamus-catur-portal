@@ -21,7 +21,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <div class="flex items-center space-x-4">
@@ -35,7 +34,6 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div id="loading-spinner" class="text-center py-10">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -45,7 +43,6 @@
         <div id="attendance-form-container" class="hidden">
             <div class="bg-white p-8 rounded-lg shadow-md">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Take Attendance</h2>
-                <!-- Filters -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div>
                         <label for="month-select" class="text-sm font-medium text-gray-700">Month</label>
@@ -63,7 +60,6 @@
                     </div>
                 </div>
 
-                <!-- Student List -->
                 <form id="attendance-list-form">
                     <div id="student-list" class="space-y-3">
                         <p class="text-gray-500 text-center py-4">Select filters to see student list.</p>
@@ -78,7 +74,7 @@
     </main>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwLl4E6JfUVInRaFd7SpeQQMgENtwbP-8YJ5hECeBnwqUjd68Aq3avIr-4yPeZL8pKzWg/exec'; // <-- IMPORTANT: Replace this with your deployed script URL
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwme0prIcMhCw119W4Yc9yZ6PjKUiQ6Y2LBMWOU7OKzSvrJ-cTDeIdDtk5RVnD3hYasvg/exec'; 
         let allStudents = [];
 
         window.onload = () => {
@@ -141,6 +137,10 @@
         function populateLevelFilter() {
             const levels = [...new Set(allStudents.map(s => s.level).filter(Boolean))];
             const levelFilter = document.getElementById('level-filter');
+            // Clear previous options except the first one
+            while (levelFilter.options.length > 1) {
+                levelFilter.remove(1);
+            }
             levels.forEach(level => levelFilter.add(new Option(level, level)));
         }
 
@@ -167,7 +167,7 @@
             `;
             filteredStudents.forEach(student => {
                 studentsHTML += `
-                    <div class="grid grid-cols-5 items-center p-4 border rounded-lg hover:bg-gray-50" data-student-id="${student.studentId}" data-class-type="${student.typeOfClass}">
+                    <div class="grid grid-cols-5 items-center p-4 border rounded-lg hover:bg-gray-50" data-student-id="${student.studentId}" data-class-type="${student.typeOfClass || ''}">
                         <div class="col-span-2 flex items-center space-x-3">
                             <img src="${student.profilePhotos || 'https://placehold.co/100x100/f37324/white?text='+(student.name ? student.name.charAt(0) : 'S')}" class="w-10 h-10 rounded-full object-cover">
                             <div>
