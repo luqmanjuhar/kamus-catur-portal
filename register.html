@@ -19,9 +19,9 @@
 </head>
 <body>
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-xl w-full space-y-8">
+        <div class="max-w-3xl w-full space-y-8">
             <div>
-                <img class="mx-auto h-20 w-auto" src="Asset 28.png" alt="Kamus Catur Logo" onerror="this.onerror=null;this.src='https://placehold.co/200x200/f37324/white?text=KC';">
+                <img class="mx-auto h-20 w-auto" src="Asset 28.png" alt="Kamus Catur Logo">
                 <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
                     Create Your Account
                 </h2>
@@ -33,7 +33,7 @@
                 <form id="register-form" class="space-y-6">
                     <!-- Role Selection -->
                     <div>
-                        <label for="role" class="text-sm font-medium text-gray-700">I am a...</label>
+                        <label for="role" class="text-sm font-medium text-gray-700">I am registering as a...</label>
                         <select id="role" name="role" required class="input-field">
                             <option value="" disabled selected>Select your role...</option>
                             <option value="student">Student</option>
@@ -42,60 +42,69 @@
                         </select>
                     </div>
 
-                    <!-- Common Fields -->
-                    <div id="common-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label class="text-sm">Full Name</label><input required name="name" class="input-field"></div>
-                        <div><label class="text-sm">Email</label><input required name="email" type="email" class="input-field"></div>
-                        <div><label class="text-sm">Password</label><input required name="password" type="password" class="input-field"></div>
-                        <div><label class="text-sm">Confirm Password</label><input required name="confirmPassword" type="password" class="input-field"></div>
-                    </div>
-                    
-                    <!-- Student Specific Fields -->
-                    <div id="student-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div><label class="text-sm">Student ID</label><input required name="studentId" class="input-field" placeholder="e.g., S001"></div>
-                         <div><label class="text-sm">School Name</label><input name="schoolName" class="input-field"></div>
+                    <!-- All Form Sections Container -->
+                    <div id="form-fields-container">
+                        <!-- Common Fields Section -->
+                        <div id="common-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            <div><label class="text-sm">Full Name</label><input required name="name" id="full-name" class="input-field" style="text-transform:uppercase"></div>
+                            <div><label class="text-sm">Email</label><input required name="email" type="email" class="input-field"></div>
+                            <div class="relative"><label class="text-sm">Password</label><input required name="password" id="password" type="password" class="input-field pr-10"><button type="button" class="absolute top-8 right-0 pr-3 flex items-center toggle-password" data-target="password">👁️</button></div>
+                            <div class="relative"><label class="text-sm">Confirm Password</label><input required name="confirmPassword" id="confirmPassword" type="password" class="input-field pr-10"><button type="button" class="absolute top-8 right-0 pr-3 flex items-center toggle-password" data-target="confirmPassword">👁️</button></div>
+                            <div><label class="text-sm">Contact No.</label><div class="flex items-center"><span class="input-field !w-auto !rounded-r-none bg-gray-100">+60</span><input name="contactNo" type="tel" class="input-field !rounded-l-none" placeholder="12-345 6789"></div></div>
+                            <div><label class="text-sm">Profile Photo (Optional)</label><input name="profilePhoto" id="profilePhoto" type="file" accept="image/*" class="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-primary hover:file:bg-orange-100"></div>
+                        </div>
+                        
+                        <!-- Student Specific Fields -->
+                        <div id="student-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mt-4">
+                            <h4 class="md:col-span-2 text-md font-semibold text-gray-600 border-b pb-2">Student Details</h4>
+                            <div class="md:col-span-2"><p class="text-sm text-gray-500 bg-orange-50 p-3 rounded-lg">Your unique Student ID will be auto-generated upon registration.</p></div>
+                            <div><label class="text-sm">Lichess/Chess.com Username</label><input name="lichessUsername" class="input-field"></div>
+                            <div><label class="text-sm">Identity No.</label><input name="identityNo" class="input-field" placeholder="e.g., 112233-44-5566"></div>
+                            <div><label class="text-sm">School Name</label><input name="schoolName" class="input-field"></div>
+                            <div><label class="text-sm">Day of Class</label><select name="dayOfClass" class="input-field"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>
+                            <div><label class="text-sm">Type of Class</label><select name="typeOfClass" class="input-field"><option>Personal</option><option>Personal (Family)</option><option>Group</option><option>School Development Program</option></select></div>
+                            <div><label class="text-sm">Level</label><select name="level" class="input-field"><option>Beginner (Step 1 - 1 plus)</option><option>Beginner Plus (Step 2 - 2 plus)</option><option>Intermediate (Step 3 - 3 plus)</option><option>Intermediate Plus (Step 4 - 4 plus)</option><option>Advance (Step 5 - 5 plus)</option><option>Advance Plus (Step 6)</option></select></div>
+                            <div><label class="text-sm">Assigned Coach</label><input name="assignedCoach" class="input-field"></div>
+                        </div>
+
+                        <!-- Parent Specific Fields -->
+                         <div id="parent-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mt-4">
+                            <h4 class="md:col-span-2 text-md font-semibold text-gray-600 border-b pb-2">Parent Details</h4>
+                            <div class="md:col-span-2"><p class="text-sm text-gray-500 bg-orange-50 p-3 rounded-lg">Your unique Parent ID will be auto-generated upon registration.</p></div>
+                            <div><label class="text-sm">Related Student ID(s)</label><input name="relatedStudentId" placeholder="e.g., S24-06-001, S24-06-002" class="input-field"></div>
+                            <div class="md:col-span-2"><label class="text-sm">Address</label><input name="address" class="input-field"></div>
+                            <div><label class="text-sm">State</label><input name="state" class="input-field"></div>
+                        </div>
+
+                         <!-- Trainer Specific Fields -->
+                         <div id="trainer-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mt-4">
+                            <h4 class="md:col-span-2 text-md font-semibold text-gray-600 border-b pb-2">Trainer Details</h4>
+                            <div class="md:col-span-2"><p class="text-sm text-gray-500 bg-orange-50 p-3 rounded-lg">Your unique Trainer ID will be auto-generated upon registration.</p></div>
+                            <div class="md:col-span-2"><label class="text-sm">Address</label><input name="address" class="input-field"></div>
+                            <div><label class="text-sm">Bank Name</label><input name="bankName" class="input-field"></div>
+                            <div><label class="text-sm">Account Info</label><input name="accountInfo" placeholder="Number & Name" class="input-field"></div>
+                        </div>
                     </div>
 
-                    <!-- Parent Specific Fields -->
-                     <div id="parent-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div><label class="text-sm">Parent ID</label><input required name="parentId" class="input-field" placeholder="e.g., P001"></div>
-                         <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
-                    </div>
-
-                     <!-- Trainer Specific Fields -->
-                     <div id="trainer-fields" class="form-section grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div><label class="text-sm">Trainer ID</label><input required name="trainerId" class="input-field" placeholder="e.g., T001"></div>
-                         <div><label class="text-sm">Contact No.</label><input name="contactNo" class="input-field"></div>
-                    </div>
-
-                    <div>
-                        <button type="submit" id="submit-button" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg btn-primary disabled:opacity-50" disabled>
-                           Select a role to start
-                        </button>
+                    <div class="pt-4">
+                        <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 rounded-lg btn-primary disabled:opacity-50" disabled>Select a role to start</button>
                     </div>
                 </form>
                 <div id="message-box" class="mt-4 text-center text-sm font-medium"></div>
-                 <div class="mt-6 text-center text-sm">
-                    <a href="index.html" class="font-medium text-primary hover:text-gray-700">
-                        Already have an account? Login here &rarr;
-                    </a>
-                </div>
+                 <div class="mt-6 text-center text-sm"><a href="index.html" class="font-medium text-primary hover:text-gray-700">Already have an account? Login &rarr;</a></div>
             </div>
         </div>
     </div>
 
     <script>
-        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwLl4E6JfUVInRaFd7SpeQQMgENtwbP-8YJ5hECeBnwqUjd68Aq3avIr-4yPeZL8pKzWg/exec'; // <-- IMPORTANT: Replace this with your deployed script URL
+        const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbwme0prIcMhCw119W4Yc9yZ6PjKUiQ6Y2LBMWOU7OKzSvrJ-cTDeIdDtk5RVnD3hYasvg/exec';
         
         const roleSelect = document.getElementById('role');
         const submitButton = document.getElementById('submit-button');
-        const formSections = document.querySelectorAll('.form-section');
-        const messageBox = document.getElementById('message-box');
         
         roleSelect.addEventListener('change', (e) => {
             const selectedRole = e.target.value;
-            formSections.forEach(s => s.style.display = 'none');
-            
+            document.querySelectorAll('.form-section').forEach(s => s.style.display = 'none');
             if (selectedRole) {
                 document.getElementById('common-fields').style.display = 'grid';
                 document.getElementById(`${selectedRole}-fields`).style.display = 'grid';
@@ -107,48 +116,50 @@
             }
         });
 
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
+        document.getElementById('full-name').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+
+        document.getElementById('register-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const form = e.target;
-            const password = form.querySelector('[name="password"]').value;
-            const confirmPassword = form.querySelector('[name="confirmPassword"]').value;
-
-            if (password !== confirmPassword) {
+            if (form.password.value !== form.confirmPassword.value) {
                 displayMessage('Passwords do not match.', 'error');
                 return;
             }
-
             submitButton.disabled = true;
             submitButton.textContent = 'Registering...';
             displayMessage('Creating your account...', 'info');
+            const file = form.profilePhoto.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const fileData = { fileName: file.name, data: event.target.result.split(',')[1] };
+                    submitData(form, fileData);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                submitData(form, null);
+            }
+        });
 
+        async function submitData(form, photoFile) {
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-
-            const payload = {
-                action: 'register',
-                sheetName: data.role,
-                data: data
-            };
-
+            const payload = { action: 'register', sheetName: data.role, data, photoFile };
             try {
                 const response = await fetch(googleAppScriptURL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
                 if (result.success) {
-                    displayMessage('Registration successful! A welcome email has been sent. You can now log in.', 'success');
+                    displayMessage('Registration successful! A confirmation email has been sent with your new ID and Password.', 'success');
                     form.reset();
-                    formSections.forEach(s => s.style.display = 'none');
+                    document.querySelectorAll('.form-section').forEach(s => s.style.display = 'none');
+                    roleSelect.value = "";
                     submitButton.disabled = true;
                     submitButton.textContent = 'Select a role to start';
-                } else {
-                    throw new Error(result.message);
-                }
+                } else { throw new Error(result.message); }
             } catch (error) {
                 displayMessage(`Registration failed: ${error.message}`, 'error');
             } finally {
@@ -157,13 +168,26 @@
                     submitButton.textContent = 'Register';
                 }
             }
-        });
+        }
 
         function displayMessage(message, type) {
+            const messageBox = document.getElementById('message-box');
             messageBox.textContent = message;
             messageBox.className = `mt-4 text-center text-sm font-medium ${type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-gray-600'}`;
         }
-
+        
+        document.getElementById('form-fields-container').addEventListener('click', (e) => {
+            const toggleButton = e.target.closest('.toggle-password');
+            if (toggleButton) {
+                const targetId = toggleButton.dataset.target;
+                const passwordInput = document.getElementById(targetId);
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                } else {
+                    passwordInput.type = 'password';
+                }
+            }
+        });
     </script>
 </body>
 </html>
