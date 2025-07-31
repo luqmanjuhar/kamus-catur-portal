@@ -1,0 +1,112 @@
+/**
+ * Handles the pre-flight OPTIONS request for CORS (Cross-Origin Resource Sharing).
+ * This is crucial for allowing the web app (HTML file) to send data to this script.
+ *
+ * @param {Object} e - The event parameter for an OPTIONS request.
+ * @returns {ContentService.TextOutput} - A response with the necessary CORS headers.
+ */
+function doOptions(e) {
+  return ContentService.createTextOutput().setHeaders({
+      'Access-Control-Allow-Origin': '*', // Allows any origin to access
+      'Access-Control-Allow-Methods': 'POST, OPTIONS', // Specifies allowed methods
+      'Access-Control-Allow-Headers': 'Content-Type', // Specifies allowed headers
+    });
+}
+
+/**
+ * Handles direct visits to the web app URL (GET requests).
+ * This provides a simple confirmation message to show the script is running.
+ *
+ * @param {Object} e - The event parameter for a GET request.
+ * @returns {ContentService.TextOutput} - A simple text response.
+ */
+function doGet(e) {
+  return ContentService.createTextOutput("Success! The script is running and ready to receive data from the calculator.");
+}
+
+/**
+ * Handles HTTP POST requests to the web app.
+ * This function is the endpoint for the allowance calculator to send data to.
+ * It parses the incoming data and saves it to a specified Google Sheet.
+ *
+ * @param {Object} e - The event parameter for a POST request, containing the postBody.
+ * @returns {ContentService.TextOutput} - A JSON response indicating success or failure.
+ */
+function doPost(e) {
+  // --- Configuration ---
+  // The Spreadsheet ID has been set to your specific sheet.
+  const SPREADSHEET_ID = "1SMfLxnNwdP8T3CTdjbcnZSVnl9wz1qabrwPQWYzdDVc"; 
+  
+  // The name of the sheet (tab) where the data will be saved.
+  const SHEET_NAME = "Laporan Elaun";
+  
+  // --- CORS Header for all responses ---
+  const corsHeader = {
+    'Access-Control-Allow-Origin': '*'
+  };
+
+  // --- Error Handling & Setup ---
+  if (!e || !e.postBody || !e.postBody.contents) {
+    return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": "Invalid POST data." }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders(corsHeader);
+  }
+
+  let sheet;
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME);
+      // UPDATED: Added new columns for additional allowances and bonuses
+      const headers = [
+        "Tarikh Simpan", "Nama Jurulatih", "Bulan Laporan", 
+        "Jumlah Elaun Fizikal (RM)", "Jumlah Elaun Pembangunan (RM)", "Jumlah Elaun Online (RM)", 
+        "Jumlah Elaun Tambahan & Bonus (RM)", "Jumlah Pengurangan (RM)", "Jumlah Bersih (RM)",
+        "Butiran Kelas Fizikal", "Butiran Kelas Pembangunan", "Butiran Kelas Online", 
+        "Butiran Elaun Tambahan & Bonus", "Butiran Pengurangan"
+      ];
+      sheet.appendRow(headers);
+    }
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": "Could not open spreadsheet: " + error.message }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders(corsHeader);
+  }
+
+  // --- Data Processing ---
+  try {
+    const data = JSON.parse(e.postBody.contents);
+
+    // UPDATED: Added new data fields to the row
+    const newRow = [
+      new Date(), 
+      data.nama, 
+      data.bulan,
+      data.ringkasan.fizikal, 
+      data.ringkasan.pembangunan,
+      data.ringkasan.online,
+      data.ringkasan.tambahanBonus,
+      data.ringkasan.pengurangan, 
+      data.ringkasan.bersih,
+      JSON.stringify(data.fizikal, null, 2), 
+      JSON.stringify(data.pembangunan, null, 2),
+      JSON.stringify(data.online, null, 2),
+      JSON.stringify(data.tambahanBonus, null, 2),
+      JSON.stringify(data.pengurangan, null, 2)
+    ];
+
+    sheet.appendRow(newRow);
+
+    // --- Success Response ---
+    return ContentService.createTextOutput(JSON.stringify({ "status": "success", "message": "Data saved successfully." }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders(corsHeader);
+
+  } catch (error) {
+    // --- Error Response ---
+    return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": "Failed to save data: " + error.message }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders(corsHeader);
+  }
+}
