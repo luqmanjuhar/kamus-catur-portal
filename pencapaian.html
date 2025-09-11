@@ -551,41 +551,56 @@
       return { cleanTitle: t, extractedDate: null };
     }
 
-    // TUKAR: Normalisasi pautan imej agar boleh dipaparkan (Drive, Dropbox)
+    // Normalisasi pautan imej (Drive/Dropbox/OneDrive/Photos)
     function normalizeImageURL(url) {
       if (!url) return "";
       let u = url.trim();
 
-      // Google Drive - tukar ke pautan terus
+      // Google Drive → guna thumbnail stabil
       if (u.includes("drive.google.com")) {
+        // /file/d/ID/view
         let m = u.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
+        // ?id=ID
         m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
-        // handle uc?id=... tetap guna
+        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
+        // uc?export=download&id=ID (fallback)
         m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
       }
 
-      // Dropbox - jadikan fail terus
+      // OneDrive
+      if (u.includes("1drv.ms") || u.includes("onedrive.live.com")) {
+        if (!u.includes("download=1")) {
+          u += (u.includes("?") ? "&" : "?") + "download=1";
+        }
+        return u;
+      }
+
+      // Dropbox → paksa paparan terus
       if (u.includes("dropbox.com")) {
-        if (u.includes("?dl=0")) u = u.replace("?dl=0", "?raw=1");
-        if (u.includes("?dl=1")) u = u.replace("?dl=1", "?raw=1");
+        u = u.replace("?dl=0", "?raw=1").replace("?dl=1", "?raw=1");
         if (!u.includes("?")) u += "?raw=1";
         return u;
       }
 
-      // Google Photos (photos.app.goo.gl) tidak boleh di-embed terus
+      // Google Photos tidak boleh di-embed terus
       if (u.includes("photos.app.goo.gl")) return "";
+
+      // Imgur (pautan halaman) → tukar ke host imej
+      if (u.includes("imgur.com") && !u.includes("i.imgur.com")) {
+        const m = u.match(/imgur\.com\/(gallery\/|a\/)?([a-zA-Z0-9]+)/);
+        if (m && m[2]) return `https://i.imgur.com/${m[2]}.jpg`;
+      }
 
       return u;
     }
 
-    // Kad dengan paparan imej + butang pautan
+    // Kad dengan paparan imej + butang pautan (guna kolum Image sahaja)
     function buildCard(r) {
-      const rawDisplay = (r[COLS.image] || r[COLS.photoURL] || "").trim();
+      const rawDisplay = (r[COLS.image] || "").trim();
       const displayURL = normalizeImageURL(rawDisplay);
-      const linkURL = (r[COLS.photoURL] || rawDisplay).trim();
+      const linkURL = rawDisplay;
 
       const hasDisplay = !!displayURL;
       const hasLink = !!linkURL;
@@ -601,6 +616,7 @@
         img.src = displayURL;
         img.alt = "Gambar kejohanan";
         img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
         img.className = "h-full w-full object-cover";
         img.onerror = function () {
           this.src = '';
@@ -745,5 +761,5 @@
     // Mula
     loadData();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d69daf533da84c',t:'MTc1NzU4Nzk1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d7d1a383aea84c',t:'MTc1NzYwMDU2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
