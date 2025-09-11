@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="color-scheme" content="light">
   <style>
-    /* Skeleton shimmer */
     .shimmer {
       position: relative;
       overflow: hidden;
@@ -142,7 +141,7 @@
     <!-- Status / Alerts -->
     <div id="alertBox" class="hidden mb-6 rounded-xl border border-orange-300 bg-orange-50 text-orange-900 p-4"></div>
 
-    <!-- Loader (tanpa gambar) -->
+    <!-- Loader -->
     <div id="loader" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       <div class="rounded-2xl bg-white p-4 border border-orange-200 shadow">
         <div class="h-4 w-2/3 bg-orange-200/50 rounded mb-2 shimmer"></div>
@@ -220,7 +219,7 @@
       photoText: "Photo / Gambar",
       remarks: "Remarks/Tambahan",
       photoURL: "URL Photo",
-      image: "Image" // masih dibaca dan dieksport, tapi tidak dipaparkan
+      image: "Image"
     };
 
     // Elemen
@@ -496,38 +495,22 @@
       }
     }
 
+    // Parse tarikh dengan keutamaan mm/dd bila ambigu
     function parseDateSafe(val) {
       if (!val) return null;
       const t = (val + "").trim();
-      // Sokong dd/mm/yyyy, mm/dd/yyyy, d-m-yy, dll. Bezakan ikut nilai hari/bulan
       let m = t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
       if (m) {
-        let a = +m[1]; // bahagian pertama (hari atau bulan)
-        let b = +m[2]; // bahagian kedua (bulan atau hari)
-        let year = +m[3];
-        if (year < 100) year = 2000 + year; // anggap abad semasa
+        let a = +m[1], b = +m[2], y = +m[3];
+        if (y < 100) y = 2000 + y;
         let day, month;
-        if (b > 12 && a >= 1 && a <= 12) {
-          // Contoh 08/30/2025 -> mm/dd/yyyy
-          month = a; day = b;
-        } else if (a > 12 && b >= 1 && b <= 12) {
-          // Contoh 30/08/2025 -> dd/mm/yyyy
-          day = a; month = b;
-        } else {
-          // Kedua-dua <= 12 (ambigu). Utamakan mm/dd seperti data contoh anda
-          month = a; day = b;
-        }
-        return new Date(year, month - 1, day);
+        if (b > 12 && a >= 1 && a <= 12) { month = a; day = b; }
+        else if (a > 12 && b >= 1 && b <= 12) { day = a; month = b; }
+        else { month = a; day = b; }
+        return new Date(y, month - 1, day);
       }
-      // Sokong yyyy-mm-dd atau yyyy/m/d
       m = t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
-      if (m) {
-        const year = +m[1];
-        const month = +m[2];
-        const day = +m[3];
-        return new Date(year, month - 1, day);
-      }
-      // Format lain: cuba parse asli
+      if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
       const tryNative = new Date(t);
       return isNaN(tryNative.getTime()) ? null : tryNative;
     }
@@ -554,7 +537,6 @@
       if (!title) return { cleanTitle: title || "", extractedDate: null };
       let t = title.trim();
       const patterns = [
-        // Benarkan pemisah termasuk kolon dan kurungan sebelum tarikh, contoh: ": 08/30/2025" atau "(30/08/2025)"
         /(.*?)[\s,\-:\(\[]\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})\s*[)\]]?$/,
         /(.*?)[\s,:\-]\s*(\d{4}[\-]\d{2}[\-]\d{2})$/,
         /(.*?)[\s,:\-]\s*(\d{4}[\/]\d{1,2}[\/]\d{1,2})$/
@@ -569,13 +551,88 @@
       return { cleanTitle: t, extractedDate: null };
     }
 
-    // Kad tanpa paparan imej, hanya butang pautan imej
+    // TUKAR: Normalisasi pautan imej agar boleh dipaparkan (Drive, Dropbox)
+    function normalizeImageURL(url) {
+      if (!url) return "";
+      let u = url.trim();
+
+      // Google Drive - tukar ke pautan terus
+      if (u.includes("drive.google.com")) {
+        let m = u.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+        m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+        // handle uc?id=... tetap guna
+        m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+      }
+
+      // Dropbox - jadikan fail terus
+      if (u.includes("dropbox.com")) {
+        if (u.includes("?dl=0")) u = u.replace("?dl=0", "?raw=1");
+        if (u.includes("?dl=1")) u = u.replace("?dl=1", "?raw=1");
+        if (!u.includes("?")) u += "?raw=1";
+        return u;
+      }
+
+      // Google Photos (photos.app.goo.gl) tidak boleh di-embed terus
+      if (u.includes("photos.app.goo.gl")) return "";
+
+      return u;
+    }
+
+    // Kad dengan paparan imej + butang pautan
     function buildCard(r) {
-      const imgURL = (r[COLS.photoURL] || "").trim();
-      const hasPhoto = !!imgURL;
+      const rawDisplay = (r[COLS.image] || r[COLS.photoURL] || "").trim();
+      const displayURL = normalizeImageURL(rawDisplay);
+      const linkURL = (r[COLS.photoURL] || rawDisplay).trim();
+
+      const hasDisplay = !!displayURL;
+      const hasLink = !!linkURL;
 
       const wrap = document.createElement("article");
-      wrap.className = "card group rounded-2xl bg-white border border-orange-200 shadow hover:shadow-lg transition overflow-hidden flex flex-col p-4";
+      wrap.className = "card group rounded-2xl bg-white border border-orange-200 shadow hover:shadow-lg transition overflow-hidden flex flex-col";
+
+      // Media (imej di atas)
+      const media = document.createElement("div");
+      media.className = "relative aspect-[16/10] bg-orange-50";
+      if (hasDisplay) {
+        const img = document.createElement("img");
+        img.src = displayURL;
+        img.alt = "Gambar kejohanan";
+        img.loading = "lazy";
+        img.className = "h-full w-full object-cover";
+        img.onerror = function () {
+          this.src = '';
+          this.alt = 'Gambar gagal dimuat';
+          this.style.display = 'none';
+          media.classList.add("bg-[linear-gradient(135deg,#FFEDD5,#FEF3C7)]");
+          media.innerHTML = `
+            <div class="absolute inset-0 flex items-center justify-center text-orange-600/70">
+              <div class="flex items-center gap-2">
+                <svg xmlns='http://www.w3.org/2000/svg' class='size-6' viewBox='0 0 24 24' fill='none' stroke='currentColor'>
+                  <path d='M12 9v4m0 4h.01' stroke-width='2' stroke-linecap='round'/>
+                  <circle cx='12' cy='12' r='9' stroke-width='2'/>
+                </svg>
+                <span class="text-sm font-semibold">Tiada gambar</span>
+              </div>
+            </div>
+          `;
+        };
+        media.appendChild(img);
+      } else {
+        media.innerHTML = `
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="rounded-xl bg-orange-100 text-orange-600 px-3 py-2 text-sm font-semibold">
+              Tiada gambar
+            </div>
+          </div>
+        `;
+      }
+
+      // Kandungan
+      const body = document.createElement("div");
+      body.className = "p-4 flex flex-col";
 
       const title = document.createElement("h3");
       title.className = "text-base font-extrabold text-orange-700 leading-snug";
@@ -607,9 +664,9 @@
 
       const right = document.createElement("div");
       right.className = "flex items-center gap-2";
-      if (hasPhoto) {
+      if (hasLink) {
         const viewBtn = document.createElement("a");
-        viewBtn.href = imgURL;
+        viewBtn.href = linkURL;
         viewBtn.target = "_blank";
         viewBtn.rel = "noopener";
         viewBtn.className = "inline-flex items-center gap-1 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold px-3 py-1.5 shadow transition";
@@ -623,13 +680,15 @@
         right.appendChild(viewBtn);
       }
 
-      wrap.appendChild(title);
-      wrap.appendChild(meta);
-      wrap.appendChild(achievement);
-      wrap.appendChild(remarks);
+      wrap.appendChild(media);
+      wrap.appendChild(body);
+      body.appendChild(title);
+      body.appendChild(meta);
+      body.appendChild(achievement);
+      body.appendChild(remarks);
       footer.appendChild(stamp);
       footer.appendChild(right);
-      wrap.appendChild(footer);
+      body.appendChild(footer);
 
       return wrap;
     }
@@ -654,7 +713,7 @@
     levelSel.addEventListener("change", () => { currentLevel = levelSel.value; filterAndRender(); });
     catSel.addEventListener("change", () => { currentCategory = catSel.value; filterAndRender(); });
 
-    // Eksport CSV (termasuk kolum Image walaupun tidak dipaparkan)
+    // Eksport CSV
     document.getElementById("exportCsvBtn").addEventListener("click", () => {
       const rows = filteredRows.length ? filteredRows : [];
       if (!rows.length) { showAlert("Tiada data untuk dieksport. Sila tapis/pilih nama."); return; }
@@ -686,5 +745,5 @@
     // Mula
     loadData();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d631a2d326a84c',t:'MTc1NzU4MzUyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d69daf533da84c',t:'MTc1NzU4Nzk1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
