@@ -556,15 +556,10 @@
       if (!url) return "";
       let u = url.trim();
 
-      // Google Drive → guna thumbnail stabil
+      // Google Drive → gunakan thumbnail stabil yang boleh dipaparkan
       if (u.includes("drive.google.com")) {
-        // /file/d/ID/view
         let m = u.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
-        // ?id=ID
-        m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
-        // uc?export=download&id=ID (fallback)
         m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
         if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
       }
@@ -577,7 +572,7 @@
         return u;
       }
 
-      // Dropbox → paksa paparan terus
+      // Dropbox
       if (u.includes("dropbox.com")) {
         u = u.replace("?dl=0", "?raw=1").replace("?dl=1", "?raw=1");
         if (!u.includes("?")) u += "?raw=1";
@@ -596,7 +591,7 @@
       return u;
     }
 
-    // Kad dengan thumbnail kecil + butang pautan (guna kolum Image sahaja)
+    // Kad dengan imej square 300px di atas + butang pautan (guna kolum Image sahaja)
     function buildCard(r) {
       const rawDisplay = (r[COLS.image] || "").trim();
       const displayURL = normalizeImageURL(rawDisplay);
@@ -606,11 +601,11 @@
       const hasLink = !!linkURL;
 
       const wrap = document.createElement("article");
-      wrap.className = "card group rounded-2xl bg-white border border-orange-200 shadow hover:shadow-lg transition overflow-hidden p-4 flex items-start gap-4";
+      wrap.className = "card group rounded-2xl bg-white border border-orange-200 shadow hover:shadow-lg transition overflow-hidden flex flex-col";
 
-      // Thumbnail square kecil di kiri
-      const thumb = document.createElement("div");
-      thumb.className = "shrink-0 relative w-[300px] h-[300px] rounded-xl overflow-hidden bg-orange-50";
+      // Media square 300px (dipotong kemas)
+      const media = document.createElement("div");
+      media.className = "relative mx-auto mt-4 w-[300px] h-[300px] rounded-xl overflow-hidden bg-orange-50";
       if (hasDisplay) {
         const img = document.createElement("img");
         img.src = displayURL;
@@ -622,28 +617,28 @@
           this.src = '';
           this.alt = 'Gambar gagal dimuat';
           this.style.display = 'none';
-          thumb.classList.add("bg-[linear-gradient(135deg,#FFEDD5,#FEF3C7)]");
-          thumb.innerHTML = `
-            <div class=\"absolute inset-0 flex items-center justify-center text-orange-600/70\">
-              <div class=\"rounded-xl bg-orange-100 text-orange-600 px-2 py-1 text-xs font-semibold\">Tiada gambar</div>
+          media.classList.add("bg-[linear-gradient(135deg,#FFEDD5,#FEF3C7)]");
+          media.innerHTML = `
+            <div class="absolute inset-0 flex items-center justify-center text-orange-600/70">
+              <div class="rounded-xl bg-orange-100 text-orange-600 px-2 py-1 text-xs font-semibold">Tiada gambar</div>
             </div>
           `;
         };
-        thumb.appendChild(img);
+        media.appendChild(img);
       } else {
-        thumb.innerHTML = `
-          <div class=\"absolute inset-0 flex items-center justify-center\">
-            <div class=\"rounded-xl bg-orange-100 text-orange-600 px-2 py-1 text-xs font-semibold\">Tiada gambar</div>
+        media.innerHTML = `
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="rounded-xl bg-orange-100 text-orange-600 px-2 py-1 text-xs font-semibold">Tiada gambar</div>
           </div>
         `;
       }
 
-      // Kandungan di kanan
+      // Kandungan di bawah imej
       const body = document.createElement("div");
-      body.className = "flex-1 min-w-0";
+      body.className = "p-4 flex flex-col";
 
       const title = document.createElement("h3");
-      title.className = "text-base font-extrabold text-orange-700 leading-snug line-clamp-2";
+      title.className = "text-base font-extrabold text-orange-700 leading-snug";
       const { cleanTitle, extractedDate } = extractDateFromTitle(r[COLS.tournament] || "");
       title.textContent = cleanTitle || "Tanpa Nama Kejohanan";
 
@@ -655,18 +650,19 @@
       if (r[COLS.category]) meta.appendChild(buildBadge(r[COLS.category]));
 
       const achievement = document.createElement("p");
-      achievement.className = "text-sm text-slate-700 mt-1 line-clamp-2";
+      achievement.className = "text-sm text-slate-700 mt-1";
       achievement.innerHTML = "<span class='font-semibold text-orange-700'>Pencapaian:</span> " + (r[COLS.achievement] || "-");
 
       const remarks = document.createElement("p");
-      remarks.className = "text-xs text-slate-600 mt-1 line-clamp-2";
+      remarks.className = "text-xs text-slate-600";
       remarks.innerHTML = "<span class='font-semibold text-orange-700'>Catatan:</span> " + (r[COLS.remarks] || "-");
 
+      // Baris bawah
       const footer = document.createElement("div");
-      footer.className = "mt-3 flex items-center justify-between gap-3";
+      footer.className = "mt-3 flex items-center justify-between";
 
       const stamp = document.createElement("div");
-      stamp.className = "text-[11px] text-orange-900/60 truncate";
+      stamp.className = "text-[11px] text-orange-900/60";
       stamp.textContent = r[COLS.timestamp] ? `Hantar: ${formatDate(r[COLS.timestamp])}` : "";
 
       const right = document.createElement("div");
@@ -678,16 +674,16 @@
         viewBtn.rel = "noopener";
         viewBtn.className = "inline-flex items-center gap-1 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold px-3 py-1.5 shadow transition";
         viewBtn.innerHTML = `
-          <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"size-4\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\">
-            <path d=\"M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z\" stroke-width=\"2\"/>
-            <circle cx=\"12\" cy=\"12\" r=\"3\" stroke-width=\"2\"/>
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke-width="2"/>
+            <circle cx="12" cy="12" r="3" stroke-width="2"/>
           </svg>
           Lihat Gambar
         `;
         right.appendChild(viewBtn);
       }
 
-      wrap.appendChild(thumb);
+      wrap.appendChild(media);
       wrap.appendChild(body);
       body.appendChild(title);
       body.appendChild(meta);
@@ -752,5 +748,5 @@
     // Mula
     loadData();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d7fc9116b5a84c',t:'MTc1NzYwMjMyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d81aa9e7b9a84c',t:'MTc1NzYwMzU1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
