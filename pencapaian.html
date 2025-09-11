@@ -499,20 +499,43 @@
     function parseDateSafe(val) {
       if (!val) return null;
       const t = (val + "").trim();
-      const dmy = t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-      if (dmy) {
-        const [_, d, m, y] = dmy;
-        const year = (+y < 100 ? 2000 + (+y) : +y);
-        return new Date(year, +m - 1, +d);
+      // Sokong dd/mm/yyyy, mm/dd/yyyy, d-m-yy, dll. Bezakan ikut nilai hari/bulan
+      let m = t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+      if (m) {
+        let a = +m[1]; // bahagian pertama (hari atau bulan)
+        let b = +m[2]; // bahagian kedua (bulan atau hari)
+        let year = +m[3];
+        if (year < 100) year = 2000 + year; // anggap abad semasa
+        let day, month;
+        if (b > 12 && a >= 1 && a <= 12) {
+          // Contoh 08/30/2025 -> mm/dd/yyyy
+          month = a; day = b;
+        } else if (a > 12 && b >= 1 && b <= 12) {
+          // Contoh 30/08/2025 -> dd/mm/yyyy
+          day = a; month = b;
+        } else {
+          // Kedua-dua <= 12 (ambigu). Utamakan mm/dd seperti data contoh anda
+          month = a; day = b;
+        }
+        return new Date(year, month - 1, day);
       }
-      const iso = new Date(t);
-      return isNaN(iso.getTime()) ? null : iso;
+      // Sokong yyyy-mm-dd atau yyyy/m/d
+      m = t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+      if (m) {
+        const year = +m[1];
+        const month = +m[2];
+        const day = +m[3];
+        return new Date(year, month - 1, day);
+      }
+      // Format lain: cuba parse asli
+      const tryNative = new Date(t);
+      return isNaN(tryNative.getTime()) ? null : tryNative;
     }
     function formatDate(val) {
       const d = parseDateSafe(val);
       if (!d) return (val || "").toString();
       try {
-        return d.toLocaleDateString("ms-MY", { year: "numeric", month: "short", day: "2-digit" });
+        return d.toLocaleDateString("ms-MY", { year: "numeric", month: "long", day: "2-digit" });
       } catch {
         return d.toDateString();
       }
@@ -531,14 +554,15 @@
       if (!title) return { cleanTitle: title || "", extractedDate: null };
       let t = title.trim();
       const patterns = [
-        /(.*?)[\s\-\(\[]\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})\s*[)\]]?$/,
-        /(.*?)[\s,\-]\s*(\d{4}[\-]\d{2}[\-]\d{2})$/,
-        /(.*?)[\s,\-]\s*(\d{4}[\/]\d{1,2}[\/]\d{1,2})$/
+        // Benarkan pemisah termasuk kolon dan kurungan sebelum tarikh, contoh: ": 08/30/2025" atau "(30/08/2025)"
+        /(.*?)[\s,\-:\(\[]\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})\s*[)\]]?$/,
+        /(.*?)[\s,:\-]\s*(\d{4}[\-]\d{2}[\-]\d{2})$/,
+        /(.*?)[\s,:\-]\s*(\d{4}[\/]\d{1,2}[\/]\d{1,2})$/
       ];
       for (const p of patterns) {
         const m = t.match(p);
         if (m) {
-          const cleanTitle = m[1].trim().replace(/[\-–,]$/, '').trim();
+          const cleanTitle = m[1].trim().replace(/[\-–,:]$/, '').trim();
           return { cleanTitle, extractedDate: m[2] };
         }
       }
@@ -560,7 +584,7 @@
 
       const meta = document.createElement("div");
       meta.className = "mt-1 flex flex-wrap items-center gap-2";
-      const dateForBadge = extractedDate ? extractedDate : r[COLS.date];
+      const dateForBadge = extractedDate || r[COLS.date];
       if (dateForBadge) meta.appendChild(buildBadge(formatDate(dateForBadge)));
       if (r[COLS.level]) meta.appendChild(buildBadge(r[COLS.level]));
       if (r[COLS.category]) meta.appendChild(buildBadge(r[COLS.category]));
@@ -662,5 +686,5 @@
     // Mula
     loadData();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d4df56761cdce2',t:'MTc1NzU2OTY2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d631a2d326a84c',t:'MTc1NzU4MzUyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
