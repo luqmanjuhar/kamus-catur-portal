@@ -41,7 +41,7 @@
                 Profil Pemain & Kejohanan Catur
               </h1>
               <p class="text-sm md:text-base text-orange-900/80 mt-1">
-                Pilih profil pemain untuk lihat maklumat dan pencapaian, atau buka senarai kejohanan terkini.
+                Pilih profil pemain untuk lihat maklumat dan pencapaian, atau terokai senarai kejohanan.
               </p>
             </div>
             <div class="flex items-center gap-3">
@@ -97,7 +97,7 @@
                 </div>
               </div>
               <p id="playerHelp" class="text-xs text-orange-900/70 mt-2">
-                Tapis mengikut jurulatih/tahap/jenis/status, kemudian pilih nama untuk melihat profil diikuti papan ringkas dan pencapaian.
+                Tapis mengikut jurulatih/tahap/jenis/status, kemudian pilih nama untuk melihat profil dan pencapaian.
               </p>
               <p id="filterCount" class="text-xs text-orange-900/60 mt-1"></p>
             </div>
@@ -157,7 +157,7 @@
         <article id="selectedProfile" class="rounded-2xl bg-white border border-orange-200 shadow p-5 flex items-start gap-4"></article>
       </div>
 
-      <!-- Papan ringkas Pencapaian (di bawah profil, sebelum kad) -->
+      <!-- Papan ringkas Pencapaian (di bawah profil) -->
       <div id="achSummaryWrap" class="hidden mt-4">
         <div class="rounded-3xl bg-white/70 backdrop-blur border border-orange-200 shadow-xl p-5 md:p-6">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -198,12 +198,6 @@
                     <button data-leveldir="desc" class="w-full text-left px-3 py-2 text-sm hover:bg-orange-50">Antarabangsa → Sekolah</button>
                   </div>
                 </div>
-                <button id="sortByCategory" class="btn inline-flex items-center gap-2 rounded-lg bg-white border border-orange-300 hover:border-orange-400 text-orange-700 text-sm font-semibold px-3 py-1.5 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M7 7h10M5 12h14M9 17h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  Kategori
-                </button>
               </div>
               <div id="achSortHint" class="mt-2 text-xs text-orange-900/60">Disusun: Tarikh (↓ baru → lama)</div>
             </div>
@@ -442,7 +436,6 @@
 
       sortByDate: document.getElementById("sortByDate"),
       sortByLevel: document.getElementById("sortByLevel"),
-      sortByCategory: document.getElementById("sortByCategory"),
       dateDir: document.getElementById("dateDir"),
       achSortHint: document.getElementById("achSortHint"),
     };
@@ -470,9 +463,9 @@
 
     // Achievements state
     let currentAchievements = [];
-    let sortState = { by: "date", dir: "desc", levelDir: "asc", catDir: "asc" }; // date | level | category, levelDir: asc|desc, catDir: asc|desc
+    let sortState = { by: "date", dir: "desc", levelDir: "asc" }; // date | level
 
-    // Util CSV
+    // CSV utils
     function parseCSV(text) {
       const rows = [];
       let i = 0, field = "", row = [], inQuotes = false;
@@ -512,6 +505,7 @@
       return out;
     }
 
+    // Helpers
     function showAlert(msg, type="info") {
       ui.alertBox.classList.remove("hidden");
       ui.alertBox.textContent = msg;
@@ -521,8 +515,6 @@
       ui.alertBox.classList.add("hidden");
       ui.alertBox.textContent = "";
     }
-
-    // Helpers
     function parseDateSafe(val) {
       if (!val) return null;
       const t = (val + "").trim();
@@ -594,6 +586,8 @@
       span.textContent = text;
       return span;
     }
+
+    // Profil info tambahan
     function formatDOBFromNRIC(nric) {
       const s = (nric || '').replace(/[^0-9]/g,'');
       if (s.length < 6) return '';
@@ -709,8 +703,7 @@
         })).filter(o => o[TCOLS.name] || o[TCOLS.organizer]);
 
         populateTournamentFilters(tourAll);
-        updateTournamentStats(tourAll);
-        filterAndRenderTournaments();
+        filterAndRenderTournaments(); // Akan papar semua jika tiada carian
       } catch (e) {
         tourAll = [];
         updateTournamentStats(tourAll);
@@ -816,8 +809,29 @@
       if (st) temp = temp.filter(x => x[TCOLS.state] === st);
       if (tp) temp = temp.filter(x => x.__type === tp);
 
-      tourFiltered = temp;
+      // Paparkan semua kejohanan bila tiada carian/tapisan (seperti sebelum ini)
+      tourFiltered = (!q && !st && !tp) ? tourAll.slice() : temp;
+
+      // Kemas kini statistik asas berdasarkan hasil semasa
       updateTournamentStats(tourFiltered);
+
+      // Kira jumlah pencapaian dan pemain terlibat daripada hasil semasa
+      let achTotal = 0;
+      const playersSet = new Set();
+      const nameCache = tourFiltered.map(t => (t[TCOLS.name] || '').toLowerCase());
+      for (const r of perfRows) {
+        const title = (r[COLS.tournament] || '').toLowerCase();
+        const player = (r[COLS.name] || '').trim();
+        if (!player) continue;
+        if (nameCache.some(n => n && title.includes(n))) {
+          achTotal++;
+          playersSet.add(player);
+        }
+      }
+      const achCountEl = document.getElementById('tourAchCount');
+      const achPlayersEl = document.getElementById('tourAchPlayers');
+      if (achCountEl) achCountEl.textContent = achTotal.toString();
+      if (achPlayersEl) achPlayersEl.textContent = playersSet.size.toString();
 
       if (!tourFiltered.length) {
         tel.tournResults.classList.add("hidden");
@@ -862,6 +876,50 @@
         else color = "bg-amber-100 text-amber-800 border-amber-200";
         chips.appendChild(buildBadge(x.__type, color));
 
+        // Ringkasan pencapaian pelajar yang terlibat (daripada data prestasi)
+        const involved = perfRows.filter(r => {
+          const tName = (r[COLS.tournament]||'').toLowerCase();
+          const name = (x[TCOLS.name]||'').toLowerCase();
+          return tName.includes(name) && (r[COLS.name]||'').trim();
+        });
+        const summary = document.createElement('div');
+        summary.className = 'mt-3 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900/90';
+        if (involved.length) {
+          const byPlayer = {};
+          involved.forEach(r => {
+            const n = (r[COLS.name]||'-').trim();
+            byPlayer[n] = byPlayer[n] || [];
+            byPlayer[n].push(r);
+          });
+          const total = involved.length;
+          const players = Object.keys(byPlayer);
+          const head = document.createElement('div');
+          head.className = 'font-semibold text-orange-700';
+          head.textContent = `Ringkasan Pencapaian (${players.length} pemain, ${total} rekod)`;
+          summary.appendChild(head);
+          const listWrap = document.createElement('ul');
+          listWrap.className = 'mt-2 space-y-1 max-h-40 overflow-auto pr-1';
+          players.sort((a,b)=>a.localeCompare(b,'ms')).slice(0,10).forEach(n => {
+            const li = document.createElement('li');
+            const achTexts = byPlayer[n].map(r => (r[COLS.achievement]||'').toString().trim()).filter(Boolean);
+            const chips = achTexts.slice(0,3).map(t => `
+              <span class="inline-flex items-center rounded-full border border-orange-200 bg-white px-2 py-0.5 text-[11px] text-orange-700">${t}</span>
+            `).join(' ');
+            const more = achTexts.length > 3 ? ` <span class="text-[11px] text-orange-700/70">+${achTexts.length-3} lagi</span>` : '';
+            li.innerHTML = `<span class='font-medium'>${n}</span> — ${chips || `${byPlayer[n].length} rekod`}${more}`;
+            listWrap.appendChild(li);
+          });
+          if (players.length > 10) {
+            const more = document.createElement('div');
+            more.className = 'text-xs text-orange-700/80 mt-1';
+            more.textContent = `+${players.length-10} pemain lagi`;
+            summary.appendChild(more);
+          }
+          summary.appendChild(listWrap);
+        } else {
+          summary.textContent = 'Tiada ringkasan pencapaian ditemui untuk kejohanan ini.';
+        }
+
         const footer = document.createElement("div");
         footer.className = "mt-3 flex items-center justify-between";
         const right = document.createElement("div");
@@ -883,6 +941,7 @@
         card.appendChild(sub);
         card.appendChild(chips);
         card.appendChild(dr);
+        card.appendChild(summary);
         footer.appendChild(document.createElement("div"));
         footer.appendChild(right);
         card.appendChild(footer);
@@ -1117,7 +1176,6 @@
         });
         pel.achSortHint.textContent = `Disusun: Tarikh (${sortState.dir === "desc" ? "↓ baru → lama" : "↑ lama → baru"})`;
       } else if (sortState.by === "level") {
-        // Dua pendekatan: levelDir = asc (Sekolah→Antarabangsa) atau desc (Antarabangsa→Sekolah)
         const ascGroups = [
           ["school", "sekolah"],
           ["district", "daerah"],
@@ -1136,17 +1194,6 @@
         };
         arr.sort((a,b) => (score(a[COLS.level]) - score(b[COLS.level])) || sortFallbackDateDesc(a,b));
         pel.achSortHint.textContent = `Disusun: Peringkat (${sortState.levelDir === 'desc' ? 'Antarabangsa → Sekolah' : 'Sekolah → Antarabangsa'})`;
-      } else if (sortState.by === "category") {
-        const ascOrder = ["bawah 7","under 7","bawah 8","bawah 10","bawah 12","bawah 14","bawah 16","bawah 18","oku","para","team","berpasukan","terbuka","open"]; // Bawah → Terbuka (termasuk Bawah 7)
-        const descOrder = [...ascOrder].reverse(); // Terbuka → Bawah
-        const order = sortState.catDir === 'desc' ? descOrder : ascOrder;
-        const cscore = v => {
-          const t = (v||"").toString().trim().toLowerCase();
-          const i = order.findIndex(k => t.includes(k));
-          return i === -1 ? 999 : i;
-        };
-        arr.sort((a,b) => (cscore(a[COLS.category]) - cscore(b[COLS.category])) || sortFallbackDateDesc(a,b));
-        pel.achSortHint.textContent = `Disusun: Kategori (${sortState.catDir === 'desc' ? 'Terbuka → Bawah' : 'Bawah → Terbuka'})`;
       }
 
       // Render
@@ -1161,7 +1208,6 @@
     function setActiveSortButton() {
       pel.sortByDate.classList.toggle("is-active", sortState.by === "date");
       pel.sortByLevel.classList.toggle("is-active", sortState.by === "level");
-      pel.sortByCategory.classList.toggle("is-active", sortState.by === "category");
       pel.dateDir.textContent = sortState.by === 'date' ? (sortState.dir === 'desc' ? '↓' : '↑') : '↓';
       const ld = document.getElementById('levelDir');
       if (ld) ld.textContent = sortState.by === 'level' ? (sortState.levelDir === 'desc' ? '↓' : '↑') : '↕';
@@ -1197,19 +1243,15 @@
       pel.profileEmpty.classList.add("hidden");
       pel.profAchLoader.classList.remove("hidden");
 
-      // Profil
       renderSelectedProfile(name);
 
-      // Data pencapaian untuk pemain
       currentAchievements = perfRows.filter(r => (r[COLS.name] || "").trim() === name);
 
-      // Tunjuk papan ringkas dan kad
       pel.achSummaryWrap.classList.remove("hidden");
       pel.achievementsWrap.classList.remove("hidden");
       pel.profAchLoader.classList.add("hidden");
 
-      // Reset sort ke Tarikh (baru → lama)
-      sortState = { by: "date", dir: "desc" };
+      sortState = { by: "date", dir: "desc", levelDir: "asc" };
       setActiveSortButton();
       sortAchievements();
     }
@@ -1237,13 +1279,12 @@
       if (sortState.by === "date") {
         sortState.dir = sortState.dir === "desc" ? "asc" : "desc";
       } else {
-        sortState = { by: "date", dir: "desc" };
+        sortState = { ...sortState, by: "date", dir: "desc" };
       }
       setActiveSortButton();
       sortAchievements();
     });
     pel.sortByLevel.addEventListener("click", (e) => {
-      // Toggle menu kecil untuk pilih arah susunan peringkat
       e.stopPropagation();
       const menu = document.getElementById('levelMenu');
       menu.classList.toggle('hidden');
@@ -1263,47 +1304,42 @@
         sortState.by = 'level';
         sortState.levelDir = btn.getAttribute('data-leveldir') === 'desc' ? 'desc' : 'asc';
         document.getElementById('levelMenu').classList.add('hidden');
-        document.getElementById('levelDir').textContent = sortState.levelDir === 'desc' ? '↓' : '↑';
         setActiveSortButton();
         sortAchievements();
       });
     });
-    pel.sortByCategory.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const menu = document.getElementById('catMenu');
-      menu.classList.toggle('hidden');
-      sortState.by = 'category';
-      setActiveSortButton();
-    });
-    // Pilihan menu kategori
-    document.querySelectorAll('#catMenu [data-catdir]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        sortState.by = 'category';
-        sortState.catDir = btn.getAttribute('data-catdir') === 'desc' ? 'desc' : 'asc';
-        document.getElementById('catMenu').classList.add('hidden');
-        const cd = document.getElementById('catDir');
-        if (cd) cd.textContent = sortState.catDir === 'desc' ? '↓' : '↑';
-        setActiveSortButton();
-        sortAchievements();
-      });
-    });
-    // Tutup menu bila klik luar (kategori)
-    document.addEventListener('click', (e) => {
-      const menu = document.getElementById('catMenu');
-      const btn = document.getElementById('sortByCategory');
-      if (!menu || !btn) return;
-      if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.add('hidden');
+
+    // Kejohanan: carian & tapisan
+    tel.tourSearch.addEventListener('input', filterAndRenderTournaments);
+    tel.tourState.addEventListener('change', filterAndRenderTournaments);
+    tel.tourType.addEventListener('change', filterAndRenderTournaments);
+    tel.tourExportBtn.addEventListener('click', () => {
+      // Eksport CSV daripada paparan semasa
+      const header = ["Nama Kejohanan","Nama Penganjur","Negeri","Tarikh Mula","Tarikh Tamat","Jenis","Link Pendaftaran"];
+      const rows = tourFiltered.map(x => [
+        x[TCOLS.name]||"", x[TCOLS.organizer]||"", x[TCOLS.state]||"",
+        x[TCOLS.start]||"", x[TCOLS.end]||"", x.__type||"", x[TCOLS.reg]||""
+      ]);
+      const csv = [header, ...rows].map(r => r.map(v => `"${(v||"").toString().replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = "kejohanan.csv"; a.click();
+      URL.revokeObjectURL(url);
     });
 
     // Init
     (async function init() {
       hideAlert();
       activateTab("profil");
-      pel.profileEmpty.classList.remove("hidden");
-      const yEl = document.getElementById('yearNow');
-      if (yEl) yEl.textContent = new Date().getFullYear();
+      document.getElementById('yearNow').textContent = new Date().getFullYear();
+
       await Promise.all([loadProfiles(), loadPerformance(), loadTournaments()]);
+      // Selepas muat turun kejohanan, papar semua tanpa carian
+      filterAndRenderTournaments();
+      // Profil: paparkan kosong dahulu
+      document.getElementById('profileEmpty').classList.remove('hidden');
     })();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ef3bc180a5a84c',t:'MTc1Nzg0NjA4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f0d26e729ba84a',t:'MTc1Nzg2Mjc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
