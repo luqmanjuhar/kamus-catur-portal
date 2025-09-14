@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Prestasi & Kejohanan Catur</title>
+  <title>Profil Pemain & Kejohanan Catur</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="color-scheme" content="light">
   <style>
@@ -21,10 +21,12 @@
     }
     @media print {
       body { background: white; }
-      header, #alertBox { display: none !important; }
-      #results, #tournResults { margin-top: 0 !important; }
+      header, #alertBox, #tabs { display: none !important; }
       .card { break-inside: avoid; }
     }
+    .btn { transition: transform .06s ease, box-shadow .2s ease; }
+    .btn:active { transform: scale(.98); }
+    .is-active { box-shadow: inset 0 0 0 2px rgba(234,88,12,.5); }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 text-slate-800">
@@ -36,20 +38,20 @@
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 class="text-2xl md:text-3xl font-extrabold text-orange-700 tracking-tight">
-                Dashboard Prestasi & Kejohanan Catur
+                Profil Pemain & Kejohanan Catur
               </h1>
               <p class="text-sm md:text-base text-orange-900/80 mt-1">
-                Lihat rekod individu dan senarai kejohanan yang dimuat naik.
+                Pilih profil pemain untuk lihat maklumat dan pencapaian, atau buka senarai kejohanan terkini.
               </p>
             </div>
             <div class="flex items-center gap-3">
-              <button id="refreshBtn" class="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2 rounded-xl shadow transition active:scale-[.98]">
+              <button id="refreshBtn" class="btn inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2 rounded-xl shadow">
                 <span>Segarkan Data</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v6h6M20 20v-6h-6M20 8a8 8 0 00-12-6.9M4 16a8 8 0 0012 6.9"/>
                 </svg>
               </button>
-              <button id="printBtn" class="inline-flex items-center gap-2 bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold px-4 py-2 rounded-xl border border-orange-200 shadow-sm transition">
+              <button id="printBtn" class="btn inline-flex items-center gap-2 bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold px-4 py-2 rounded-xl border border-orange-200 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M6 9V4h12v5M6 18h12v2H6z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <rect x="4" y="9" width="16" height="7" rx="2" ry="2" stroke-width="2"></rect>
@@ -60,9 +62,9 @@
           </div>
 
           <!-- Tabs -->
-          <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <button id="tabPrestasi" class="tab-btn bg-white border border-orange-300 hover:border-orange-400 text-orange-700 font-semibold px-4 py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
-              <span>Prestasi Pelajar</span>
+          <div id="tabs" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button id="tabProfil" class="tab-btn bg-white border border-orange-300 hover:border-orange-400 text-orange-700 font-semibold px-4 py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+              <span>Profil Pemain</span>
             </button>
             <button id="tabKejohanan" class="tab-btn bg-white border border-orange-300 hover:border-orange-400 text-orange-700 font-semibold px-4 py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
               <span>Senarai Kejohanan</span>
@@ -72,21 +74,20 @@
       </div>
     </header>
 
-    <!-- Status / Alerts (disembunyikan bila ralat) -->
+    <!-- Status / Alerts -->
     <div id="alertBox" class="hidden mb-6 rounded-xl border border-orange-300 bg-orange-50 text-orange-900 p-4"></div>
 
-    <!-- Section: Prestasi Pelajar -->
-    <section id="prestasiSection">
-      <!-- Header Prestasi -->
+    <!-- Section: Profil Pemain -->
+    <section id="profilSection">
       <div class="rounded-3xl bg-white/70 backdrop-blur border border-orange-200 shadow-xl mb-6">
         <div class="p-6 md:p-8">
           <div class="grid md:grid-cols-3 gap-4">
             <div class="md:col-span-2">
-              <label for="nameSelect" class="block text-sm font-semibold text-orange-900/80 mb-2">
-                Nama Pelajar
+              <label for="playerSelect" class="block text-sm font-semibold text-orange-900/80 mb-2">
+                Pilih Nama Pemain
               </label>
               <div class="relative">
-                <select id="nameSelect" class="w-full appearance-none bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-4 py-3 pr-10 text-slate-800 shadow-sm">
+                <select id="playerSelect" class="w-full appearance-none bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-4 py-3 pr-10 text-slate-800 shadow-sm">
                   <option value="">— Sila pilih nama —</option>
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-orange-600">
@@ -95,82 +96,147 @@
                   </svg>
                 </div>
               </div>
-              <p id="nameHelp" class="text-xs text-orange-900/70 mt-2">
-                Pilih nama untuk melihat butiran.
+              <p id="playerHelp" class="text-xs text-orange-900/70 mt-2">
+                Tapis mengikut jurulatih/tahap/jenis/status, kemudian pilih nama untuk melihat profil diikuti papan ringkas dan pencapaian.
               </p>
+              <p id="filterCount" class="text-xs text-orange-900/60 mt-1"></p>
             </div>
 
             <div class="grid grid-cols-3 gap-3">
               <div class="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 shadow">
-                <div class="text-xs/4 opacity-90">Jumlah Rekod</div>
-                <div id="statTotal" class="text-2xl font-extrabold mt-1">0</div>
+                <div class="text-xs/4 opacity-90">Jumlah Pemain</div>
+                <div id="profStatTotal" class="text-2xl font-extrabold mt-1">0</div>
               </div>
               <div class="rounded-2xl bg-white border border-orange-200 p-4 shadow">
-                <div class="text-xs/4 text-orange-900/80">Kejohanan</div>
-                <div id="statTournaments" class="text-2xl font-extrabold text-orange-700 mt-1">0</div>
+                <div class="text-xs/4 text-orange-900/80">Jurulatih</div>
+                <div id="profStatCoaches" class="text-2xl font-extrabold text-orange-700 mt-1">0</div>
               </div>
               <div class="rounded-2xl bg-white border border-orange-200 p-4 shadow">
-                <div class="text-xs/4 text-orange-900/80">Kategori</div>
-                <div id="statCategories" class="text-2xl font-extrabold text-orange-700 mt-1">0</div>
+                <div class="text-xs/4 text-orange-900/80">Tahap</div>
+                <div id="profStatLevels" class="text-2xl font-extrabold text-orange-700 mt-1">0</div>
               </div>
             </div>
           </div>
 
-          <!-- Carian + Tapisan Prestasi -->
-          <div class="mt-4 hidden" id="searchWrap">
-            <div class="grid lg:grid-cols-5 md:grid-cols-3 gap-3">
-              <div class="lg:col-span-2 md:col-span-2">
-                <label for="searchInput" class="block text-xs font-semibold text-orange-900/80 mb-1">
-                  Cari Nama Kejohanan
-                </label>
-                <input id="searchInput" type="text" placeholder="Contoh: MSSM, Open, District..."
-                       class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-4 py-2.5 text-slate-800 shadow-sm" />
-              </div>
-              <div>
-                <label for="searchDate" class="block text-xs font-semibold text-orange-900/80 mb-1">
-                  Cari Tarikh (dari nama)
-                </label>
-                <input id="searchDate" type="text" placeholder="cth: 2024-05 atau 15/06/2024"
-                       class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-4 py-2.5 text-slate-800 shadow-sm" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-orange-900/80 mb-1">Peringkat</label>
-                <select id="filterLevel" class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-3 py-2.5 text-slate-800 shadow-sm">
-                  <option value="">Semua</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-orange-900/80 mb-1">Kategori</label>
-                <select id="filterCategory" class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-3 py-2.5 text-slate-800 shadow-sm">
-                  <option value="">Semua</option>
-                </select>
-              </div>
+          <!-- Penapis Profil -->
+          <div class="mt-4 grid lg:grid-cols-4 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-orange-900/80 mb-1">Jurulatih</label>
+              <select id="filterCoach" class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-3 py-2.5 text-slate-800 shadow-sm">
+                <option value="">Semua</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-orange-900/80 mb-1">Tahap</label>
+              <select id="filterLevel" class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-3 py-2.5 text-slate-800 shadow-sm">
+                <option value="">Semua</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-orange-900/80 mb-1">Jenis Kelas</label>
+              <select id="filterJenis" class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-3 py-2.5 text-slate-800 shadow-sm">
+                <option value="">Semua</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-orange-900/80 mb-1">Status</label>
+              <select id="filterStatus" class="w-full bg-white border border-orange-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 rounded-xl px-3 py-2.5 text-slate-800 shadow-sm">
+                <option value="">Semua</option>
+                <option value="kchers">KCHERS</option>
+                <option value="active">ACTIVE</option>
+                <option value="inactive">INACTIVE</option>
+                <option value="alumni">ALUMNI</option>
+              </select>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Loader Prestasi -->
-      <div id="loader" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div class="rounded-2xl bg-white p-4 border border-orange-200 shadow">
-          <div class="h-72 w-full bg-orange-200/50 rounded shimmer mb-3"></div>
-          <div class="h-4 w-2/3 bg-orange-200/50 rounded mb-2"></div>
-          <div class="h-3 w-1/2 bg-orange-200/50 rounded"></div>
+      <!-- Profil terpilih -->
+      <div id="selectedProfileWrap" class="hidden">
+        <article id="selectedProfile" class="rounded-2xl bg-white border border-orange-200 shadow p-5 flex items-start gap-4"></article>
+      </div>
+
+      <!-- Papan ringkas Pencapaian (di bawah profil, sebelum kad) -->
+      <div id="achSummaryWrap" class="hidden mt-4">
+        <div class="rounded-3xl bg-white/70 backdrop-blur border border-orange-200 shadow-xl p-5 md:p-6">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto">
+              <div class="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 shadow">
+                <div class="text-xs/4 opacity-90">Jumlah Pencapaian</div>
+                <div id="achStatTotal" class="text-2xl font-extrabold mt-1">0</div>
+              </div>
+              <div class="rounded-2xl bg-white border border-orange-200 p-4 shadow">
+                <div class="text-xs/4 text-orange-900/80">Peringkat Unik</div>
+                <div id="achStatLevels" class="text-2xl font-extrabold text-orange-700 mt-1">0</div>
+              </div>
+              <div class="rounded-2xl bg-white border border-orange-200 p-4 shadow">
+                <div class="text-xs/4 text-orange-900/80">Kategori Unik</div>
+                <div id="achStatCats" class="text-2xl font-extrabold text-orange-700 mt-1">0</div>
+              </div>
+            </div>
+
+            <div class="w-full md:w-auto">
+              <div class="text-sm font-semibold text-orange-700 mb-2">Susun mengikut</div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="sortByDate" class="btn inline-flex items-center gap-2 rounded-lg bg-white border border-orange-300 hover:border-orange-400 text-orange-700 text-sm font-semibold px-3 py-1.5 shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M8 7h8M6 11h12M10 15h8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Tarikh <span id="dateDir" class="text-xs text-orange-600">↓</span>
+                </button>
+                <div class="relative">
+                  <button id="sortByLevel" class="btn inline-flex items-center gap-2 rounded-lg bg-white border border-orange-300 hover:border-orange-400 text-orange-700 text-sm font-semibold px-3 py-1.5 shadow-sm pr-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M4 18h16M6 14h12M8 10h8M10 6h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Peringkat
+                    <span id="levelDir" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-orange-600">↕</span>
+                  </button>
+                  <div id="levelMenu" class="hidden absolute z-10 mt-2 w-56 rounded-xl border border-orange-200 bg-white shadow-lg overflow-hidden">
+                    <button data-leveldir="asc" class="w-full text-left px-3 py-2 text-sm hover:bg-orange-50">Sekolah → Antarabangsa</button>
+                    <button data-leveldir="desc" class="w-full text-left px-3 py-2 text-sm hover:bg-orange-50">Antarabangsa → Sekolah</button>
+                  </div>
+                </div>
+                <button id="sortByCategory" class="btn inline-flex items-center gap-2 rounded-lg bg-white border border-orange-300 hover:border-orange-400 text-orange-700 text-sm font-semibold px-3 py-1.5 shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M7 7h10M5 12h14M9 17h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Kategori
+                </button>
+              </div>
+              <div id="achSortHint" class="mt-2 text-xs text-orange-900/60">Disusun: Tarikh (↓ baru → lama)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Senarai Kad Pencapaian -->
+      <div id="achievementsWrap" class="hidden mt-4">
+        <div class="mb-3 flex items-center justify-between">
+          <div class="text-sm text-orange-900/80" id="achMeta">0 rekod</div>
+        </div>
+        <div id="cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+
+      <!-- Loader Profil + Pencapaian -->
+      <div id="profAchLoader" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+        <div class="rounded-2xl bg-white p-6 border border-orange-200 shadow flex items-center gap-4">
+          <div class="size-20 rounded-full bg-orange-200/50 shimmer"></div>
+          <div class="flex-1">
+            <div class="h-4 w-2/3 bg-orange-200/50 rounded mb-2"></div>
+            <div class="h-3 w-1/2 bg-orange-200/50 rounded"></div>
+          </div>
         </div>
         <div class="rounded-2xl bg-white p-4 border border-orange-200 shadow">
-          <div class="h-72 w-full bg-orange-200/50 rounded shimmer mb-3"></div>
-          <div class="h-4 w-2/3 bg-orange-200/50 rounded mb-2"></div>
-          <div class="h-3 w-1/2 bg-orange-200/50 rounded"></div>
-        </div>
-        <div class="rounded-2xl bg-white p-4 border border-orange-200 shadow">
-          <div class="h-72 w-full bg-orange-200/50 rounded shimmer mb-3"></div>
+          <div class="h-48 w-full bg-orange-200/50 rounded shimmer mb-3"></div>
           <div class="h-4 w-2/3 bg-orange-200/50 rounded mb-2"></div>
           <div class="h-3 w-1/2 bg-orange-200/50 rounded"></div>
         </div>
       </div>
 
-      <!-- Empty Prestasi -->
-      <div id="emptyState" class="hidden">
+      <!-- Empty state -->
+      <div id="profileEmpty" class="hidden">
         <div class="rounded-3xl border border-orange-200 bg-white p-10 text-center shadow">
           <div class="mx-auto mb-4 h-16 w-16 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -178,43 +244,10 @@
               <path d="M8 12h8M12 8v8" stroke-width="2" stroke-linecap="round"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-orange-700">Tiada rekod ditemui</h3>
-          <p class="text-sm text-orange-900/80 mt-1">Sila pilih nama lain atau semak data di Google Sheet.</p>
+          <h3 class="text-lg font-bold text-orange-700">Tiada data dipaparkan</h3>
+          <p class="text-sm text-orange-900/80 mt-1">Sila pilih nama pemain.</p>
         </div>
       </div>
-
-      <!-- Results Prestasi -->
-      <section id="results" class="hidden">
-        <div id="playerHeader" class="mb-6 rounded-2xl bg-white border border-orange-200 shadow p-5 flex items-center gap-4">
-          <div id="playerAvatar" class="h-16 w-16 rounded-xl overflow-hidden bg-orange-100 flex items-center justify-center text-orange-600 font-bold"></div>
-          <div class="flex-1">
-            <h2 id="selectedName" class="text-xl md:text-2xl font-extrabold text-orange-700"></h2>
-            <div class="text-sm text-orange-900/70" id="metaCount"></div>
-          </div>
-          <div class="hidden md:flex items-center gap-4 text-sm">
-            <div class="text-center">
-              <div class="font-extrabold text-orange-700" id="metaTournCount">0</div>
-              <div class="text-orange-900/70">Kejohanan</div>
-            </div>
-            <div class="text-center">
-              <div class="font-extrabold text-orange-700" id="metaYearRange">-</div>
-              <div class="text-orange-900/70">Julat Tahun</div>
-            </div>
-          </div>
-        </div>
-
-        <div id="cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-
-        <div class="mt-4">
-          <button id="exportCsvBtn" class="inline-flex items-center gap-2 bg-white border border-orange-300 hover:border-orange-400 text-orange-700 font-semibold px-4 py-2 rounded-xl shadow-sm transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M12 5v8m0 0l-3-3m3 3l3-3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <rect x="3" y="3" width="18" height="14" rx="2" ry="2" stroke-width="2"></rect>
-            </svg>
-            <span>Eksport CSV Prestasi</span>
-          </button>
-        </div>
-      </section>
     </section>
 
     <!-- Section: Senarai Kejohanan -->
@@ -223,8 +256,8 @@
         <div class="p-6 md:p-8">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h2 class="text-xl md:text-2xl font-extrabold text-orange-700">Dashboard Kejohanan Dimuat Naik</h2>
-              <p class="text-sm text-orange-900/80 mt-1">Data ini dibaca terus dari Google Sheet yang anda berikan.</p>
+              <h2 class="text-xl md:text-2xl font-extrabold text-orange-700">Senarai Kejohanan</h2>
+              <p class="text-sm text-orange-900/80 mt-1">Data dibaca terus dari Google Sheet.</p>
             </div>
             <div class="grid grid-cols-3 gap-3 w-full md:w-auto">
               <div class="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 shadow">
@@ -266,12 +299,12 @@
               </select>
             </div>
             <div class="flex items-end">
-              <button id="tourExportBtn" class="w-full inline-flex items-center justify-center gap-2 bg-white border border-orange-300 hover:border-orange-400 text-orange-700 font-semibold px-4 py-2.5 rounded-xl shadow-sm transition">
+              <button id="tourExportBtn" class="btn w-full inline-flex items-center justify-center gap-2 bg-white border border-orange-300 hover:border-orange-400 text-orange-700 font-semibold px-4 py-2.5 rounded-xl shadow-sm transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M12 5v8m0 0l-3-3m3 3l3-3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <rect x="3" y="3" width="18" height="14" rx="2" ry="2" stroke-width="2"></rect>
                 </svg>
-                Eksport CSV Kejohanan
+                Eksport CSV
               </button>
             </div>
           </div>
@@ -319,14 +352,16 @@
 
     <!-- Footer -->
     <footer class="mt-10 text-center text-sm text-orange-900/70">
-      Data dimuat daripada Google Sheet secara langsung. Pastikan pautan kekal umum.
+      <div>Data dimuat daripada Google Sheet secara langsung. Pastikan pautan kekal umum.</div>
+      <div class="mt-1 text-xs text-orange-900/60">© <span id="yearNow"></span> Kamus Catur Enterprise. Hak cipta terpelihara.</div>
     </footer>
   </div>
 
   <script>
-    // Sumber CSV
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTV1wrZklXUoqDTohB_hlJU92k8hLqaUCuKiJYlcxxX14sO2YP2wVeC2ge_Qng2bViWsX--IH82asLB/pub?gid=67263338&single=true&output=csv";
+    // URLs CSV
+    const CSV_URL_PERF = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTV1wrZklXUoqDTohB_hlJU92k8hLqaUCuKiJYlcxxX14sO2YP2wVeC2ge_Qng2bViWsX--IH82asLB/pub?gid=67263338&single=true&output=csv";
     const CSV_URL_TOURN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTV1wrZklXUoqDTohB_hlJU92k8hLqaUCuKiJYlcxxX14sO2YP2wVeC2ge_Qng2bViWsX--IH82asLB/pub?gid=1759627665&single=true&output=csv";
+    const CSV_URL_PROFILE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSC4K1A01L8hGffDGZi5caGAmCmEofkdPARenPvgsr0JXKs1GgHHVp3-zzSj-BoLbxTdpcXqc3a-MKI/pub?gid=444058901&single=true&output=csv";
 
     // Kolum Prestasi
     const COLS = {
@@ -350,34 +385,69 @@
       state: "Negeri",
       start: "Tarikh mula",
       end: "Tarikh Tamat",
-      fide: "Fide Rated", // Kami akan kesan FIDE/MCF/Casual/Online dari kolum ini
+      fide: "Fide Rated",
       reg: "Link Pendaftaran"
     };
 
-    // Elemen Prestasi
-    const el = {
-      nameSelect: document.getElementById("nameSelect"),
-      loader: document.getElementById("loader"),
-      results: document.getElementById("results"),
-      cards: document.getElementById("cards"),
-      emptyState: document.getElementById("emptyState"),
-      statTotal: document.getElementById("statTotal"),
-      statTournaments: document.getElementById("statTournaments"),
-      statCategories: document.getElementById("statCategories"),
-      selectedName: document.getElementById("selectedName"),
-      metaCount: document.getElementById("metaCount"),
-      alertBox: document.getElementById("alertBox"),
-      refreshBtn: document.getElementById("refreshBtn"),
-      searchWrap: document.getElementById("searchWrap"),
-      searchInput: document.getElementById("searchInput"),
-      nameHelp: document.getElementById("nameHelp"),
-      playerAvatar: document.getElementById("playerAvatar"),
-      metaTournCount: document.getElementById("metaTournCount"),
-      metaYearRange: document.getElementById("metaYearRange"),
-      printBtn: document.getElementById("printBtn"),
+    // Kolum Profil
+    const PCOLS = {
+      nama: "NAMA",
+      jenis: "JENIS KELAS",
+      tahap: "TAHAP",
+      jurulatih: "JURULATIH",
+      status: "STATUS",
+      nric: "NO KAD PENGENALAN",
+      urlPhoto: "URL Photo"
     };
 
-    // Elemen Kejohanan
+    // Elemen UI
+    const ui = {
+      tabProfil: document.getElementById("tabProfil"),
+      tabKejohanan: document.getElementById("tabKejohanan"),
+      profilSection: document.getElementById("profilSection"),
+      kejohananSection: document.getElementById("kejohananSection"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      printBtn: document.getElementById("printBtn"),
+      alertBox: document.getElementById("alertBox"),
+    };
+
+    // Profil + Achievements
+    const pel = {
+      playerSelect: document.getElementById("playerSelect"),
+      playerHelp: document.getElementById("playerHelp"),
+      profStatTotal: document.getElementById("profStatTotal"),
+      profStatCoaches: document.getElementById("profStatCoaches"),
+      profStatLevels: document.getElementById("profStatLevels"),
+
+      profAchLoader: document.getElementById("profAchLoader"),
+      profileEmpty: document.getElementById("profileEmpty"),
+
+      selectedProfileWrap: document.getElementById("selectedProfileWrap"),
+      selectedProfile: document.getElementById("selectedProfile"),
+
+      achSummaryWrap: document.getElementById("achSummaryWrap"),
+      achStatTotal: document.getElementById("achStatTotal"),
+      achStatLevels: document.getElementById("achStatLevels"),
+      achStatCats: document.getElementById("achStatCats"),
+
+      achievementsWrap: document.getElementById("achievementsWrap"),
+      achMeta: document.getElementById("achMeta"),
+      cards: document.getElementById("cards"),
+
+      filterCoach: document.getElementById("filterCoach"),
+      filterLevel: document.getElementById("filterLevel"),
+      filterJenis: document.getElementById("filterJenis"),
+      filterStatus: document.getElementById("filterStatus"),
+      filterCount: document.getElementById("filterCount"),
+
+      sortByDate: document.getElementById("sortByDate"),
+      sortByLevel: document.getElementById("sortByLevel"),
+      sortByCategory: document.getElementById("sortByCategory"),
+      dateDir: document.getElementById("dateDir"),
+      achSortHint: document.getElementById("achSortHint"),
+    };
+
+    // Kejohanan
     const tel = {
       tourLoader: document.getElementById("tourLoader"),
       tourEmpty: document.getElementById("tourEmpty"),
@@ -390,51 +460,43 @@
       statTotal: document.getElementById("tourStatTotal"),
       statStates: document.getElementById("tourStatStates"),
       statTypes: document.getElementById("tourStatTypes"),
-      tabPrestasi: document.getElementById("tabPrestasi"),
-      tabKejohanan: document.getElementById("tabKejohanan"),
-      prestasiSection: document.getElementById("prestasiSection"),
-      kejohananSection: document.getElementById("kejohananSection"),
     };
 
-    let allRows = [];
-    let filteredRows = [];
-    let currentName = "";
-    let currentSearch = "";
-    let currentDateSearch = "";
-    let currentLevel = "";
-    let currentCategory = "";
-
-    let tourAll = [];
+    // Data store
+    let perfRows = [];   // semua prestasi
+    let profRows = [];   // semua profil
+    let tourAll = [];    // semua kejohanan
     let tourFiltered = [];
-    let tSearch = "", tState = "", tType = "";
 
-    // Parser CSV ringkas
+    // Achievements state
+    let currentAchievements = [];
+    let sortState = { by: "date", dir: "desc", levelDir: "asc", catDir: "asc" }; // date | level | category, levelDir: asc|desc, catDir: asc|desc
+
+    // Util CSV
     function parseCSV(text) {
       const rows = [];
       let i = 0, field = "", row = [], inQuotes = false;
       const pushField = () => { row.push(field); field = ""; };
       const pushRow = () => { rows.push(row); row = []; };
-
       while (i < text.length) {
-        const char = text[i];
+        const c = text[i];
         if (inQuotes) {
-          if (char === '"') {
+          if (c === '"') {
             if (text[i + 1] === '"') { field += '"'; i++; }
             else { inQuotes = false; }
-          } else field += char;
+          } else field += c;
         } else {
-          if (char === '"') inQuotes = true;
-          else if (char === ',') pushField();
-          else if (char === '\n') { pushField(); pushRow(); }
-          else if (char === '\r') {}
-          else field += char;
+          if (c === '"') inQuotes = true;
+          else if (c === ',') pushField();
+          else if (c === '\n') { pushField(); pushRow(); }
+          else if (c === '\r') {}
+          else field += c;
         }
         i++;
       }
       if (field.length > 0 || row.length > 0) { pushField(); pushRow(); }
       return rows;
     }
-
     function rowsToObjects(rows) {
       if (!rows || rows.length === 0) return [];
       const header = rows[0].map(h => h.trim());
@@ -450,53 +512,17 @@
       return out;
     }
 
+    function showAlert(msg, type="info") {
+      ui.alertBox.classList.remove("hidden");
+      ui.alertBox.textContent = msg;
+      ui.alertBox.className = "mb-6 rounded-xl p-4 " + (type==="error" ? "border border-red-300 bg-red-50 text-red-900" : "border border-orange-300 bg-orange-50 text-orange-900");
+    }
     function hideAlert() {
-      el.alertBox.classList.add("hidden");
-      el.alertBox.textContent = "";
-    }
-    function showEmpty() {
-      el.results.classList.add("hidden");
-      el.emptyState.classList.remove("hidden");
-    }
-    function toggleLoading(isLoading) {
-      el.loader.classList.toggle("hidden", !isLoading);
-      if (isLoading) {
-        el.results.classList.add("hidden");
-        el.emptyState.classList.add("hidden");
-      }
+      ui.alertBox.classList.add("hidden");
+      ui.alertBox.textContent = "";
     }
 
-    // Normalisasi pautan imej
-    function normalizeImageURL(url) {
-      if (!url) return "";
-      let u = url.trim();
-
-      if (u.includes("drive.google.com")) {
-        let m = u.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
-        m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
-      }
-      if (u.includes("1drv.ms") || u.includes("onedrive.live.com")) {
-        if (!u.includes("download=1")) {
-          u += (u.includes("?") ? "&" : "?") + "download=1";
-        }
-        return u;
-      }
-      if (u.includes("dropbox.com")) {
-        u = u.replace("?dl=0", "?raw=1").replace("?dl=1", "?raw=1");
-        if (!u.includes("?")) u += "?raw=1";
-        return u;
-      }
-      if (u.includes("photos.app.goo.gl")) return "";
-      if (u.includes("imgur.com") && !u.includes("i.imgur.com")) {
-        const m = u.match(/imgur\.com\/(gallery\/|a\/)?([a-zA-Z0-9]+)/);
-        if (m && m[2]) return `https://i.imgur.com/${m[2]}.jpg`;
-      }
-      return u;
-    }
-
-    // Tarikh utiliti
+    // Helpers
     function parseDateSafe(val) {
       if (!val) return null;
       const t = (val + "").trim();
@@ -512,26 +538,14 @@
       }
       m = t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
       if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
-      const tryNative = new Date(t);
-      return isNaN(tryNative.getTime()) ? null : tryNative;
+      const dn = new Date(t);
+      return isNaN(dn.getTime()) ? null : dn;
     }
     function formatDate(val) {
       const d = parseDateSafe(val);
       if (!d) return (val || "").toString();
-      try {
-        return d.toLocaleDateString("ms-MY", { year: "numeric", month: "long", day: "2-digit" });
-      } catch {
-        return d.toDateString();
-      }
+      try { return d.toLocaleDateString("ms-MY", { year:'numeric', month:'long', day:'2-digit' }); } catch { return d.toDateString(); }
     }
-
-    function buildBadge(text, colorClass = "bg-orange-100 text-orange-800 border-orange-200") {
-      const span = document.createElement("span");
-      span.className = `inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold border ${colorClass}`;
-      span.textContent = text;
-      return span;
-    }
-
     function extractDateFromTitle(title) {
       if (!title) return { cleanTitle: title || "", extractedDate: null };
       let t = title.trim();
@@ -549,14 +563,74 @@
       }
       return { cleanTitle: t, extractedDate: null };
     }
-
-    // Normalisasi tajuk untuk padanan antara dataset
-    function normalizeTitle(s) {
-      const base = extractDateFromTitle(s || "").cleanTitle.toLowerCase();
-      return base.replace(/\s+/g, ' ').trim();
+    function normalizeImageURL(u) {
+      if (!u) return "";
+      let url = u.trim();
+      if (url.includes("drive.google.com")) {
+        let m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
+        m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
+      }
+      if (url.includes("1drv.ms") || url.includes("onedrive.live.com")) {
+        if (!url.includes("download=1")) url += (url.includes("?") ? "&" : "?") + "download=1";
+        return url;
+      }
+      if (url.includes("dropbox.com")) {
+        url = url.replace("?dl=0", "?raw=1").replace("?dl=1", "?raw=1");
+        if (!url.includes("?")) url += "?raw=1";
+        return url;
+      }
+      if (url.includes("photos.app.goo.gl")) return "";
+      if (url.includes("imgur.com") && !url.includes("i.imgur.com")) {
+        const m = url.match(/imgur\.com\/(gallery\/|a\/)?([a-zA-Z0-9]+)/);
+        if (m && m[2]) return `https://i.imgur.com/${m[2]}.jpg`;
+      }
+      return url;
     }
-
-    // Klasifikasi jenis kejohanan daripada kolum "Fide Rated"
+    function buildBadge(text, colorClass = "bg-orange-100 text-orange-800 border-orange-200") {
+      const span = document.createElement("span");
+      span.className = `inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold border ${colorClass}`;
+      span.textContent = text;
+      return span;
+    }
+    function formatDOBFromNRIC(nric) {
+      const s = (nric || '').replace(/[^0-9]/g,'');
+      if (s.length < 6) return '';
+      const yy = parseInt(s.slice(0,2),10);
+      const mm = parseInt(s.slice(2,4),10);
+      const dd = parseInt(s.slice(4,6),10);
+      if (!(mm>=1 && mm<=12) || !(dd>=1 && dd<=31)) return '';
+      const fullYear = yy <= 29 ? 2000 + yy : 1900 + yy;
+      const d = new Date(fullYear, mm-1, dd);
+      if (isNaN(d.getTime())) return '';
+      try { return d.toLocaleDateString('ms-MY', { year:'numeric', month:'long', day:'2-digit' }); } catch { return d.toDateString(); }
+    }
+    function computeAgeFromNRIC(nric) {
+      const s = (nric || '').replace(/[^0-9]/g,'');
+      if (s.length < 6) return null;
+      const yy = parseInt(s.slice(0,2),10);
+      const mm = parseInt(s.slice(2,4),10);
+      const dd = parseInt(s.slice(4,6),10);
+      if (!(mm>=1 && mm<=12) || !(dd>=1 && dd<=31)) return null;
+      const fullYear = yy <= 29 ? 2000 + yy : 1900 + yy;
+      const dob = new Date(fullYear, mm-1, dd);
+      if (isNaN(dob.getTime())) return null;
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      return age;
+    }
+    function getStatusNorm(s) {
+      const t = (s || '').toString().trim().toLowerCase();
+      if (!t) return '';
+      if (t.includes('kchers')) return 'kchers';
+      if (t.includes('alumni')) return 'alumni';
+      if (t.includes('inactive') || t.includes('tamat') || t.includes('expired') || t.includes('inaktif')) return 'inactive';
+      if (t.includes('active') || t.includes('aktif') || t.includes('valid')) return 'active';
+      return t;
+    }
     function getTournamentType(val) {
       const t = (val || "").toString().trim().toLowerCase();
       if (!t) return "Casual";
@@ -568,186 +642,362 @@
       return "Casual";
     }
 
-    // Muat Prestasi
-    async function loadPrestasi() {
-      hideAlert();
-      toggleLoading(true);
+    // Data
+    let profileFilters = { coach: "", level: "", jenis: "", status: "" };
+
+    // Loaders
+    async function loadProfiles() {
       try {
-        const res = await fetch(CSV_URL, { cache: "no-store" });
+        const res = await fetch(CSV_URL_PROFILE, { cache: "no-store" });
+        if (!res.ok) throw new Error("fail");
+        const text = await res.text();
+        const rows = rowsToObjects(parseCSV(text));
+        profRows = rows.map(r => ({
+          [PCOLS.nama]: (r[PCOLS.nama] || "").trim(),
+          [PCOLS.jenis]: (r[PCOLS.jenis] || "").trim(),
+          [PCOLS.tahap]: (r[PCOLS.tahap] || "").trim(),
+          [PCOLS.jurulatih]: (r[PCOLS.jurulatih] || "").trim(),
+          [PCOLS.status]: getStatusNorm((r[PCOLS.status] || "").trim()),
+          [PCOLS.nric]: (r[PCOLS.nric] || "").trim(),
+          [PCOLS.urlPhoto]: (r[PCOLS.urlPhoto] || "").trim(),
+        })).filter(o => o[PCOLS.nama]);
+
+        pel.profStatTotal.textContent = profRows.filter(matchesProfile).length.toString();
+        pel.profStatCoaches.textContent = new Set(profRows.map(x => x[PCOLS.jurulatih]).filter(Boolean)).size.toString();
+        pel.profStatLevels.textContent = new Set(profRows.map(x => x[PCOLS.tahap]).filter(Boolean)).size.toString();
+
+        populateProfileFilters();
+        rebuildNameOptions();
+        pel.profStatTotal.textContent = profRows.filter(matchesProfile).length.toString();
+      } catch (e) {
+        pel.playerHelp.textContent = "Gagal memuat profil. Sila cuba lagi.";
+      }
+    }
+
+    async function loadPerformance() {
+      try {
+        const res = await fetch(CSV_URL_PERF, { cache: "no-store" });
+        if (!res.ok) throw new Error("fail");
+        const text = await res.text();
+        const rows = rowsToObjects(parseCSV(text));
+        perfRows = rows.filter(o => ((o[COLS.name] || "").trim() || (o[COLS.tournament] || "").trim()));
+      } catch (e) {
+        perfRows = [];
+      }
+    }
+
+    async function loadTournaments() {
+      try {
+        tel.tourLoader.classList.remove("hidden");
+        tel.tournResults.classList.add("hidden");
+        tel.tourEmpty.classList.add("hidden");
+
+        const res = await fetch(CSV_URL_TOURN, { cache: "no-store" });
         if (!res.ok) throw new Error("fail");
         const text = await res.text();
         const rows = rowsToObjects(parseCSV(text));
 
-        allRows = rows.filter(o => ((o[COLS.name] || "").trim() || (o[COLS.tournament] || "").trim()));
-        populateNames(allRows);
-        updateStats(allRows);
+        tourAll = rows.map(r => ({
+          [TCOLS.name]: (r[TCOLS.name] || "").trim(),
+          [TCOLS.organizer]: (r[TCOLS.organizer] || "").trim(),
+          [TCOLS.state]: (r[TCOLS.state] || "").trim(),
+          [TCOLS.start]: (r[TCOLS.start] || "").trim(),
+          [TCOLS.end]: (r[TCOLS.end] || "").trim(),
+          [TCOLS.fide]: (r[TCOLS.fide] || "").trim(),
+          [TCOLS.reg]: (r[TCOLS.reg] || "").trim(),
+          __type: getTournamentType(r[TCOLS.fide])
+        })).filter(o => o[TCOLS.name] || o[TCOLS.organizer]);
 
-        if (currentName && hasName(currentName)) {
-          el.nameSelect.value = currentName;
-          handleNameChange();
-        } else {
-          currentName = "";
-          el.nameSelect.value = "";
-          showEmpty();
-        }
+        populateTournamentFilters(tourAll);
+        updateTournamentStats(tourAll);
+        filterAndRenderTournaments();
       } catch (e) {
-        showEmpty(); // jangan papar mesej ralat
+        tourAll = [];
+        updateTournamentStats(tourAll);
+        tel.tournResults.classList.add("hidden");
+        tel.tourEmpty.classList.remove("hidden");
       } finally {
-        toggleLoading(false);
+        tel.tourLoader.classList.add("hidden");
       }
     }
 
-    function populateNames(objs) {
-      const names = Array.from(new Set(
-        objs.map(r => (r[COLS.name] || "").trim()).filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, "ms"));
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = "— Sila pilih nama —";
-      el.nameSelect.innerHTML = "";
-      el.nameSelect.appendChild(placeholder);
+    // Profil: penapis
+    function populateProfileFilters() {
+      const coaches = Array.from(new Set(profRows.map(x => x[PCOLS.jurulatih]).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ms'));
+      pel.filterCoach.innerHTML = '<option value="">Semua</option>' + coaches.map(v=>`<option value="${v}">${v}</option>`).join("");
+
+      pel.filterStatus.innerHTML = '<option value="">Semua</option>' +
+        '<option value="kchers">KCHERS</option>' +
+        '<option value="active">ACTIVE</option>' +
+        '<option value="inactive">INACTIVE</option>' +
+        '<option value="alumni">ALUMNI</option>';
+
+      updateDependentFilters();
+    }
+
+    function updateDependentFilters() {
+      const coach = profileFilters.coach || pel.filterCoach.value || "";
+      const baseList = coach ? profRows.filter(p => p[PCOLS.jurulatih] === coach) : profRows;
+
+      const levels = Array.from(new Set(baseList.map(x => x[PCOLS.tahap]).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ms'));
+      const jenis = Array.from(new Set(baseList.map(x => x[PCOLS.jenis]).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ms'));
+
+      const prevLevel = pel.filterLevel.value;
+      const prevJenis = pel.filterJenis.value;
+
+      pel.filterLevel.innerHTML = '<option value="">Semua</option>' + levels.map(v=>`<option value="${v}">${v}</option>`).join("");
+      pel.filterJenis.innerHTML = '<option value="">Semua</option>' + jenis.map(v=>`<option value="${v}">${v}</option>`).join("");
+
+      if (prevLevel && levels.includes(prevLevel)) pel.filterLevel.value = prevLevel; else { pel.filterLevel.value = ""; profileFilters.level = ""; }
+      if (prevJenis && jenis.includes(prevJenis)) pel.filterJenis.value = prevJenis; else { pel.filterJenis.value = ""; profileFilters.jenis = ""; }
+
+      rebuildNameOptions();
+      pel.profStatTotal.textContent = profRows.filter(matchesProfile).length.toString();
+    }
+
+    function matchesProfile(p) {
+      if (profileFilters.coach && p[PCOLS.jurulatih] !== profileFilters.coach) return false;
+      if (profileFilters.level && p[PCOLS.tahap] !== profileFilters.level) return false;
+      if (profileFilters.jenis && p[PCOLS.jenis] !== profileFilters.jenis) return false;
+      if (profileFilters.status) {
+        const want = profileFilters.status.toLowerCase();
+        if ((p[PCOLS.status] || '').toLowerCase() !== want) return false;
+      }
+      return true;
+    }
+
+    function rebuildNameOptions() {
+      const sel = pel.playerSelect;
+      const prev = sel.value;
+      const allNames = profRows.filter(matchesProfile).map(x => x[PCOLS.nama]);
+      const names = Array.from(new Set(allNames)).sort((a,b)=>a.localeCompare(b,'ms'));
+
+      const placeholder = document.createElement('option');
+      placeholder.value = ""; placeholder.textContent = "— Sila pilih nama —";
+
+      sel.innerHTML = "";
+      sel.appendChild(placeholder);
       for (const n of names) {
-        const opt = document.createElement("option");
-        opt.value = n;
-        opt.textContent = n;
-        el.nameSelect.appendChild(opt);
+        const op = document.createElement('option');
+        op.value = n; op.textContent = n;
+        sel.appendChild(op);
       }
 
-      const levelSel = document.getElementById("filterLevel");
-      const catSel = document.getElementById("filterCategory");
+      pel.filterCount.textContent = names.length ? `${names.length} nama sepadan` : "Tiada nama sepadan dengan tapisan";
 
-      const levels = Array.from(new Set(objs.map(r => (r[COLS.level] || "").trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,"ms"));
-      const cats = Array.from(new Set(objs.map(r => (r[COLS.category] || "").trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,"ms"));
-
-      if (levelSel && catSel) {
-        levelSel.innerHTML = '<option value="">Semua</option>' + levels.map(v=>`<option value="${v}">${v}</option>`).join("");
-        catSel.innerHTML = '<option value="">Semua</option>' + cats.map(v=>`<option value="${v}">${v}</option>`).join("");
+      if (prev && names.includes(prev)) {
+        sel.value = prev;
+      } else {
+        sel.value = "";
+        pel.selectedProfileWrap.classList.add("hidden");
+        pel.achievementsWrap.classList.add("hidden");
+        pel.achSummaryWrap.classList.add("hidden");
+        pel.profileEmpty.classList.remove("hidden");
       }
-
-      el.nameHelp.textContent = names.length ? "Pilih nama untuk melihat butiran." : "Tiada nama ditemui. Sila semak Google Sheet.";
     }
 
-    function hasName(name) {
-      return Array.from(el.nameSelect.options).some(o => o.value === name);
+    // Kejohanan: penapis dan render
+    function populateTournamentFilters(list) {
+      const states = Array.from(new Set(list.map(x => x[TCOLS.state]).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ms'));
+      tel.tourState.innerHTML = '<option value="">Semua</option>' + states.map(s=>`<option value="${s}">${s}</option>`).join("");
     }
-
-    function updateStats(objs) {
-      el.statTotal.textContent = objs.length.toString();
-      const tournaments = new Set(objs.map(o => (o[COLS.tournament] || "").trim()).filter(Boolean));
-      el.statTournaments.textContent = tournaments.size.toString();
-      const categories = new Set(objs.map(o => (o[COLS.category] || "").trim()).filter(Boolean));
-      el.statCategories.textContent = categories.size.toString();
+    function updateTournamentStats(list) {
+      tel.statTotal.textContent = list.length.toString();
+      tel.statStates.textContent = new Set(list.map(x => x[TCOLS.state]).filter(Boolean)).size.toString();
+      tel.statTypes.textContent = new Set(list.map(x => x.__type)).size.toString();
     }
+    function filterAndRenderTournaments() {
+      const q = tel.tourSearch.value.trim().toLowerCase();
+      const st = tel.tourState.value;
+      const tp = tel.tourType.value;
 
-    function handleNameChange() {
-      currentName = el.nameSelect.value;
-      currentSearch = "";
-      currentDateSearch = "";
-      currentLevel = "";
-      currentCategory = "";
-      el.searchInput.value = "";
-      const sd = document.getElementById("searchDate"); if (sd) sd.value = "";
-      const levelSel = document.getElementById("filterLevel"); if (levelSel) levelSel.value = "";
-      const catSel = document.getElementById("filterCategory"); if (catSel) catSel.value = "";
+      let temp = tourAll.slice();
+      if (q) temp = temp.filter(x => (`${x[TCOLS.name]} ${x[TCOLS.organizer]}`.toLowerCase().includes(q)));
+      if (st) temp = temp.filter(x => x[TCOLS.state] === st);
+      if (tp) temp = temp.filter(x => x.__type === tp);
 
-      if (!currentName) {
-        showEmpty();
+      tourFiltered = temp;
+      updateTournamentStats(tourFiltered);
+
+      if (!tourFiltered.length) {
+        tel.tournResults.classList.add("hidden");
+        tel.tourEmpty.classList.remove("hidden");
+        tel.tourCards.innerHTML = "";
         return;
       }
-      el.searchWrap.classList.remove("hidden");
-      filterAndRender();
+      tel.tourEmpty.classList.add("hidden");
+      tel.tournResults.classList.remove("hidden");
+      renderTournamentCards(tourFiltered);
     }
-
-    function handleSearch() {
-      currentSearch = el.searchInput.value.trim().toLowerCase();
-      filterAndRender();
-    }
-
-    function filterAndRender() {
-      const byName = allRows.filter(r => (r[COLS.name] || "").trim() === currentName);
-
-      let temp = byName.filter(r => {
-        if (!currentSearch) return true;
-        const { cleanTitle } = extractDateFromTitle(r[COLS.tournament] || "");
-        return cleanTitle.toLowerCase().includes(currentSearch);
-      });
-
-      if (currentDateSearch) {
-        temp = temp.filter(r => {
-          const { extractedDate } = extractDateFromTitle(r[COLS.tournament] || "");
-          const candidate = (extractedDate || r[COLS.date] || "").toString().toLowerCase();
-          return candidate.includes(currentDateSearch);
-        });
-      }
-
-      if (currentLevel) temp = temp.filter(r => (r[COLS.level] || "").trim() === currentLevel);
-      if (currentCategory) temp = temp.filter(r => (r[COLS.category] || "").trim() === currentCategory);
-
-      filteredRows = temp;
-
-      if (filteredRows.length === 0) {
-        el.selectedName.textContent = currentName;
-        el.metaCount.textContent = "0 rekod";
-        el.results.classList.add("hidden");
-        el.emptyState.classList.remove("hidden");
-        return;
-      }
-      renderResults(filteredRows);
-    }
-
-    function renderResults(rows) {
-      el.results.classList.remove("hidden");
-      el.emptyState.classList.add("hidden");
-      el.selectedName.textContent = currentName;
-      el.metaCount.textContent = `${rows.length} rekod`;
-
-      const tournSet = new Set();
-      const years = [];
-
-      el.cards.innerHTML = "";
+    function renderTournamentCards(list) {
+      const sorted = list.map(x => ({ x, d: parseDateSafe(x[TCOLS.start]) }))
+        .sort((a,b) => (b.d?.getTime?.()||0) - (a.d?.getTime?.()||0));
+      tel.tourCards.innerHTML = "";
       const frag = document.createDocumentFragment();
 
-      const withDate = rows.map(r => {
-        const { extractedDate } = extractDateFromTitle(r[COLS.tournament] || "");
-        const d = parseDateSafe(extractedDate || r[COLS.date]);
-        if (d) years.push(d.getFullYear());
-        tournSet.add((r[COLS.tournament] || "").trim());
-        return { r, d };
-      }).sort((a, b) => (b.d?.getTime?.() || 0) - (a.d?.getTime?.() || 0));
+      for (const { x } of sorted) {
+        const card = document.createElement("article");
+        card.className = "rounded-2xl bg-white border border-orange-200 shadow hover:shadow-lg transition overflow-hidden p-4 flex flex-col";
 
-      for (const { r } of withDate) {
-        const card = buildCard(r);
+        const title = document.createElement("h3");
+        title.className = "text-lg font-extrabold text-orange-700";
+        title.textContent = x[TCOLS.name] || "Tanpa Nama Kejohanan";
+
+        const sub = document.createElement("div");
+        sub.className = "mt-1 text-sm text-orange-900/80";
+        sub.textContent = x[TCOLS.organizer] ? `Penganjur: ${x[TCOLS.organizer]}` : "Penganjur: -";
+
+        const chips = document.createElement("div");
+        chips.className = "mt-2 flex flex-wrap items-center gap-2";
+        if (x[TCOLS.state]) chips.appendChild(buildBadge(x[TCOLS.state]));
+
+        const dr = document.createElement("div");
+        dr.className = "text-sm text-slate-700";
+        dr.innerHTML = `<span class="font-semibold text-orange-700">Tarikh:</span> ${x[TCOLS.start] ? formatDate(x[TCOLS.start]) : "-"} ${x[TCOLS.end] ? "hingga " + formatDate(x[TCOLS.end]) : ""}`;
+
+        let color = "bg-slate-100 text-slate-700 border-slate-200";
+        if (x.__type === "FIDE Rated") color = "bg-emerald-100 text-emerald-700 border-emerald-200";
+        else if (x.__type === "MCF Rated") color = "bg-blue-100 text-blue-700 border-blue-200";
+        else if (x.__type === "Online") color = "bg-violet-100 text-violet-700 border-violet-200";
+        else color = "bg-amber-100 text-amber-800 border-amber-200";
+        chips.appendChild(buildBadge(x.__type, color));
+
+        const footer = document.createElement("div");
+        footer.className = "mt-3 flex items-center justify-between";
+        const right = document.createElement("div");
+        right.className = "flex items-center gap-2";
+        if (x[TCOLS.reg]) {
+          const a = document.createElement("a");
+          a.href = x[TCOLS.reg]; a.target = "_blank"; a.rel = "noopener";
+          a.className = "inline-flex items-center gap-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-3 py-1.5 shadow transition";
+          a.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Pendaftaran';
+          right.appendChild(a);
+        } else {
+          const span = document.createElement("span");
+          span.className = "inline-flex items-center gap-2 rounded-lg bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 border border-orange-200";
+          span.textContent = "Tiada pautan";
+          right.appendChild(span);
+        }
+
+        card.appendChild(title);
+        card.appendChild(sub);
+        card.appendChild(chips);
+        card.appendChild(dr);
+        footer.appendChild(document.createElement("div"));
+        footer.appendChild(right);
+        card.appendChild(footer);
+
         frag.appendChild(card);
       }
-      el.cards.appendChild(frag);
 
-      const initials = currentName.split(/\s+/).filter(Boolean).map(x => x[0]?.toUpperCase()).slice(0,2).join("") || "?";
-      el.playerAvatar.innerHTML = `<span>${initials}</span>`;
-
-      el.metaTournCount.textContent = tournSet.size.toString();
-      if (years.length) {
-        const minY = Math.min(...years), maxY = Math.max(...years);
-        el.metaYearRange.textContent = minY === maxY ? `${minY}` : `${minY}–${maxY}`;
-      } else {
-        el.metaYearRange.textContent = "-";
-      }
+      tel.tourCards.appendChild(frag);
     }
 
-    // Kad Prestasi (gambar square 300px dari URL Photo)
-    function buildCard(r) {
+    // PROFIL terpilih
+    function renderSelectedProfile(name) {
+      const p = profRows.find(x => (x[PCOLS.nama] || "").trim() === name);
+      if (!p) {
+        pel.selectedProfileWrap.classList.add("hidden");
+        return;
+      }
+      pel.selectedProfileWrap.classList.remove("hidden");
+      const wrap = pel.selectedProfile;
+      wrap.innerHTML = "";
+
+      const avatarWrap = document.createElement("div");
+      avatarWrap.className = "relative shrink-0";
+      const imgBox = document.createElement("div");
+
+      const normSt = getStatusNorm(p[PCOLS.status]);
+      let ringClass = "ring-0";
+      if (normSt === 'kchers') ringClass = "ring-4 ring-orange-500";
+      else if (normSt === 'active') ringClass = "ring-4 ring-orange-300";
+      else if (normSt === 'alumni') ringClass = "ring-4 ring-red-500";
+      else if (normSt === 'inactive') ringClass = "ring-4 ring-black";
+
+      imgBox.className = `size-32 md:size-36 rounded-full overflow-hidden bg-orange-50 border border-orange-200 ${ringClass}`;
+      const u = normalizeImageURL(p[PCOLS.urlPhoto]);
+      if (u) {
+        const img = document.createElement("img");
+        img.src = u; img.alt = "Foto pemain"; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
+        img.className = "h-full w-full object-cover";
+        img.onerror = function() {
+          this.src = '';
+          this.alt = 'Gambar gagal dimuat';
+          this.style.display = 'none';
+          const normSt2 = getStatusNorm(p[PCOLS.status]);
+          let ringClass2 = "ring-0";
+          if (normSt2 === 'kchers') ringClass2 = "ring-4 ring-orange-500";
+          else if (normSt2 === 'active') ringClass2 = "ring-4 ring-orange-300";
+          else if (normSt2 === 'alumni') ringClass2 = "ring-4 ring-red-500";
+          else if (normSt2 === 'inactive') ringClass2 = "ring-4 ring-black";
+          imgBox.className = `size-24 md:size-28 rounded-full flex items-center justify-center bg-orange-100 border border-orange-200 text-orange-600 text-xs font-semibold ${ringClass2}`;
+          imgBox.textContent = "Tiada gambar";
+        };
+        imgBox.appendChild(img);
+      } else {
+        const normSt2 = getStatusNorm(p[PCOLS.status]);
+        let ringClass2 = "ring-0";
+        if (normSt2 === 'kchers') ringClass2 = "ring-4 ring-orange-500";
+        else if (normSt2 === 'active') ringClass2 = "ring-4 ring-orange-300";
+        else if (normSt2 === 'alumni') ringClass2 = "ring-4 ring-red-500";
+        else if (normSt2 === 'inactive') ringClass2 = "ring-4 ring-black";
+        imgBox.className = `size-24 md:size-28 rounded-full flex items-center justify-center bg-orange-100 border border-orange-200 text-orange-600 text-xs font-semibold ${ringClass2}`;
+        imgBox.textContent = "Tiada gambar";
+      }
+      avatarWrap.appendChild(imgBox);
+
+      const body = document.createElement("div");
+      body.className = "flex-1 min-w-0";
+      const title = document.createElement("h2");
+      title.className = "text-xl md:text-2xl font-extrabold text-orange-700 truncate";
+      title.textContent = p[PCOLS.nama] || "-";
+
+      const meta = document.createElement("div");
+      meta.className = "mt-1 flex flex-wrap items-center gap-2";
+      if (p[PCOLS.jenis]) meta.appendChild(buildBadge(p[PCOLS.jenis]));
+      if (p[PCOLS.tahap]) meta.appendChild(buildBadge(p[PCOLS.tahap], "bg-amber-100 text-amber-800 border-amber-200"));
+      if (p[PCOLS.jurulatih]) meta.appendChild(buildBadge(`Jurulatih: ${p[PCOLS.jurulatih]}`, "bg-emerald-100 text-emerald-700 border-emerald-200"));
+      if (p[PCOLS.status]) {
+        const norm = getStatusNorm(p[PCOLS.status]);
+        let color = "bg-slate-100 text-slate-700 border-slate-200";
+        if (norm === 'active') color = "bg-orange-100 text-orange-700 border-orange-200";
+        else if (norm === 'kchers') color = "bg-amber-100 text-amber-800 border-amber-200";
+        else if (norm === 'alumni') color = "bg-red-200 text-red-800 border-red-300";
+        else if (norm === 'inactive') color = "bg-red-100 text-red-700 border-red-200";
+        meta.appendChild(buildBadge(`Status: ${norm.toUpperCase()}`, color));
+      }
+
+      body.appendChild(title);
+      body.appendChild(meta);
+
+      const dob = formatDOBFromNRIC(p[PCOLS.nric]);
+      const age = computeAgeFromNRIC(p[PCOLS.nric]);
+      if (dob || age !== null) {
+        const dobEl = document.createElement('div');
+        dobEl.className = 'mt-2 text-sm text-orange-900/80';
+        const ageText = (age !== null) ? ` &middot; <span class="font-semibold text-orange-700">Umur:</span> ${age} tahun` : '';
+        const dobText = dob ? `<span class="font-semibold text-orange-700">Tarikh Lahir:</span> ${dob}` : '';
+        dobEl.innerHTML = `${dobText}${ageText}`;
+        body.appendChild(dobEl);
+      }
+
+      wrap.appendChild(avatarWrap);
+      wrap.appendChild(body);
+    }
+
+    // KAD pencapaian
+    function buildAchCard(r) {
       const rawDisplay = (r[COLS.photoURL] || "").trim();
       const displayURL = normalizeImageURL(rawDisplay);
       const linkURL = rawDisplay;
-
-      const hasDisplay = !!displayURL;
-      const hasLink = !!linkURL;
 
       const wrap = document.createElement("article");
       wrap.className = "card group rounded-2xl bg-white border border-orange-200 shadow hover:shadow-lg transition overflow-hidden flex flex-col";
 
       const media = document.createElement("div");
       media.className = "relative mx-auto mt-4 w-[300px] h-[300px] rounded-xl overflow-hidden bg-orange-50";
-      if (hasDisplay) {
+      if (displayURL) {
         const img = document.createElement("img");
         img.src = displayURL;
         img.alt = "Gambar kejohanan";
@@ -758,9 +1008,8 @@
           this.src = '';
           this.alt = 'Gambar gagal dimuat';
           this.style.display = 'none';
-          media.classList.add("bg-[linear-gradient(135deg,#FFEDD5,#FEF3C7)]");
           media.innerHTML = `
-            <div class="absolute inset-0 flex items-center justify-center text-orange-600/70">
+            <div class="absolute inset-0 flex items-center justify-center">
               <div class="rounded-xl bg-orange-100 text-orange-600 px-2 py-1 text-xs font-semibold">Tiada gambar</div>
             </div>
           `;
@@ -806,7 +1055,7 @@
 
       const right = document.createElement("div");
       right.className = "flex items-center gap-2";
-      if (hasLink) {
+      if (linkURL) {
         const viewBtn = document.createElement("a");
         viewBtn.href = linkURL;
         viewBtn.target = "_blank";
@@ -820,324 +1069,241 @@
           Lihat Gambar
         `;
         right.appendChild(viewBtn);
+      } else {
+        const none = document.createElement("span");
+        none.className = "inline-flex items-center gap-2 rounded-lg bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 border border-orange-200";
+        none.textContent = "Tiada pautan";
+        right.appendChild(none);
       }
 
-      wrap.appendChild(media);
-      wrap.appendChild(body);
+      footer.appendChild(stamp);
+      footer.appendChild(right);
+
       body.appendChild(title);
       body.appendChild(meta);
       body.appendChild(achievement);
       body.appendChild(remarks);
-      footer.appendChild(stamp);
-      footer.appendChild(right);
       body.appendChild(footer);
+
+      wrap.appendChild(media);
+      wrap.appendChild(body);
 
       return wrap;
     }
 
-    // Muat Kejohanan
-    async function loadTournaments() {
-      try {
-        tel.tourLoader.classList.remove("hidden");
-        tel.tournResults.classList.add("hidden");
-        tel.tourEmpty.classList.add("hidden");
-
-        const res = await fetch(CSV_URL_TOURN, { cache: "no-store" });
-        if (!res.ok) throw new Error("fail");
-        const text = await res.text();
-        const rows = rowsToObjects(parseCSV(text));
-
-        // Pembersihan dan mapping kolum + klasifikasi jenis
-        tourAll = rows.map(r => {
-          const type = getTournamentType(r[TCOLS.fide]);
-          return {
-            [TCOLS.name]: (r[TCOLS.name] || "").trim(),
-            [TCOLS.organizer]: (r[TCOLS.organizer] || "").trim(),
-            [TCOLS.state]: (r[TCOLS.state] || "").trim(),
-            [TCOLS.start]: (r[TCOLS.start] || "").trim(),
-            [TCOLS.end]: (r[TCOLS.end] || "").trim(),
-            [TCOLS.fide]: (r[TCOLS.fide] || "").trim(),
-            [TCOLS.reg]: (r[TCOLS.reg] || "").trim(),
-            __type: type
-          };
-        }).filter(o => o[TCOLS.name] || o[TCOLS.organizer]);
-
-        populateTournamentFilters(tourAll);
-        updateTournamentStats(tourAll);
-
-        filterAndRenderTournaments();
-      } catch (e) {
-        // Jangan paparkan ralat, hanya kosong
-        tourAll = [];
-        updateTournamentStats(tourAll);
-        tel.tournResults.classList.add("hidden");
-        tel.tourEmpty.classList.remove("hidden");
-      } finally {
-        tel.tourLoader.classList.add("hidden");
-      }
+    // RENDER & SORT PENCAPAIAN
+    function updateAchDashboard(list) {
+      pel.achStatTotal.textContent = list.length.toString();
+      pel.achStatLevels.textContent = new Set(list.map(x => (x[COLS.level] || '').trim()).filter(Boolean)).size.toString();
+      pel.achStatCats.textContent = new Set(list.map(x => (x[COLS.category] || '').trim()).filter(Boolean)).size.toString();
     }
 
-    function populateTournamentFilters(list) {
-      const states = Array.from(new Set(list.map(x => x[TCOLS.state]).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ms'));
-      tel.tourState.innerHTML = '<option value="">Semua</option>' + states.map(s=>`<option value="${s}">${s}</option>`).join("");
+    function sortFallbackDateDesc(a,b) {
+      const da = parseDateSafe(extractDateFromTitle(a[COLS.tournament]||"").extractedDate || a[COLS.date]);
+      const db = parseDateSafe(extractDateFromTitle(b[COLS.tournament]||"").extractedDate || b[COLS.date]);
+      return (db?.getTime?.()||0) - (da?.getTime?.()||0);
     }
 
-    function updateTournamentStats(list) {
-      tel.statTotal.textContent = list.length.toString();
-      tel.statStates.textContent = new Set(list.map(x => x[TCOLS.state]).filter(Boolean)).size.toString();
-      const types = new Set(list.map(x => x.__type));
-      tel.statTypes.textContent = types.size.toString();
-    }
+    function sortAchievements() {
+      let arr = currentAchievements.slice();
 
-    function filterAndRenderTournaments() {
-      tSearch = tel.tourSearch.value.trim().toLowerCase();
-      tState = tel.tourState.value;
-      tType = tel.tourType.value;
-
-      let temp = tourAll.slice();
-
-      if (tSearch) {
-        temp = temp.filter(x => {
-          const hay = `${x[TCOLS.name]} ${x[TCOLS.organizer]}`.toLowerCase();
-          return hay.includes(tSearch);
+      if (sortState.by === "date") {
+        arr.sort((a,b) => {
+          const da = parseDateSafe(extractDateFromTitle(a[COLS.tournament]||"").extractedDate || a[COLS.date]);
+          const db = parseDateSafe(extractDateFromTitle(b[COLS.tournament]||"").extractedDate || b[COLS.date]);
+          const va = da ? da.getTime() : 0;
+          const vb = db ? db.getTime() : 0;
+          return sortState.dir === "desc" ? (vb - va) : (va - vb);
         });
-      }
-      if (tState) temp = temp.filter(x => x[TCOLS.state] === tState);
-      if (tType) temp = temp.filter(x => x.__type === tType);
-
-      tourFiltered = temp;
-      updateTournamentStats(tourFiltered);
-
-      if (!tourFiltered.length) {
-        tel.tournResults.classList.add("hidden");
-        tel.tourEmpty.classList.remove("hidden");
-        tel.tourCards.innerHTML = "";
-        return;
-      }
-
-      tel.tourEmpty.classList.add("hidden");
-      tel.tournResults.classList.remove("hidden");
-      renderTournamentCards(tourFiltered);
-    }
-
-    function renderTournamentCards(list) {
-      // Susun dari terbaharu (ikut tarikh mula)
-      const sorted = list.map(x => ({ x, d: parseDateSafe(x[TCOLS.start]) }))
-        .sort((a,b) => (b.d?.getTime?.()||0) - (a.d?.getTime?.()||0));
-
-      const frag = document.createDocumentFragment();
-      tel.tourCards.innerHTML = "";
-
-      for (const { x } of sorted) {
-        const card = document.createElement("article");
-        card.className = "rounded-2xl bg-white border border-orange-200 shadow hover:shadow-lg transition overflow-hidden p-4 flex flex-col";
-
-        const title = document.createElement("h3");
-        title.className = "text-lg font-extrabold text-orange-700";
-        title.textContent = x[TCOLS.name] || "Tanpa Nama Kejohanan";
-
-        const sub = document.createElement("div");
-        sub.className = "mt-1 text-sm text-orange-900/80";
-        sub.textContent = x[TCOLS.organizer] ? `Penganjur: ${x[TCOLS.organizer]}` : "Penganjur: -";
-
-        const chips = document.createElement("div");
-        chips.className = "mt-2 flex flex-wrap items-center gap-2";
-        if (x[TCOLS.state]) chips.appendChild(buildBadge(x[TCOLS.state]));
-
-        // Tarikh julat
-        const dr = document.createElement("div");
-        dr.className = "text-sm text-slate-700";
-        const s = x[TCOLS.start], e = x[TCOLS.end];
-        dr.innerHTML = `<span class="font-semibold text-orange-700">Tarikh:</span> ${s ? formatDate(s) : "-"} ${e ? "hingga " + formatDate(e) : ""}`;
-
-        // Jenis badge (4 jenis)
-        let color = "bg-slate-100 text-slate-700 border-slate-200";
-        if (x.__type === "FIDE Rated") color = "bg-emerald-100 text-emerald-700 border-emerald-200";
-        else if (x.__type === "MCF Rated") color = "bg-blue-100 text-blue-700 border-blue-200";
-        else if (x.__type === "Online") color = "bg-violet-100 text-violet-700 border-violet-200";
-        else color = "bg-amber-100 text-amber-800 border-amber-200";
-        const typeBadge = buildBadge(x.__type, color);
-        chips.appendChild(typeBadge);
-
-        // Kumpulkan pencapaian pelajar yang menyertai kejohanan ini
-        const related = (allRows || []).filter(r => normalizeTitle(r[COLS.tournament] || "") === normalizeTitle(x[TCOLS.name] || ""));
-        if (related.length) {
-          const achWrap = document.createElement("div");
-          achWrap.className = "mt-3 rounded-xl border border-orange-100 bg-orange-50/50 p-3";
-          const achTitle = document.createElement("div");
-          achTitle.className = "text-sm font-bold text-orange-700 mb-2";
-          achTitle.textContent = "Pencapaian Peserta";
-
-          const listEl = document.createElement("ul");
-          listEl.className = "space-y-2";
-          related.slice(0, 8).forEach(r => {
-            const li = document.createElement("li");
-            li.className = "flex items-start gap-2";
-            const dot = document.createElement("span");
-            dot.className = "mt-[6px] size-2 rounded-full bg-orange-400";
-            const txt = document.createElement("div");
-            txt.className = "text-sm text-slate-700";
-            const nm = (r[COLS.name] || "Tanpa Nama").trim();
-            const ac = (r[COLS.achievement] || "-").trim();
-            txt.innerHTML = `<span class="font-semibold text-orange-700">${nm}</span> — ${ac}`;
-            li.appendChild(dot);
-            li.appendChild(txt);
-            listEl.appendChild(li);
-          });
-
-          if (related.length > 8) {
-            const more = document.createElement("div");
-            more.className = "text-xs text-orange-700 mt-2";
-            more.textContent = `+${related.length - 8} lagi peserta...`;
-            achWrap.appendChild(more);
+        pel.achSortHint.textContent = `Disusun: Tarikh (${sortState.dir === "desc" ? "↓ baru → lama" : "↑ lama → baru"})`;
+      } else if (sortState.by === "level") {
+        // Dua pendekatan: levelDir = asc (Sekolah→Antarabangsa) atau desc (Antarabangsa→Sekolah)
+        const ascGroups = [
+          ["school", "sekolah"],
+          ["district", "daerah"],
+          ["state", "negeri"],
+          ["national", "kebangsaan"],
+          ["international", "antarabangsa"]
+        ];
+        const descGroups = [...ascGroups].reverse();
+        const orderGroups = sortState.levelDir === 'desc' ? descGroups : ascGroups;
+        const score = v => {
+          const t = (v||"").toString().trim().toLowerCase();
+          for (let i = 0; i < orderGroups.length; i++) {
+            if (orderGroups[i].some(k => t.includes(k))) return i;
           }
-
-          achWrap.appendChild(achTitle);
-          achWrap.appendChild(listEl);
-          card.appendChild(achWrap);
-        }
-
-        const footer = document.createElement("div");
-        footer.className = "mt-3 flex items-center justify-between";
-        const left = document.createElement("div");
-        left.className = "text-xs text-orange-900/70";
-        left.textContent = "";
-
-        const right = document.createElement("div");
-        right.className = "flex items-center gap-2";
-
-        if (x[TCOLS.reg]) {
-          const a = document.createElement("a");
-          a.href = x[TCOLS.reg];
-          a.target = "_blank";
-          a.rel = "noopener";
-          a.className = "inline-flex items-center gap-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-3 py-1.5 shadow transition";
-          a.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Pendaftaran
-          `;
-          right.appendChild(a);
-        } else {
-          const span = document.createElement("span");
-          span.className = "inline-flex items-center gap-2 rounded-lg bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 border border-orange-200";
-          span.textContent = "Tiada pautan";
-          right.appendChild(span);
-        }
-
-        card.appendChild(title);
-        card.appendChild(sub);
-        card.appendChild(chips);
-        card.appendChild(dr);
-        footer.appendChild(left);
-        footer.appendChild(right);
-        card.appendChild(footer);
-
-        frag.appendChild(card);
+          return 999;
+        };
+        arr.sort((a,b) => (score(a[COLS.level]) - score(b[COLS.level])) || sortFallbackDateDesc(a,b));
+        pel.achSortHint.textContent = `Disusun: Peringkat (${sortState.levelDir === 'desc' ? 'Antarabangsa → Sekolah' : 'Sekolah → Antarabangsa'})`;
+      } else if (sortState.by === "category") {
+        const ascOrder = ["bawah 7","under 7","bawah 8","bawah 10","bawah 12","bawah 14","bawah 16","bawah 18","oku","para","team","berpasukan","terbuka","open"]; // Bawah → Terbuka (termasuk Bawah 7)
+        const descOrder = [...ascOrder].reverse(); // Terbuka → Bawah
+        const order = sortState.catDir === 'desc' ? descOrder : ascOrder;
+        const cscore = v => {
+          const t = (v||"").toString().trim().toLowerCase();
+          const i = order.findIndex(k => t.includes(k));
+          return i === -1 ? 999 : i;
+        };
+        arr.sort((a,b) => (cscore(a[COLS.category]) - cscore(b[COLS.category])) || sortFallbackDateDesc(a,b));
+        pel.achSortHint.textContent = `Disusun: Kategori (${sortState.catDir === 'desc' ? 'Terbuka → Bawah' : 'Bawah → Terbuka'})`;
       }
 
-      tel.tourCards.appendChild(frag);
+      // Render
+      pel.cards.innerHTML = "";
+      const frag = document.createDocumentFragment();
+      for (const r of arr) frag.appendChild(buildAchCard(r));
+      pel.cards.appendChild(frag);
+      pel.achMeta.textContent = `${arr.length} rekod`;
+      updateAchDashboard(arr);
     }
 
-    // Tabs
+    function setActiveSortButton() {
+      pel.sortByDate.classList.toggle("is-active", sortState.by === "date");
+      pel.sortByLevel.classList.toggle("is-active", sortState.by === "level");
+      pel.sortByCategory.classList.toggle("is-active", sortState.by === "category");
+      pel.dateDir.textContent = sortState.by === 'date' ? (sortState.dir === 'desc' ? '↓' : '↑') : '↓';
+      const ld = document.getElementById('levelDir');
+      if (ld) ld.textContent = sortState.by === 'level' ? (sortState.levelDir === 'desc' ? '↓' : '↑') : '↕';
+    }
+
+    // Interaksi tab
     function activateTab(which) {
-      if (which === "prestasi") {
-        tel.prestasiSection.classList.remove("hidden");
-        tel.kejohananSection.classList.remove("hidden"); // kedua-duanya kelihatan (bergulung)
-        tel.tabPrestasi.classList.add("ring-2","ring-orange-300");
-        tel.tabKejohanan.classList.remove("ring-2","ring-orange-300");
+      ui.tabProfil.classList.remove("ring-2","ring-orange-300");
+      ui.tabKejohanan.classList.remove("ring-2","ring-orange-300");
+      if (which === "profil") {
+        ui.tabProfil.classList.add("ring-2","ring-orange-300");
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
-        tel.prestasiSection.classList.remove("hidden");
-        tel.kejohananSection.classList.remove("hidden");
-        tel.tabPrestasi.classList.remove("ring-2","ring-orange-300");
-        tel.tabKejohanan.classList.add("ring-2","ring-orange-300");
+        ui.tabKejohanan.classList.add("ring-2","ring-orange-300");
         document.getElementById("kejohananSection").scrollIntoView({ behavior: "smooth" });
       }
     }
 
-    // Prestasi: event handlers
-    el.nameSelect.addEventListener("change", handleNameChange);
-    el.refreshBtn.addEventListener("click", () => { loadPrestasi(); loadTournaments(); });
-    el.searchInput.addEventListener("input", () => {
-      if (window.__searchTimer) clearTimeout(window.__searchTimer);
-      window.__searchTimer = setTimeout(handleSearch, 200);
+    // Pilih pemain -> render profil + papan + pencapaian
+    function handlePlayerChange() {
+      const name = pel.playerSelect.value;
+
+      pel.cards.innerHTML = "";
+      pel.achievementsWrap.classList.add("hidden");
+      pel.achSummaryWrap.classList.add("hidden");
+
+      if (!name) {
+        pel.selectedProfileWrap.classList.add("hidden");
+        pel.profileEmpty.classList.remove("hidden");
+        return;
+      }
+
+      pel.profileEmpty.classList.add("hidden");
+      pel.profAchLoader.classList.remove("hidden");
+
+      // Profil
+      renderSelectedProfile(name);
+
+      // Data pencapaian untuk pemain
+      currentAchievements = perfRows.filter(r => (r[COLS.name] || "").trim() === name);
+
+      // Tunjuk papan ringkas dan kad
+      pel.achSummaryWrap.classList.remove("hidden");
+      pel.achievementsWrap.classList.remove("hidden");
+      pel.profAchLoader.classList.add("hidden");
+
+      // Reset sort ke Tarikh (baru → lama)
+      sortState = { by: "date", dir: "desc" };
+      setActiveSortButton();
+      sortAchievements();
+    }
+
+    // Events
+    ui.tabProfil.addEventListener("click", () => activateTab("profil"));
+    ui.tabKejohanan.addEventListener("click", () => activateTab("kejohanan"));
+    ui.refreshBtn.addEventListener("click", async () => {
+      await Promise.all([loadProfiles(), loadPerformance(), loadTournaments()]);
+      rebuildNameOptions();
+      pel.profStatTotal.textContent = profRows.filter(matchesProfile).length.toString();
+      handlePlayerChange();
     });
-    document.getElementById("searchDate").addEventListener("input", () => {
-      if (window.__dateTimer) clearTimeout(window.__dateTimer);
-      window.__dateTimer = setTimeout(() => {
-        currentDateSearch = document.getElementById("searchDate").value.trim().toLowerCase();
-        filterAndRender();
-      }, 200);
+    ui.printBtn.addEventListener("click", () => window.print());
+    pel.playerSelect.addEventListener("change", handlePlayerChange);
+
+    // Penapis profil
+    pel.filterCoach.addEventListener("change", () => { profileFilters.coach = pel.filterCoach.value; updateDependentFilters(); });
+    pel.filterLevel.addEventListener("change", () => { profileFilters.level = pel.filterLevel.value; rebuildNameOptions(); pel.profStatTotal.textContent = profRows.filter(matchesProfile).length.toString(); });
+    pel.filterJenis.addEventListener("change", () => { profileFilters.jenis = pel.filterJenis.value; rebuildNameOptions(); pel.profStatTotal.textContent = profRows.filter(matchesProfile).length.toString(); });
+    pel.filterStatus.addEventListener("change", () => { profileFilters.status = pel.filterStatus.value; rebuildNameOptions(); pel.profStatTotal.textContent = profRows.filter(matchesProfile).length.toString(); });
+
+    // Sorting buttons
+    pel.sortByDate.addEventListener("click", () => {
+      if (sortState.by === "date") {
+        sortState.dir = sortState.dir === "desc" ? "asc" : "desc";
+      } else {
+        sortState = { by: "date", dir: "desc" };
+      }
+      setActiveSortButton();
+      sortAchievements();
     });
-    const levelSel = document.getElementById("filterLevel");
-    const catSel = document.getElementById("filterCategory");
-    levelSel.addEventListener("change", () => { currentLevel = levelSel.value; filterAndRender(); });
-    catSel.addEventListener("change", () => { currentCategory = catSel.value; filterAndRender(); });
-
-    // Prestasi: eksport CSV
-    document.getElementById("exportCsvBtn").addEventListener("click", () => {
-      const rows = filteredRows.length ? filteredRows : [];
-      if (!rows.length) { return; }
-      const header = [
-        COLS.timestamp, COLS.name, COLS.tournament, COLS.date, COLS.level,
-        COLS.category, COLS.achievement, COLS.photoText, COLS.remarks, COLS.photoURL, COLS.image
-      ];
-      const csv = [header.join(",")].concat(rows.map(r => header.map(h => {
-        const v = (r[h] ?? "").toString();
-        const needsQuote = v.includes(",") || v.includes("\n") || v.includes("\"");
-        const safe = v.replaceAll("\"", "\"\"");
-        return needsQuote ? `"${safe}"` : safe;
-      }).join(","))).join("\n");
-
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const fileNameSafe = (currentName || 'prestasi').replace(/[^a-z0-9-_]+/gi,'_');
-      a.href = url;
-      a.download = `${fileNameSafe}_prestasi.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+    pel.sortByLevel.addEventListener("click", (e) => {
+      // Toggle menu kecil untuk pilih arah susunan peringkat
+      e.stopPropagation();
+      const menu = document.getElementById('levelMenu');
+      menu.classList.toggle('hidden');
+      sortState.by = 'level';
+      setActiveSortButton();
+    });
+    // Tutup menu bila klik luar
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('levelMenu');
+      const btn = document.getElementById('sortByLevel');
+      if (!menu || !btn) return;
+      if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.add('hidden');
+    });
+    // Pilihan dalam menu
+    document.querySelectorAll('#levelMenu [data-leveldir]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sortState.by = 'level';
+        sortState.levelDir = btn.getAttribute('data-leveldir') === 'desc' ? 'desc' : 'asc';
+        document.getElementById('levelMenu').classList.add('hidden');
+        document.getElementById('levelDir').textContent = sortState.levelDir === 'desc' ? '↓' : '↑';
+        setActiveSortButton();
+        sortAchievements();
+      });
+    });
+    pel.sortByCategory.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const menu = document.getElementById('catMenu');
+      menu.classList.toggle('hidden');
+      sortState.by = 'category';
+      setActiveSortButton();
+    });
+    // Pilihan menu kategori
+    document.querySelectorAll('#catMenu [data-catdir]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sortState.by = 'category';
+        sortState.catDir = btn.getAttribute('data-catdir') === 'desc' ? 'desc' : 'asc';
+        document.getElementById('catMenu').classList.add('hidden');
+        const cd = document.getElementById('catDir');
+        if (cd) cd.textContent = sortState.catDir === 'desc' ? '↓' : '↑';
+        setActiveSortButton();
+        sortAchievements();
+      });
+    });
+    // Tutup menu bila klik luar (kategori)
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('catMenu');
+      const btn = document.getElementById('sortByCategory');
+      if (!menu || !btn) return;
+      if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.add('hidden');
     });
 
-    // Kejohanan: event handlers
-    tel.tourSearch.addEventListener("input", () => {
-      if (window.__tSearchTimer) clearTimeout(window.__tSearchTimer);
-      window.__tSearchTimer = setTimeout(filterAndRenderTournaments, 200);
-    });
-    tel.tourState.addEventListener("change", filterAndRenderTournaments);
-    tel.tourType.addEventListener("change", filterAndRenderTournaments);
-    tel.tourExportBtn.addEventListener("click", () => {
-      const list = tourFiltered.length ? tourFiltered : tourAll;
-      if (!list.length) return;
-      const header = [TCOLS.name, TCOLS.organizer, TCOLS.state, TCOLS.start, TCOLS.end, TCOLS.fide, TCOLS.reg];
-      const csv = [header.join(",")].concat(list.map(r => header.map(h => {
-        const v = (r[h] ?? "").toString();
-        const needsQuote = v.includes(",") || v.includes("\n") || v.includes("\"");
-        const safe = v.replaceAll("\"", "\"\"");
-        return needsQuote ? `"${safe}"` : safe;
-      }).join(","))).join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `kejohanan.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    });
-
-    tel.tabPrestasi.addEventListener("click", () => activateTab("prestasi"));
-    tel.tabKejohanan.addEventListener("click", () => activateTab("kejohanan"));
-
-    el.printBtn.addEventListener("click", () => window.print());
-
-    // Mula
-    loadPrestasi();
-    loadTournaments();
-    activateTab("prestasi");
+    // Init
+    (async function init() {
+      hideAlert();
+      activateTab("profil");
+      pel.profileEmpty.classList.remove("hidden");
+      const yEl = document.getElementById('yearNow');
+      if (yEl) yEl.textContent = new Date().getFullYear();
+      await Promise.all([loadProfiles(), loadPerformance(), loadTournaments()]);
+    })();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97dcb3dbc1e7a3e3',t:'MTc1NzY1MTc3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ef3bc180a5a84c',t:'MTc1Nzg0NjA4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
