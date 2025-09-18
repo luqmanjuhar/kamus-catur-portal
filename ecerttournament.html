@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pusat Sijil Acara — Semak & Muat Turun</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Tema oren-putih yang ringan dan bersih */
+    .soft-card { backdrop-filter: saturate(180%) blur(6px); }
+    .ring-focus:focus { outline: none; box-shadow: 0 0 0 4px rgba(251, 146, 60, .25); }
+    .bg-page {
+      background:
+        radial-gradient(1000px 600px at 0% 0%, rgba(253,186,116,.25) 0%, transparent 50%),
+        radial-gradient(900px 600px at 100% 10%, rgba(251,146,60,.18) 0%, transparent 55%),
+        #ffffff;
+    }
+    .btn { transition: transform .06s ease, filter .2s ease; }
+    .btn:active { transform: translateY(1px); filter: brightness(.97); }
+    .shadow-soft { box-shadow: 0 8px 24px rgba(15,23,42,.06); }
+  </style>
+</head>
+<body class="min-h-screen bg-page text-slate-800 font-sans antialiased">
+  <div class="max-w-3xl mx-auto px-4 py-10 sm:py-14">
+    <!-- Header -->
+    <header class="mb-8 sm:mb-10">
+      <div class="flex items-center gap-3">
+        <!-- Logo ringkas -->
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-400 grid place-items-center shadow-soft">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="text-white">
+            <path d="M12 3l7 4v10l-7 4-7-4V7l7-4z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 8v8M8 10.5l8 3" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Pusat Sijil Acara</h1>
+          <p class="text-slate-500 text-sm">Semak penyertaan anda dan muat turun sijil dengan pantas</p>
+        </div>
+      </div>
+      <!-- Notis -->
+      <div class="mt-4 rounded-xl soft-card bg-white/70 border border-orange-100 p-4 shadow-soft">
+        <p class="text-sm leading-relaxed text-slate-700">
+          Demo mesra privasi: Canva Code tidak menyokong pengumpulan nombor kad pengenalan.
+          Sila gunakan <span class="font-semibold text-orange-600">Kod Sijil</span> unik untuk semakan.
+        </p>
+      </div>
+    </header>
+
+    <!-- Finder -->
+    <section class="rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft">
+      <h2 class="text-lg font-semibold mb-4 text-slate-900">Semak & Muat Turun</h2>
+      <form id="checkForm" class="space-y-4">
+        <!-- Event -->
+        <div>
+          <label for="eventSelect" class="block text-sm mb-1 text-slate-600">Pilih Kejohanan / Event</label>
+          <select id="eventSelect" class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400">
+            <!-- options injected -->
+          </select>
+        </div>
+
+        <!-- Kod Sijil -->
+        <div>
+          <label for="codeInput" class="block text-sm mb-1 text-slate-600">Kod Sijil</label>
+          <input id="codeInput" type="text" inputmode="latin" autocomplete="off" placeholder="Contoh: ABC12345"
+                 class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400">
+          <p class="text-xs text-slate-500 mt-2">Masukkan 4 digit akhir no kad pengenalan peserta.</p>
+        </div>
+
+        <!-- Tindakan -->
+        <div class="flex items-center gap-3">
+          <button type="submit" class="btn rounded-xl bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 font-medium shadow-soft">
+            Semak & Muat Turun
+          </button>
+          <button type="button" id="clearBtn" class="btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-3">
+            Kosongkan
+          </button>
+        </div>
+      </form>
+
+      <!-- Keputusan -->
+      <div id="resultBox" class="mt-6 hidden">
+        <div class="rounded-xl bg-white border border-orange-100 p-4 shadow-soft">
+          <div class="flex flex-col gap-3">
+            <div>
+              <p class="text-orange-600 text-sm font-medium mb-1">Padanan ditemui</p>
+              <h3 id="resName" class="text-lg font-semibold text-slate-900"></h3>
+              <p id="resEvent" class="text-slate-700 text-sm mt-1"></p>
+              <p id="resDate" class="text-slate-500 text-xs mt-1"></p>
+            </div>
+            <div id="certList" class="grid sm:grid-cols-2 gap-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Makluman -->
+      <div id="alertBox" class="mt-6 hidden">
+        <div id="alertCard" class="rounded-xl bg-orange-50 border border-orange-200 p-4">
+          <p id="alertText" class="text-orange-700 text-sm"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Senarai event ringkas -->
+    <div class="mt-6">
+      <h3 class="text-sm font-semibold text-slate-700 mb-2">Event dimuatkan</h3>
+      <div id="eventChips" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-10 text-center text-slate-500 text-xs">
+      Demo mesra privasi. Semua proses berlaku di pelayar anda.
+    </footer>
+  </div>
+
+  <script>
+    // Konfigurasi: URL CSV Google Sheet anda (Publish to web)
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2iJ2osj2c3BF7VsfswyfHjU0Tb8c-KkYUNRUDqorvj_xXPhIcQZ3QU7ZnSvJlDNkqgFl7LqJ-9yHq/pub?gid=1625987910&single=true&output=csv';
+
+    // Data storan dalam memori
+    let records = []; // {event, date, name, ic, achievement, type, category, code, url}
+
+    const dom = {
+      eventSelect: document.getElementById('eventSelect'),
+      codeInput: document.getElementById('codeInput'),
+      checkForm: document.getElementById('checkForm'),
+      clearBtn: document.getElementById('clearBtn'),
+      resultBox: document.getElementById('resultBox'),
+      resName: document.getElementById('resName'),
+      resEvent: document.getElementById('resEvent'),
+      resDate: document.getElementById('resDate'),
+      alertBox: document.getElementById('alertBox'),
+      alertText: document.getElementById('alertText'),
+      certList: document.getElementById('certList'),
+      eventChips: document.getElementById('eventChips'),
+    };
+
+    function setAlert(msg) {
+      dom.alertText.textContent = msg;
+      dom.alertBox.classList.remove('hidden');
+      setTimeout(() => dom.alertBox.classList.add('hidden'), 5000);
+    }
+
+    function setResultList(recs) {
+      if (!recs || !recs.length) {
+        dom.resultBox.classList.add('hidden');
+        return;
+      }
+      const first = recs[0];
+      dom.resName.textContent = first.name;
+      dom.resEvent.textContent = first.event;
+      dom.resDate.textContent = first.date ? `Tarikh: ${first.date}` : '';
+
+      dom.certList.innerHTML = '';
+      recs.forEach(r => {
+        const card = document.createElement('a');
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+        card.href = r.url || '#';
+        card.className = 'group block rounded-xl border border-orange-200 bg-white hover:bg-orange-50 p-4 transition shadow-soft';
+        const title = r.type || r.category || 'Sijil Penyertaan';
+        const sub = r.achievement ? ` — ${r.achievement}` : '';
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="font-medium text-slate-900">${title}${sub}</p>
+              <p class="text-xs text-slate-500 mt-0.5">Klik untuk muat turun PDF</p>
+            </div>
+            <span class="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600">⬇️</span>
+          </div>`;
+        dom.certList.appendChild(card);
+      });
+
+      dom.resultBox.classList.remove('hidden');
+    }
+
+    function updateEvents() {
+      const current = dom.eventSelect.value;
+      const events = [...new Set(records.map(r => r.event))].sort((a,b) => a.localeCompare(b));
+      dom.eventSelect.innerHTML = '';
+      const first = document.createElement('option');
+      first.value = '';
+      first.textContent = events.length ? 'Pilih event…' : '— Tiada event —';
+      dom.eventSelect.appendChild(first);
+      events.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e;
+        opt.textContent = e;
+        dom.eventSelect.appendChild(opt);
+      });
+      if (events.includes(current)) dom.eventSelect.value = current;
+
+      // Cip event
+      dom.eventChips.innerHTML = '';
+      events.forEach(e => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.textContent = e;
+        chip.className = 'text-[11px] md:text-xs rounded-full bg-white border border-slate-200 hover:bg-orange-50 text-slate-700 px-3 py-1.5';
+        chip.addEventListener('click', () => {
+          dom.eventSelect.value = e;
+          dom.eventSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        dom.eventChips.appendChild(chip);
+      });
+    }
+
+    function normalize(h) { return (h || '').toString().trim().toLowerCase(); }
+
+    function mapHeaders(headers) {
+      const map = {};
+      headers.forEach((h, i) => {
+        const n = normalize(h);
+        if (n.includes('nama kejohanan')) map.event = i;
+        else if (n.includes('tarikh')) map.date = i;
+        else if (n.includes('nama peserta')) map.name = i;
+        else if (n.includes('no kad') || n.includes('kad pengenalan')) map.ic = i;
+        else if (n.includes('pencapaian') || n.includes('penyertaan')) map.achievement = i;
+        else if (n.includes('jenis sijil')) map.type = i;
+        else if (n.includes('kategori')) map.category = i;
+        else if (n.includes('kod sijil')) map.code = i;
+        else if (n.includes('url') && n.includes('pdf')) map.url = i;
+        else if (n.includes('url') && !map.url) map.url = i; // fallback
+      });
+      return map;
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let i=0, field='', row=[], inQuotes=false;
+      const pushField=()=>{ row.push(field); field=''; };
+      const pushRow=()=>{ rows.push(row); row=[]; };
+      while (i < text.length) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') {
+            if (text[i+1] === '"') { field += '"'; i++; }
+            else { inQuotes = false; }
+          } else { field += c; }
+        } else {
+          if (c === '"') inQuotes = true;
+          else if (c === ',') pushField();
+          else if (c === '\n') { pushField(); pushRow(); }
+          else if (c === '\r') { /* ignore */ }
+          else field += c;
+        }
+        i++;
+      }
+      pushField();
+      if (row.length) pushRow();
+      while (rows.length && rows[rows.length-1].every(v => v.trim() === '')) rows.pop();
+      return rows;
+    }
+
+    function toRecords(rows) {
+      if (!rows.length) return [];
+      const headers = rows[0];
+      const idx = mapHeaders(headers);
+      const out = [];
+      for (let r=1; r<rows.length; r++) {
+        const row = rows[r];
+        const rec = {
+          event: (row[idx.event] || '').trim(),
+          date: (row[idx.date] || '').trim(),
+          name: (row[idx.name] || '').trim(),
+          ic:   (row[idx.ic] || '').replace(/[^0-9]/g,'').trim(),
+          achievement: (row[idx.achievement] || '').trim(),
+          type: (row[idx.type] || '').trim(),
+          category: (row[idx.category] || '').trim(),
+          code: (row[idx.code] || '').trim(),
+          url:  (row[idx.url] || '').trim(),
+        };
+        if (rec.event && rec.name && rec.code) out.push(rec);
+      }
+      return out;
+    }
+
+    async function loadCSV(url) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Gagal memuatkan CSV');
+        const text = await res.text();
+        const rows = parseCSV(text.replace(/^\uFEFF/, ''));
+        const parsed = toRecords(rows);
+        if (!parsed.length) throw new Error('Tiada rekod sah ditemui. Semak tajuk lajur anda.');
+        records = parsed;
+        updateEvents();
+        setAlert('Data Google Sheet dimuatkan.');
+      } catch (e) {
+        setAlert(e.message || 'Ralat memuatkan CSV.');
+      }
+    }
+
+    function resetForm() {
+      dom.codeInput.value = '';
+      dom.resultBox.classList.add('hidden');
+      dom.alertBox.classList.add('hidden');
+      dom.codeInput.focus();
+    }
+
+    // Semak
+    dom.checkForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      dom.resultBox.classList.add('hidden');
+
+      const eventName = dom.eventSelect.value.trim();
+      const code = dom.codeInput.value.trim();
+
+      if (!records.length) {
+        setAlert('Tiada data dimuatkan.');
+        return;
+      }
+      if (!eventName) {
+        setAlert('Sila pilih event terlebih dahulu.');
+        return;
+      }
+      if (!code) {
+        setAlert('Sila masukkan Kod Sijil.');
+        return;
+      }
+
+      const recs = records.filter(r =>
+        r.event === eventName && r.code.toUpperCase() === code.toUpperCase()
+      );
+
+      if (!recs.length) {
+        setAlert('Maaf, padanan tidak ditemui. Semak event dan Kod Sijil anda.');
+        return;
+      }
+      setResultList(recs);
+    });
+
+    dom.clearBtn.addEventListener('click', resetForm);
+
+    // Init: muatkan Google Sheet automatik
+    updateEvents();
+    loadCSV(CSV_URL);
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'980fce24d511a850',t:'MTc1ODE4NzYyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
