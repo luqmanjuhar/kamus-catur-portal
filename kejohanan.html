@@ -37,17 +37,24 @@
           <p class="text-slate-500 text-sm">Semak penyertaan anda dan muat turun sijil dengan pantas</p>
         </div>
       </div>
-      <!-- Notis -->
-      <div class="mt-4 rounded-xl soft-card bg-white/70 border border-orange-100 p-4 shadow-soft">
-        <p class="text-sm leading-relaxed text-slate-700">
-          Demo mesra privasi: Canva Code tidak menyokong pengumpulan nombor kad pengenalan.
-          Sila gunakan <span class="font-semibold text-orange-600">Kod Sijil</span> unik untuk semakan.
-        </p>
-      </div>
+
     </header>
 
-    <!-- Finder -->
-    <section class="rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft">
+    <!-- Navigation Buttons -->
+    <div class="mb-6 flex flex-wrap gap-2 justify-center">
+      <button id="btnEcert" class="btn rounded-xl bg-orange-500 text-white px-4 py-2 font-medium shadow-soft">
+        eCert
+      </button>
+      <button id="btnFoto" class="btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2">
+        Foto
+      </button>
+      <button id="btnChess" class="btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2">
+        Chess Result
+      </button>
+    </div>
+
+    <!-- eCert Section -->
+    <section id="sectionEcert" class="rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft">
       <h2 class="text-lg font-semibold mb-4 text-slate-900">Semak & Muat Turun</h2>
       <form id="checkForm" class="space-y-4">
         <!-- Event -->
@@ -63,7 +70,7 @@
           <label for="codeInput" class="block text-sm mb-1 text-slate-600">Kod Sijil</label>
           <input id="codeInput" type="text" inputmode="latin" autocomplete="off" placeholder="Contoh: 1234"
                  class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400">
-          <p class="text-xs text-slate-500 mt-2">Masukkan 4 digit akhir no kad pengenalan peserta.</p>
+          <p class="text-xs text-slate-500 mt-2">Masukkan Kod Sijil unik (contoh: 1234). Masukkan 4 digit akhir no kad pengenalan pemain.</p>
         </div>
 
         <!-- Tindakan -->
@@ -100,6 +107,22 @@
       </div>
     </section>
 
+    <!-- Foto Section -->
+    <section id="sectionFoto" class="mt-8 rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft hidden">
+      <h2 class="text-lg font-semibold mb-4 text-slate-900">Galeri Foto</h2>
+      <div id="photoEvents" class="space-y-4">
+        <!-- Photo events will be loaded here -->
+      </div>
+    </section>
+
+    <!-- Chess Result Section -->
+    <section id="sectionChess" class="mt-8 rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft hidden">
+      <h2 class="text-lg font-semibold mb-4 text-slate-900">Kejohanan Catur</h2>
+      <div id="chessEvents" class="space-y-4">
+        <!-- Chess events will be loaded here -->
+      </div>
+    </section>
+
     <!-- Senarai event ringkas -->
     <div class="mt-6">
       <h3 class="text-sm font-semibold text-slate-700 mb-2">Event dimuatkan</h3>
@@ -115,9 +138,11 @@
   <script>
     // Konfigurasi: URL CSV Google Sheet anda (Publish to web)
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2iJ2osj2c3BF7VsfswyfHjU0Tb8c-KkYUNRUDqorvj_xXPhIcQZ3QU7ZnSvJlDNkqgFl7LqJ-9yHq/pub?gid=1625987910&single=true&output=csv';
+    const CHESS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2iJ2osj2c3BF7VsfswyfHjU0Tb8c-KkYUNRUDqorvj_xXPhIcQZ3QU7ZnSvJlDNkqgFl7LqJ-9yHq/pub?gid=1676401999&single=true&output=csv';
 
     // Data storan dalam memori
     let records = []; // {event, date, name, ic, achievement, type, category, code, url}
+    let chessEvents = []; // {event, date, resultLink, photoLink}
 
     const dom = {
       eventSelect: document.getElementById('eventSelect'),
@@ -132,6 +157,14 @@
       alertText: document.getElementById('alertText'),
       certList: document.getElementById('certList'),
       eventChips: document.getElementById('eventChips'),
+      chessEvents: document.getElementById('chessEvents'),
+      photoEvents: document.getElementById('photoEvents'),
+      btnEcert: document.getElementById('btnEcert'),
+      btnFoto: document.getElementById('btnFoto'),
+      btnChess: document.getElementById('btnChess'),
+      sectionEcert: document.getElementById('sectionEcert'),
+      sectionFoto: document.getElementById('sectionFoto'),
+      sectionChess: document.getElementById('sectionChess'),
     };
 
     function setAlert(msg) {
@@ -204,6 +237,80 @@
       });
     }
 
+    function updateChessEvents() {
+      dom.chessEvents.innerHTML = '';
+      if (!chessEvents.length) {
+        dom.chessEvents.innerHTML = '<p class="text-slate-500 text-sm">Tiada kejohanan catur dimuatkan.</p>';
+        return;
+      }
+
+      chessEvents.forEach(chess => {
+        const card = document.createElement('div');
+        card.className = 'rounded-xl bg-white border border-orange-200 p-4 shadow-soft';
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="font-semibold text-slate-900">${chess.event}</h3>
+              <p class="text-slate-500 text-sm mt-1">${chess.date ? `Tarikh: ${chess.date}` : ''}</p>
+            </div>
+            <div class="flex gap-2">
+              ${chess.resultLink ? `<a href="${chess.resultLink}" target="_blank" rel="noopener noreferrer" class="btn rounded-lg bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 text-sm font-medium">Keputusan</a>` : ''}
+            </div>
+          </div>`;
+        dom.chessEvents.appendChild(card);
+      });
+    }
+
+    function updatePhotoEvents() {
+      dom.photoEvents.innerHTML = '';
+      if (!chessEvents.length) {
+        dom.photoEvents.innerHTML = '<p class="text-slate-500 text-sm">Tiada foto dimuatkan.</p>';
+        return;
+      }
+
+      chessEvents.forEach(chess => {
+        if (chess.photoLink) {
+          const card = document.createElement('div');
+          card.className = 'rounded-xl bg-white border border-orange-200 p-4 shadow-soft';
+          card.innerHTML = `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="font-semibold text-slate-900">${chess.event}</h3>
+                <p class="text-slate-500 text-sm mt-1">${chess.date ? `Tarikh: ${chess.date}` : ''}</p>
+              </div>
+              <div class="flex gap-2">
+                <a href="${chess.photoLink}" target="_blank" rel="noopener noreferrer" class="btn rounded-lg bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 text-sm font-medium">Lihat Foto</a>
+              </div>
+            </div>`;
+          dom.photoEvents.appendChild(card);
+        }
+      });
+    }
+
+    function switchSection(activeSection) {
+      // Hide all sections
+      dom.sectionEcert.classList.add('hidden');
+      dom.sectionFoto.classList.add('hidden');
+      dom.sectionChess.classList.add('hidden');
+      
+      // Reset all button styles
+      dom.btnEcert.className = 'btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2';
+      dom.btnFoto.className = 'btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2';
+      dom.btnChess.className = 'btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2';
+      
+      // Show active section and highlight button
+      if (activeSection === 'ecert') {
+        dom.sectionEcert.classList.remove('hidden');
+        dom.btnEcert.className = 'btn rounded-xl bg-orange-500 text-white px-4 py-2 font-medium shadow-soft';
+      } else if (activeSection === 'foto') {
+        dom.sectionFoto.classList.remove('hidden');
+        dom.btnFoto.className = 'btn rounded-xl bg-orange-500 text-white px-4 py-2 font-medium shadow-soft';
+      } else if (activeSection === 'chess') {
+        dom.sectionChess.classList.remove('hidden');
+        dom.btnChess.className = 'btn rounded-xl bg-orange-500 text-white px-4 py-2 font-medium shadow-soft';
+      }
+    }
+
     function normalize(h) { return (h || '').toString().trim().toLowerCase(); }
 
     function mapHeaders(headers) {
@@ -220,6 +327,18 @@
         else if (n.includes('kod sijil')) map.code = i;
         else if (n.includes('url') && n.includes('pdf')) map.url = i;
         else if (n.includes('url') && !map.url) map.url = i; // fallback
+      });
+      return map;
+    }
+
+    function mapChessHeaders(headers) {
+      const map = {};
+      headers.forEach((h, i) => {
+        const n = normalize(h);
+        if (n.includes('nama kejohanan')) map.event = i;
+        else if (n.includes('tarikh')) map.date = i;
+        else if (n.includes('link chess result')) map.resultLink = i;
+        else if (n.includes('link google photo')) map.photoLink = i;
       });
       return map;
     }
@@ -274,6 +393,24 @@
       return out;
     }
 
+    function toChessRecords(rows) {
+      if (!rows.length) return [];
+      const headers = rows[0];
+      const idx = mapChessHeaders(headers);
+      const out = [];
+      for (let r=1; r<rows.length; r++) {
+        const row = rows[r];
+        const rec = {
+          event: (row[idx.event] || '').trim(),
+          date: (row[idx.date] || '').trim(),
+          resultLink: (row[idx.resultLink] || '').trim(),
+          photoLink: (row[idx.photoLink] || '').trim(),
+        };
+        if (rec.event) out.push(rec);
+      }
+      return out;
+    }
+
     async function loadCSV(url) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
@@ -287,6 +424,21 @@
         setAlert('Data Google Sheet dimuatkan.');
       } catch (e) {
         setAlert(e.message || 'Ralat memuatkan CSV.');
+      }
+    }
+
+    async function loadChessCSV(url) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Gagal memuatkan CSV catur');
+        const text = await res.text();
+        const rows = parseCSV(text.replace(/^\uFEFF/, ''));
+        const parsed = toChessRecords(rows);
+        chessEvents = parsed;
+        updateChessEvents();
+        updatePhotoEvents();
+      } catch (e) {
+        console.error('Ralat memuatkan data catur:', e);
       }
     }
 
@@ -331,9 +483,17 @@
 
     dom.clearBtn.addEventListener('click', resetForm);
 
+    // Navigation button event listeners
+    dom.btnEcert.addEventListener('click', () => switchSection('ecert'));
+    dom.btnFoto.addEventListener('click', () => switchSection('foto'));
+    dom.btnChess.addEventListener('click', () => switchSection('chess'));
+
     // Init: muatkan Google Sheet automatik
     updateEvents();
+    updateChessEvents();
+    updatePhotoEvents();
     loadCSV(CSV_URL);
+    loadChessCSV(CHESS_CSV_URL);
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'980fce24d511a850',t:'MTc1ODE4NzYyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98263972f43886be',t:'MTc1ODQyMjcwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
