@@ -42,12 +42,20 @@
 
     <!-- Event Selection First -->
     <section class="mb-6 rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft">
-      <h2 class="text-lg font-semibold mb-4 text-slate-900">Pilih Kejohanan</h2>
-      <div>
-        <label for="mainEventSelect" class="block text-sm mb-2 text-slate-600">Sila pilih kejohanan terlebih dahulu untuk akses semua ciri</label>
-        <select id="mainEventSelect" class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800">
-          <option value="">-- Pilih Kejohanan --</option>
-        </select>
+      <h2 class="text-lg font-semibold mb-4 text-slate-900">Pilih Kejohanan & Kategori</h2>
+      <div class="space-y-4">
+        <div>
+          <label for="mainEventSelect" class="block text-sm mb-2 text-slate-600">1. Pilih Kejohanan</label>
+          <select id="mainEventSelect" class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800">
+            <option value="">-- Pilih Kejohanan --</option>
+          </select>
+        </div>
+        <div>
+          <label for="mainCategorySelect" class="block text-sm mb-2 text-slate-600">2. Pilih Kategori</label>
+          <select id="mainCategorySelect" class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800" disabled>
+            <option value="">-- Pilih kejohanan dahulu --</option>
+          </select>
+        </div>
       </div>
     </section>
 
@@ -68,14 +76,6 @@
     <section id="sectionEcert" class="rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft hidden">
       <h2 class="text-lg font-semibold mb-4 text-slate-900">Semak & Muat Turun</h2>
       <form id="checkForm" class="space-y-4">
-        <!-- Event -->
-        <div>
-          <label for="eventSelect" class="block text-sm mb-1 text-slate-600">Pilih Kejohanan / Event</label>
-          <select id="eventSelect" class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400">
-            <!-- options injected -->
-          </select>
-        </div>
-
         <!-- Kod Sijil -->
         <div>
           <label for="codeInput" class="block text-sm mb-1 text-slate-600">Kod Sijil</label>
@@ -157,8 +157,8 @@
 
     const dom = {
       mainEventSelect: document.getElementById('mainEventSelect'),
+      mainCategorySelect: document.getElementById('mainCategorySelect'),
       navigationButtons: document.getElementById('navigationButtons'),
-      eventSelect: document.getElementById('eventSelect'),
       codeInput: document.getElementById('codeInput'),
       checkForm: document.getElementById('checkForm'),
       clearBtn: document.getElementById('clearBtn'),
@@ -234,6 +234,32 @@
       if (allEvents.includes(current)) dom.mainEventSelect.value = current;
     }
 
+    function updateMainCategorySelect() {
+      const selectedEvent = dom.mainEventSelect.value;
+      const current = dom.mainCategorySelect.value;
+      
+      dom.mainCategorySelect.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+      
+      if (!selectedEvent) {
+        dom.mainCategorySelect.innerHTML = '<option value="">-- Pilih kejohanan dahulu --</option>';
+        dom.mainCategorySelect.disabled = true;
+        return;
+      }
+      
+      dom.mainCategorySelect.disabled = false;
+      
+      const categories = [...new Set(records.filter(r => r.event === selectedEvent).map(r => r.category).filter(c => c))].sort((a,b) => a.localeCompare(b));
+      
+      categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        dom.mainCategorySelect.appendChild(opt);
+      });
+      
+      if (categories.includes(current)) dom.mainCategorySelect.value = current;
+    }
+
     function enableNavigation() {
       dom.navigationButtons.classList.remove('opacity-50', 'pointer-events-none');
       dom.btnEcert.className = 'btn rounded-xl bg-orange-500 text-white px-4 py-2 font-medium shadow-soft';
@@ -258,39 +284,20 @@
 
     function updateEvents() {
       const selectedMainEvent = dom.mainEventSelect.value;
-      if (!selectedMainEvent) {
-        dom.eventSelect.innerHTML = '<option value="">Pilih kejohanan utama dahulu</option>';
+      const selectedMainCategory = dom.mainCategorySelect.value;
+      
+      // Cip event
+      dom.eventChips.innerHTML = '';
+      
+      if (!selectedMainEvent || !selectedMainCategory) {
         return;
       }
 
-      const events = records.filter(r => r.event === selectedMainEvent).map(r => r.event);
-      const uniqueEvents = [...new Set(events)];
-      
-      dom.eventSelect.innerHTML = '';
-      const first = document.createElement('option');
-      first.value = '';
-      first.textContent = uniqueEvents.length ? 'Pilih event…' : '— Tiada event —';
-      dom.eventSelect.appendChild(first);
-      uniqueEvents.forEach(e => {
-        const opt = document.createElement('option');
-        opt.value = e;
-        opt.textContent = e;
-        dom.eventSelect.appendChild(opt);
-      });
-
-      // Cip event
-      dom.eventChips.innerHTML = '';
-      uniqueEvents.forEach(e => {
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.textContent = e;
-        chip.className = 'text-[11px] md:text-xs rounded-full bg-white border border-slate-200 hover:bg-orange-50 text-slate-700 px-3 py-1.5';
-        chip.addEventListener('click', () => {
-          dom.eventSelect.value = e;
-          dom.eventSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-        dom.eventChips.appendChild(chip);
-      });
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.textContent = `${selectedMainEvent} - ${selectedMainCategory}`;
+      chip.className = 'text-[11px] md:text-xs rounded-full bg-white border border-slate-200 hover:bg-orange-50 text-slate-700 px-3 py-1.5';
+      dom.eventChips.appendChild(chip);
     }
 
     function updateChessEvents() {
@@ -491,6 +498,7 @@
         if (!parsed.length) throw new Error('Tiada rekod sah ditemui. Semak tajuk lajur anda.');
         records = parsed;
         updateMainEventSelect();
+        updateMainCategorySelect();
         updateEvents();
         setAlert('Data Google Sheet dimuatkan.');
       } catch (e) {
@@ -526,15 +534,20 @@
       e.preventDefault();
       dom.resultBox.classList.add('hidden');
 
-      const eventName = dom.eventSelect.value.trim();
+      const selectedEvent = dom.mainEventSelect.value;
+      const selectedCategory = dom.mainCategorySelect.value;
       const code = dom.codeInput.value.trim();
 
       if (!records.length) {
         setAlert('Tiada data dimuatkan.');
         return;
       }
-      if (!eventName) {
-        setAlert('Sila pilih event terlebih dahulu.');
+      if (!selectedEvent) {
+        setAlert('Sila pilih kejohanan terlebih dahulu.');
+        return;
+      }
+      if (!selectedCategory) {
+        setAlert('Sila pilih kategori terlebih dahulu.');
         return;
       }
       if (!code) {
@@ -543,11 +556,13 @@
       }
 
       const recs = records.filter(r =>
-        r.event === eventName && r.code.toUpperCase() === code.toUpperCase()
+        r.event === selectedEvent && 
+        r.category === selectedCategory && 
+        r.code.toUpperCase() === code.toUpperCase()
       );
 
       if (!recs.length) {
-        setAlert('Maaf, padanan tidak ditemui. Semak event dan Kod Sijil anda.');
+        setAlert('Maaf, padanan tidak ditemui. Semak kejohanan, kategori dan Kod Sijil anda.');
         return;
       }
       setResultList(recs);
@@ -557,7 +572,20 @@
 
     // Main event selection listener
     dom.mainEventSelect.addEventListener('change', (e) => {
-      if (e.target.value) {
+      updateMainCategorySelect();
+      if (e.target.value && dom.mainCategorySelect.value) {
+        enableNavigation();
+        updateEvents();
+        updateChessEvents();
+        updatePhotoEvents();
+      } else {
+        disableNavigation();
+      }
+    });
+
+    // Main category selection listener
+    dom.mainCategorySelect.addEventListener('change', (e) => {
+      if (dom.mainEventSelect.value && e.target.value) {
         enableNavigation();
         updateEvents();
         updateChessEvents();
@@ -574,11 +602,12 @@
 
     // Init: muatkan Google Sheet automatik
     updateMainEventSelect();
+    updateMainCategorySelect();
     updateEvents();
     updateChessEvents();
     updatePhotoEvents();
     loadCSV(CSV_URL);
     loadChessCSV(CHESS_CSV_URL);
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982e205fa211b4dc',t:'MTc1ODUwNTU2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982e9db1e638b4dc',t:'MTc1ODUxMDY5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
