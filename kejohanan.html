@@ -40,21 +40,32 @@
 
     </header>
 
+    <!-- Event Selection First -->
+    <section class="mb-6 rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft">
+      <h2 class="text-lg font-semibold mb-4 text-slate-900">Pilih Kejohanan</h2>
+      <div>
+        <label for="mainEventSelect" class="block text-sm mb-2 text-slate-600">Sila pilih kejohanan terlebih dahulu untuk akses semua ciri</label>
+        <select id="mainEventSelect" class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800">
+          <option value="">-- Pilih Kejohanan --</option>
+        </select>
+      </div>
+    </section>
+
     <!-- Navigation Buttons -->
-    <div class="mb-6 flex flex-wrap gap-2 justify-center">
-      <button id="btnEcert" class="btn rounded-xl bg-orange-500 text-white px-4 py-2 font-medium shadow-soft">
+    <div id="navigationButtons" class="mb-6 flex flex-wrap gap-2 justify-center opacity-50 pointer-events-none">
+      <button id="btnEcert" class="btn rounded-xl bg-gray-300 text-gray-500 px-4 py-2 font-medium cursor-not-allowed">
         eCert
       </button>
-      <button id="btnFoto" class="btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2">
+      <button id="btnFoto" class="btn rounded-xl bg-gray-300 text-gray-500 px-4 py-2 cursor-not-allowed">
         Foto
       </button>
-      <button id="btnChess" class="btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2">
+      <button id="btnChess" class="btn rounded-xl bg-gray-300 text-gray-500 px-4 py-2 cursor-not-allowed">
         Chess Result
       </button>
     </div>
 
     <!-- eCert Section -->
-    <section id="sectionEcert" class="rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft">
+    <section id="sectionEcert" class="rounded-2xl soft-card bg-white/80 border border-orange-100 p-5 sm:p-6 shadow-soft hidden">
       <h2 class="text-lg font-semibold mb-4 text-slate-900">Semak & Muat Turun</h2>
       <form id="checkForm" class="space-y-4">
         <!-- Event -->
@@ -68,9 +79,9 @@
         <!-- Kod Sijil -->
         <div>
           <label for="codeInput" class="block text-sm mb-1 text-slate-600">Kod Sijil</label>
-          <input id="codeInput" type="text" inputmode="latin" autocomplete="off" placeholder="Contoh: 1234"
+          <input id="codeInput" type="text" inputmode="latin" autocomplete="off" placeholder="Contoh: 0000"
                  class="w-full ring-focus bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400">
-          <p class="text-xs text-slate-500 mt-2">Masukkan Kod Sijil unik (contoh: 1234). Masukkan 4 digit akhir no kad pengenalan pemain.</p>
+          <p class="text-xs text-slate-500 mt-2">Masukkan Kod Sijil unik (contoh: 0000). Masukkan 4 digit akhir no kad pengenalan pemain.</p>
         </div>
 
         <!-- Tindakan -->
@@ -145,6 +156,8 @@
     let chessEvents = []; // {event, date, resultLink, photoLink}
 
     const dom = {
+      mainEventSelect: document.getElementById('mainEventSelect'),
+      navigationButtons: document.getElementById('navigationButtons'),
       eventSelect: document.getElementById('eventSelect'),
       codeInput: document.getElementById('codeInput'),
       checkForm: document.getElementById('checkForm'),
@@ -206,25 +219,68 @@
       dom.resultBox.classList.remove('hidden');
     }
 
+    function updateMainEventSelect() {
+      const allEvents = [...new Set([...records.map(r => r.event), ...chessEvents.map(c => c.event)])].sort((a,b) => a.localeCompare(b));
+      const current = dom.mainEventSelect.value;
+      
+      dom.mainEventSelect.innerHTML = '<option value="">-- Pilih Kejohanan --</option>';
+      allEvents.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e;
+        opt.textContent = e;
+        dom.mainEventSelect.appendChild(opt);
+      });
+      
+      if (allEvents.includes(current)) dom.mainEventSelect.value = current;
+    }
+
+    function enableNavigation() {
+      dom.navigationButtons.classList.remove('opacity-50', 'pointer-events-none');
+      dom.btnEcert.className = 'btn rounded-xl bg-orange-500 text-white px-4 py-2 font-medium shadow-soft';
+      dom.btnFoto.className = 'btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2';
+      dom.btnChess.className = 'btn rounded-xl bg-white hover:bg-orange-50 text-slate-800 border border-slate-200 px-4 py-2';
+      
+      // Show eCert section by default
+      switchSection('ecert');
+    }
+
+    function disableNavigation() {
+      dom.navigationButtons.classList.add('opacity-50', 'pointer-events-none');
+      dom.btnEcert.className = 'btn rounded-xl bg-gray-300 text-gray-500 px-4 py-2 font-medium cursor-not-allowed';
+      dom.btnFoto.className = 'btn rounded-xl bg-gray-300 text-gray-500 px-4 py-2 cursor-not-allowed';
+      dom.btnChess.className = 'btn rounded-xl bg-gray-300 text-gray-500 px-4 py-2 cursor-not-allowed';
+      
+      // Hide all sections
+      dom.sectionEcert.classList.add('hidden');
+      dom.sectionFoto.classList.add('hidden');
+      dom.sectionChess.classList.add('hidden');
+    }
+
     function updateEvents() {
-      const current = dom.eventSelect.value;
-      const events = [...new Set(records.map(r => r.event))].sort((a,b) => a.localeCompare(b));
+      const selectedMainEvent = dom.mainEventSelect.value;
+      if (!selectedMainEvent) {
+        dom.eventSelect.innerHTML = '<option value="">Pilih kejohanan utama dahulu</option>';
+        return;
+      }
+
+      const events = records.filter(r => r.event === selectedMainEvent).map(r => r.event);
+      const uniqueEvents = [...new Set(events)];
+      
       dom.eventSelect.innerHTML = '';
       const first = document.createElement('option');
       first.value = '';
-      first.textContent = events.length ? 'Pilih event…' : '— Tiada event —';
+      first.textContent = uniqueEvents.length ? 'Pilih event…' : '— Tiada event —';
       dom.eventSelect.appendChild(first);
-      events.forEach(e => {
+      uniqueEvents.forEach(e => {
         const opt = document.createElement('option');
         opt.value = e;
         opt.textContent = e;
         dom.eventSelect.appendChild(opt);
       });
-      if (events.includes(current)) dom.eventSelect.value = current;
 
       // Cip event
       dom.eventChips.innerHTML = '';
-      events.forEach(e => {
+      uniqueEvents.forEach(e => {
         const chip = document.createElement('button');
         chip.type = 'button';
         chip.textContent = e;
@@ -238,13 +294,21 @@
     }
 
     function updateChessEvents() {
+      const selectedMainEvent = dom.mainEventSelect.value;
       dom.chessEvents.innerHTML = '';
-      if (!chessEvents.length) {
-        dom.chessEvents.innerHTML = '<p class="text-slate-500 text-sm">Tiada kejohanan catur dimuatkan.</p>';
+      
+      if (!selectedMainEvent) {
+        dom.chessEvents.innerHTML = '<p class="text-slate-500 text-sm">Pilih kejohanan utama dahulu.</p>';
         return;
       }
 
-      chessEvents.forEach(chess => {
+      const filteredChess = chessEvents.filter(chess => chess.event === selectedMainEvent);
+      if (!filteredChess.length) {
+        dom.chessEvents.innerHTML = '<p class="text-slate-500 text-sm">Tiada keputusan catur untuk kejohanan ini.</p>';
+        return;
+      }
+
+      filteredChess.forEach(chess => {
         const card = document.createElement('div');
         card.className = 'rounded-xl bg-white border border-orange-200 p-4 shadow-soft';
         card.innerHTML = `
@@ -262,28 +326,34 @@
     }
 
     function updatePhotoEvents() {
+      const selectedMainEvent = dom.mainEventSelect.value;
       dom.photoEvents.innerHTML = '';
-      if (!chessEvents.length) {
-        dom.photoEvents.innerHTML = '<p class="text-slate-500 text-sm">Tiada foto dimuatkan.</p>';
+      
+      if (!selectedMainEvent) {
+        dom.photoEvents.innerHTML = '<p class="text-slate-500 text-sm">Pilih kejohanan utama dahulu.</p>';
         return;
       }
 
-      chessEvents.forEach(chess => {
-        if (chess.photoLink) {
-          const card = document.createElement('div');
-          card.className = 'rounded-xl bg-white border border-orange-200 p-4 shadow-soft';
-          card.innerHTML = `
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-slate-900">${chess.event}</h3>
-                <p class="text-slate-500 text-sm mt-1">${chess.date ? `Tarikh: ${chess.date}` : ''}</p>
-              </div>
-              <div class="flex gap-2">
-                <a href="${chess.photoLink}" target="_blank" rel="noopener noreferrer" class="btn rounded-lg bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 text-sm font-medium">Lihat Foto</a>
-              </div>
-            </div>`;
-          dom.photoEvents.appendChild(card);
-        }
+      const filteredPhotos = chessEvents.filter(chess => chess.event === selectedMainEvent && chess.photoLink);
+      if (!filteredPhotos.length) {
+        dom.photoEvents.innerHTML = '<p class="text-slate-500 text-sm">Tiada foto untuk kejohanan ini.</p>';
+        return;
+      }
+
+      filteredPhotos.forEach(chess => {
+        const card = document.createElement('div');
+        card.className = 'rounded-xl bg-white border border-orange-200 p-4 shadow-soft';
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="font-semibold text-slate-900">${chess.event}</h3>
+              <p class="text-slate-500 text-sm mt-1">${chess.date ? `Tarikh: ${chess.date}` : ''}</p>
+            </div>
+            <div class="flex gap-2">
+              <a href="${chess.photoLink}" target="_blank" rel="noopener noreferrer" class="btn rounded-lg bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 text-sm font-medium">Lihat Foto</a>
+            </div>
+          </div>`;
+        dom.photoEvents.appendChild(card);
       });
     }
 
@@ -420,6 +490,7 @@
         const parsed = toRecords(rows);
         if (!parsed.length) throw new Error('Tiada rekod sah ditemui. Semak tajuk lajur anda.');
         records = parsed;
+        updateMainEventSelect();
         updateEvents();
         setAlert('Data Google Sheet dimuatkan.');
       } catch (e) {
@@ -435,6 +506,7 @@
         const rows = parseCSV(text.replace(/^\uFEFF/, ''));
         const parsed = toChessRecords(rows);
         chessEvents = parsed;
+        updateMainEventSelect();
         updateChessEvents();
         updatePhotoEvents();
       } catch (e) {
@@ -483,17 +555,30 @@
 
     dom.clearBtn.addEventListener('click', resetForm);
 
+    // Main event selection listener
+    dom.mainEventSelect.addEventListener('change', (e) => {
+      if (e.target.value) {
+        enableNavigation();
+        updateEvents();
+        updateChessEvents();
+        updatePhotoEvents();
+      } else {
+        disableNavigation();
+      }
+    });
+
     // Navigation button event listeners
     dom.btnEcert.addEventListener('click', () => switchSection('ecert'));
     dom.btnFoto.addEventListener('click', () => switchSection('foto'));
     dom.btnChess.addEventListener('click', () => switchSection('chess'));
 
     // Init: muatkan Google Sheet automatik
+    updateMainEventSelect();
     updateEvents();
     updateChessEvents();
     updatePhotoEvents();
     loadCSV(CSV_URL);
     loadChessCSV(CHESS_CSV_URL);
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98263972f43886be',t:'MTc1ODQyMjcwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982e205fa211b4dc',t:'MTc1ODUwNTU2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
