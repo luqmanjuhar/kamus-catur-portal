@@ -1,564 +1,480 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Elaun Jurulatih Catur</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary': '#F37324',
-                        'primary-hover': '#E56214',
-                        'secondary': '#DC3C2C',
-                        'secondary-hover': '#C92C1C',
-                        'tertiary': '#F99E4C',
-                        'tertiary-light': '#FBD0A4',
-                        'dark-text': '#333333',
-                        'light-bg': '#FFFDF7'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FFFDF7;
-            color: #333333;
-        }
-        .chess-pattern {
-            background-image: 
-                linear-gradient(45deg, rgba(249, 158, 76, 0.2) 25%, transparent 25%), 
-                linear-gradient(-45deg, rgba(249, 158, 76, 0.2) 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, rgba(249, 158, 76, 0.2) 75%), 
-                linear-gradient(-45deg, transparent 75%, rgba(249, 158, 76, 0.2) 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-        }
-        .slot-container {
-            border-left: 3px solid #F37324;
-            padding-left: 12px;
-            margin-left: 8px;
-            margin-bottom: 12px;
-        }
-        .student-container {
-            border-left: 3px solid #F37324;
-            padding-left: 12px;
-            margin-bottom: 12px;
-        }
-        .subtotal-box {
-            background-color: rgba(249, 158, 76, 0.1);
-            border-left: 4px solid #F37324;
-            padding: 8px 12px;
-            margin-top: 8px;
-        }
-        input:focus, select:focus {
-            border-color: #F37324;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(243, 115, 36, 0.2);
-        }
-        input[type="checkbox"]:checked {
-            background-color: #F37324;
-            border-color: #F37324;
-        }
-        #statusMessage {
-            transition: opacity 0.5s;
-        }
-        /* Print-specific styles for payslip */
-        @media print {
-            body {
-                background-color: #fff;
-            }
-            .no-print {
-                display: none;
-            }
-            .payslip-container {
-                box-shadow: none;
-                border: 1px solid #ccc;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="min-h-screen no-print">
-        <header class="bg-primary text-white py-6 chess-pattern">
-            <div class="container mx-auto px-4">
-                <h1 class="text-3xl font-bold text-center">Kalkulator Elaun Jurulatih Catur</h1>
-            </div>
-        </header>
+/**
+ * @fileoverview Script untuk menguruskan dan mengira elaun jurulatih,
+ * menjana slip PDF, dan menyediakan papan pemuka untuk jurulatih.
+ * @version 2.0
+ */
 
-        <main class="container mx-auto px-4 py-8">
-            <!-- Maklumat Jurulatih -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">Maklumat Jurulatih</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-dark-text mb-2" for="nama">Nama Jurulatih</label>
-                        <input type="text" id="nama" class="w-full px-4 py-2 border border-tertiary rounded-lg">
-                    </div>
-                    <div>
-                        <label class="block text-dark-text mb-2" for="bulan">Bulan Laporan Utama</label>
-                        <select id="bulan" class="w-full px-4 py-2 border border-tertiary rounded-lg">
-                            <option value="1">Januari</option>
-                            <option value="2">Februari</option>
-                            <option value="3">Mac</option>
-                            <option value="4">April</option>
-                            <option value="5">Mei</option>
-                            <option value="6">Jun</option>
-                            <option value="7">Julai</option>
-                            <option value="8">Ogos</option>
-                            <option value="9">September</option>
-                            <option value="10">Oktober</option>
-                            <option value="11">November</option>
-                            <option value="12">Disember</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+// ================================================================= //
+//                            KONFIGURASI                            //
+// ================================================================= //
 
-            <!-- Kelas Fizikal -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">Kelas Fizikal</h2>
-                <p class="text-dark-text mb-4">Tandakan sekolah atau slot kelas yang dikendalikan:</p>
-                <div id="kelasContainer" class="space-y-6"></div>
-                <button id="tambahKelas" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition">
-                    + Tambah Sekolah/Lokasi (Fizikal)
-                </button>
-            </div>
+const JURULATIH_SHEET_NAME = 'Jurulatih';
+const REKOD_SHEET_NAME = 'Rekod Elaun';
+const DETAIL_REKOD_SHEET_NAME = 'Rekod Terperinci';
+const PDF_FOLDER_NAME = 'Slip Gaji Jurulatih';
 
-            <!-- Kelas Pembangunan Catur -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">Kelas Pembangunan Catur (Online)</h2>
-                <p class="text-dark-text mb-4">Tandakan kumpulan atau slot kelas yang dikendalikan:</p>
-                <div id="pembangunanContainer" class="space-y-6"></div>
-                <button id="tambahKelasPembangunan" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition">
-                    + Tambah Kumpulan (Pembangunan)
-                </button>
-            </div>
 
-            <!-- Kelas Online -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">Kelas Online (Peribadi/Kumpulan)</h2>
-                <div id="onlineStudentsContainer" class="space-y-4"></div>
-                <button id="tambahPelajarOnline" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition">
-                    + Tambah Pelajar
-                </button>
-                <div class="subtotal-box mt-6">
-                    <h4 class="font-medium text-dark-text">Subtotal Kelas Online</h4>
-                    <div class="subtotal-details text-sm mt-1">
-                        <p class="font-medium">Jumlah: <span class="subtotal-online-jumlah">RM0</span></p>
-                    </div>
-                </div>
-            </div>
+// ================================================================= //
+//                        TITIK MASUK UTAMA (WEB APP)                //
+// ================================================================= //
 
-            <!-- Elaun Tambahan & Bonus -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">Elaun Tambahan & Bonus</h2>
-                <div class="space-y-4">
-                    <h3 class="font-semibold text-lg text-dark-text mt-4 border-b pb-2">Elaun Tambahan</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-dark-text mb-2">Elaun Penyertaan Kejohanan (RM)</label><input type="number" id="elaunKejohanan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Elaun Makan (RM)</label><input type="number" id="elaunMakan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Elaun Arbiter (RM)</label><input type="number" id="elaunArbiter" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Elaun Pembantu (RM)</label><input type="number" id="elaunPembantu" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                    </div>
-                    <h3 class="font-semibold text-lg text-dark-text mt-6 border-b pb-2">Bonus</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-dark-text mb-2">Bonus Tahunan (RM)</label><input type="number" id="bonusTahunan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Bonus Perayaan (RM)</label><input type="number" id="bonusPerayaan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Bonus Pencapaian Pelajar (RM)</label><input type="number" id="bonusPelajar" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Bonus Pencapaian Jurulatih (RM)</label><input type="number" id="bonusJurulatih" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                    </div>
-                    <div class="subtotal-box mt-4">
-                        <h4 class="font-medium text-dark-text">Subtotal Elaun Tambahan & Bonus</h4>
-                        <div class="subtotal-details text-sm mt-1">
-                            <p class="font-medium mt-1">Jumlah: <span class="subtotal-tambahan-bonus-jumlah text-primary">RM0</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+/**
+ * Mengendalikan permintaan GET ke aplikasi web.
+ * Bertindak sebagai penghala (router) untuk memaparkan halaman yang betul.
+ * @param {object} e Objek acara daripada permintaan GET.
+ * @returns {HtmlService.HtmlOutput} Output HTML untuk dipaparkan.
+ */
+function doGet(e) {
+  if (e.parameter.page === 'dashboard') {
+    return HtmlService.createHtmlOutputFromFile('Dashboard.html').setTitle('Dashboard Jurulatih');
+  }
+  return HtmlService.createHtmlOutputFromFile('Index').setTitle('Kalkulator Elaun Jurulatih');
+}
 
-            <!-- Pengurangan -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">Pengurangan</h2>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-dark-text mb-2">Penyertaan Kejohanan (RM)</label><input type="number" id="kejohanan" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Komitmen Yuran Bulanan (RM)</label><input type="number" id="yuran" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Sistem Rakaman (Google Workspace) (RM)</label><input type="number" id="rakaman" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                        <div><label class="block text-dark-text mb-2">Pembelian Peralatan Catur (RM)</label><input type="number" id="peralatan" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0"></div>
-                    </div>
-                    <div>
-                        <label class="block text-dark-text mb-2">Lain-lain Pengurangan</label>
-                        <div class="flex items-center">
-                            <input type="text" id="lainKeterangan" placeholder="Keterangan" class="flex-grow px-4 py-2 border border-tertiary rounded-l-lg">
-                            <input type="number" id="lainPengurangan" class="pengurangan w-32 px-4 py-2 border-t border-b border-r border-tertiary rounded-r-lg" value="0">
-                        </div>
-                    </div>
-                    <div class="subtotal-box mt-4">
-                        <h4 class="font-medium text-dark-text">Subtotal Pengurangan</h4>
-                        <div class="subtotal-details text-sm mt-1">
-                            <p class="font-medium mt-1">Jumlah: <span class="subtotal-pengurangan-jumlah text-secondary">RM0</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Ringkasan Elaun -->
-            <div class="bg-tertiary-light rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">Ringkasan Elaun</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary"><h3 class="font-medium text-dark-text">Jumlah Kelas Fizikal</h3><p class="text-2xl font-bold text-primary">RM <span id="jumlahFizikal">0</span></p></div>
-                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary"><h3 class="font-medium text-dark-text">Jumlah Kelas Pembangunan</h3><p class="text-2xl font-bold text-primary">RM <span id="jumlahPembangunan">0</span></p></div>
-                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary"><h3 class="font-medium text-dark-text">Jumlah Kelas Online</h3><p class="text-2xl font-bold text-primary">RM <span id="jumlahOnline">0</span></p></div>
-                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary"><h3 class="font-medium text-dark-text">Jumlah Elaun Tambahan & Bonus</h3><p class="text-2xl font-bold text-primary">RM <span id="jumlahTambahanBonus">0</span></p></div>
-                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary"><h3 class="font-medium text-dark-text">Jumlah Pengurangan</h3><p class="text-2xl font-bold text-secondary">RM <span id="jumlahPengurangan">0</span></p></div>
-                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary"><h3 class="font-medium text-dark-text">Jumlah Bersih</h3><p class="text-2xl font-bold text-primary">RM <span id="jumlahBersih">0</span></p></div>
-                </div>
-            </div>
+// ================================================================= //
+//                       FUNGSI UNTUK ADMIN                          //
+// ================================================================= //
 
-            <!-- Action Buttons -->
-            <div class="flex flex-col md:flex-row justify-center items-center space-y-3 md:space-y-0 md:space-x-4">
-                <button id="kiraButton" class="w-full md:w-auto px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition shadow-lg">Kira Elaun</button>
-                <button id="saveButton" class="w-full md:w-auto px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-lg">Simpan ke Google Sheet</button>
-                <button id="resetButton" class="w-full md:w-auto px-6 py-3 bg-dark-text text-white font-medium rounded-lg hover:bg-gray-600 transition shadow-lg">Reset</button>
-                <button id="cetakButton" class="w-full md:w-auto px-6 py-3 bg-secondary text-white font-medium rounded-lg hover:bg-secondary-hover transition shadow-lg">Cetak Slip Gaji</button>
-            </div>
-            <div id="statusMessage" class="text-center mt-4 font-medium opacity-0"></div>
-        </main>
-    </div>
+/**
+ * Mendapatkan data semua jurulatih dari spreadsheet.
+ * @returns {object} Objek yang memetakan nama jurulatih kepada maklumat bank dan akaun mereka.
+ */
+function getCoachData() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(JURULATIH_SHEET_NAME);
+    if (!sheet || sheet.getLastRow() < 2) return {};
 
-    <!-- Print Area (Hidden) -->
-    <div id="printArea" class="hidden"></div>
+    const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 3).getValues();
+    const coachMap = {};
 
-    <script>
-    // --- TEMPLATES ---
-    const fizikalTemplate = (count) => `
-        <div class="border border-tertiary rounded-lg p-4 hover:bg-light-bg">
-            <div class="flex items-center mb-3">
-                <input type="checkbox" id="kelas${count}" class="kelas-fizikal w-5 h-5 text-primary mr-3 border-tertiary" checked>
-                <div class="flex-grow">
-                    <label for="kelas${count}" class="block font-medium text-lg text-dark-text">Sekolah/Lokasi ${count}</label>
-                    <input type="text" placeholder="Nama Sekolah/Lokasi" class="nama-lokasi mt-1 w-full px-3 py-2 border border-tertiary rounded-lg">
-                </div>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm text-dark-text">Bulan</label>
-                <select class="kelas-bulan w-full md:w-1/2 px-3 py-2 border border-tertiary rounded-lg">
-                    <option value="1">Januari</option><option value="2">Februari</option><option value="3">Mac</option><option value="4">April</option><option value="5">Mei</option><option value="6">Jun</option><option value="7">Julai</option><option value="8">Ogos</option><option value="9">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Disember</option>
-                </select>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm text-dark-text">Bilangan Pelajar (Per Slot)</label>
-                    <select class="pelajar-rate w-full px-3 py-2 border border-tertiary rounded-lg">
-                        <option value="70">0 - 5 pelajar</option><option value="100">6 - 10 pelajar</option><option value="120">11 - 15 pelajar</option><option value="150" selected>16 - 20 pelajar</option><option value="170">21 - 25 pelajar</option><option value="200">26 - 30 pelajar</option><option value="220">31 - 35 pelajar</option><option value="250">36 - 40 pelajar</option>
-                    </select>
-                </div>
-            </div>
-            <div class="slots-list space-y-3"></div>
-            <div class="flex justify-end mt-3"><button class="tambah-slot px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition" data-type="fizikal">+ Tambah Slot</button></div>
-            <div class="subtotal-box mt-4"><h4 class="font-medium text-dark-text">Subtotal Kelas Fizikal</h4><div class="subtotal-details text-sm mt-1"><p>Elaun Jurulatih: <span class="subtotal-pelajar">RM0</span></p><p>Jumlah Mileage: <span class="subtotal-jarak">RM0</span></p><p class="font-medium mt-1">Jumlah Keseluruhan: <span class="subtotal-jumlah">RM0</span></p></div></div>
-        </div>`;
-
-    const pembangunanTemplate = (count) => `
-        <div class="border border-tertiary rounded-lg p-4 hover:bg-light-bg">
-            <div class="flex items-center mb-3"><input type="checkbox" id="pembangunan${count}" class="kelas-pembangunan w-5 h-5 text-primary mr-3 border-tertiary" checked><div class="flex-grow"><label for="pembangunan${count}" class="block font-medium text-lg text-dark-text">Kumpulan ${count}</label><input type="text" placeholder="Nama Kumpulan" class="nama-lokasi mt-1 w-full px-3 py-2 border border-tertiary rounded-lg"></div></div>
-            <div class="mb-4">
-                <label class="block text-sm text-dark-text">Bulan</label>
-                <select class="kelas-bulan w-full md:w-1/2 px-3 py-2 border border-tertiary rounded-lg">
-                    <option value="1">Januari</option><option value="2">Februari</option><option value="3">Mac</option><option value="4">April</option><option value="5">Mei</option><option value="6">Jun</option><option value="7">Julai</option><option value="8">Ogos</option><option value="9">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Disember</option>
-                </select>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label class="block text-sm text-dark-text">Bilangan Pelajar (Per Slot)</label><select class="pelajar-rate w-full px-3 py-2 border border-tertiary rounded-lg"><option value="80" selected>7 - 10 pelajar</option><option value="100">11 - 15 pelajar</option></select></div></div>
-            <div class="slots-list space-y-3"></div><div class="flex justify-end mt-3"><button class="tambah-slot px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition" data-type="pembangunan">+ Tambah Slot</button></div>
-            <div class="subtotal-box mt-4"><h4 class="font-medium text-dark-text">Subtotal Kelas Pembangunan</h4><div class="subtotal-details text-sm mt-1"><p>Elaun Jurulatih: <span class="subtotal-pelajar">RM0</span></p><p class="font-medium mt-1">Jumlah Keseluruhan: <span class="subtotal-jumlah">RM0</span></p></div></div></div>`;
-
-    const slotFizikalTemplate = (count) => `
-        <div class="slot-container"><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><span class="font-medium text-dark-text">Slot ${count}:</span><input type="date" class="slot-tarikh w-full mt-1 px-3 py-2 border border-tertiary rounded-lg"></div><div><span class="font-medium text-dark-text">Jarak (KM):</span><select class="slot-jarak w-full mt-1 px-3 py-2 border border-tertiary rounded-lg"><option value="0">0 - 5 KM</option><option value="10">6 - 10 KM</option><option value="20">11 - 20 KM</option><option value="30">21 - 30 KM</option><option value="40">31 - 40 KM</option><option value="60">41 - 50 KM</option></select></div><div class="flex items-end"><button class="hapus-slot px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-hover transition">Hapus</button></div></div></div>`;
-    
-    const slotPembangunanTemplate = (count) => `
-        <div class="slot-container"><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><span class="font-medium text-dark-text">Slot ${count}:</span><input type="date" class="slot-tarikh w-full mt-1 px-3 py-2 border border-tertiary rounded-lg"></div><div class="flex items-end"><button class="hapus-slot px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-hover transition">Hapus</button></div></div></div>`;
-
-    const onlineStudentTemplate = () => `
-        <div class="student-container p-4 border border-tertiary rounded-lg"><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label class="block text-sm text-dark-text mb-1">Nama Pelajar</label><input type="text" class="online-student-name w-full px-3 py-2 border border-tertiary rounded-lg" placeholder="Nama pelajar"></div><div><label class="block text-sm text-dark-text mb-1">Jenis Kelas</label><select class="online-class-type w-full px-3 py-2 border border-tertiary rounded-lg"><option value="peribadi">Kelas Peribadi</option><option value="kumpulan">Kelas Kumpulan</option></select></div><div><label class="block text-sm text-dark-text mb-1">Tahap</label><select class="online-class-level w-full px-3 py-2 border border-tertiary rounded-lg"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advance">Advance</option></select></div></div><div class="flex justify-between items-center mt-3"><div class="text-sm"><span class="font-medium text-dark-text">Elaun: </span><span class="online-student-fee text-secondary font-medium">RM65</span></div><button class="hapus-pelajar px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-hover transition">Hapus</button></div></div>`;
-
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('tambahKelas').addEventListener('click', () => addKelas('fizikal'));
-        document.getElementById('tambahKelasPembangunan').addEventListener('click', () => addKelas('pembangunan'));
-        document.getElementById('tambahPelajarOnline').addEventListener('click', addPelajarOnline);
-        document.getElementById('kiraButton').addEventListener('click', calculateAll);
-        document.getElementById('resetButton').addEventListener('click', resetForm);
-        document.getElementById('cetakButton').addEventListener('click', cetakLaporan);
-        document.getElementById('saveButton').addEventListener('click', saveDataToSheet);
-        const main = document.querySelector('main');
-        main.addEventListener('change', calculateAll);
-        main.addEventListener('input', calculateAll);
-        main.addEventListener('click', (e) => {
-            if (e.target.classList.contains('tambah-slot')) addSlot(e.target);
-            if (e.target.classList.contains('hapus-slot')) { e.target.closest('.slot-container').remove(); calculateAll(); }
-            if (e.target.classList.contains('hapus-pelajar')) { e.target.closest('.student-container').remove(); calculateAll(); }
-        });
-        addKelas('fizikal');
-        addKelas('pembangunan');
-        addPelajarOnline();
+    data.forEach(row => {
+      const [name, bank, acc] = row;
+      if (name) {
+        coachMap[name] = { bank, acc };
+      }
     });
 
-    function addKelas(type) {
-        const container = document.getElementById(type === 'fizikal' ? 'kelasContainer' : 'pembangunanContainer');
-        const count = container.children.length + 1;
-        const template = type === 'fizikal' ? fizikalTemplate(count) : pembangunanTemplate(count);
-        container.insertAdjacentHTML('beforeend', template);
-        addSlot(container.lastElementChild.querySelector('.tambah-slot'));
+    return coachMap;
+  } catch (e) {
+    Logger.log(`Error in getCoachData: ${e.message}`);
+    return {};
+  }
+}
+
+/**
+ * Menyimpan rekod elaun ke dalam spreadsheet dan menjana slip gaji dalam format PDF.
+ * @param {object} reportData Data lengkap laporan elaun daripada antara muka pengguna (UI).
+ * @returns {object} Objek status yang mengandungi mesej kejayaan/ralat dan URL PDF.
+ */
+function saveRecordAndGeneratePdf(reportData) {
+  try {
+    // 1. Kira jumlah tuntutan dan jana PDF
+    reportData.totalMileage = calculateTotalMileage(reportData.fizikal);
+    const pdfUrl = generateAndSavePayslip(reportData);
+    if (!pdfUrl || pdfUrl.startsWith('Error')) {
+      throw new Error(pdfUrl || 'Gagal menjana PDF.');
     }
 
-    function addSlot(button) {
-        const slotsList = button.closest('.border').querySelector('.slots-list');
-        const slotCount = slotsList.children.length + 1;
-        const type = button.dataset.type;
-        const template = type === 'fizikal' ? slotFizikalTemplate(slotCount) : slotPembangunanTemplate(slotCount);
-        slotsList.insertAdjacentHTML('beforeend', template);
-        calculateAll();
+    // 2. Sediakan data untuk disimpan
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const uniqueId = `${new Date().toISOString().slice(0, 10)}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    const recordDate = new Date();
+
+    // 3. Simpan ringkasan rekod
+    const summarySheet = ss.getSheetByName(REKOD_SHEET_NAME);
+    const summaryRow = createSummaryRow(reportData, uniqueId, recordDate, pdfUrl);
+    summarySheet.appendRow(summaryRow);
+
+    // 4. Simpan rekod terperinci
+    const detailSheet = ss.getSheetByName(DETAIL_REKOD_SHEET_NAME);
+    const detailRows = createDetailRows(reportData, uniqueId, recordDate);
+    if (detailRows.length > 0) {
+      detailSheet.getRange(detailSheet.getLastRow() + 1, 1, detailRows.length, detailRows[0].length).setValues(detailRows);
     }
 
-    function addPelajarOnline() {
-        document.getElementById('onlineStudentsContainer').insertAdjacentHTML('beforeend', onlineStudentTemplate());
-        calculateAll();
+    return {
+      status: 'success',
+      message: 'Rekod berjaya disimpan dan PDF telah dijana!',
+      pdfUrl: pdfUrl
+    };
+  } catch (e) {
+    Logger.log(`Error in saveRecordAndGeneratePdf: ${e.message} \nStack: ${e.stack}`);
+    return {
+      status: 'error',
+      message: e.message
+    };
+  }
+}
+
+
+// ================================================================= //
+//                       FUNGSI UNTUK JURULATIH                      //
+// ================================================================= //
+
+/**
+ * Mendapatkan senarai nama semua jurulatih untuk paparan login.
+ * @returns {string[]} Senarai nama jurulatih.
+ */
+function getCoachNames() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(JURULATIH_SHEET_NAME);
+    if (sheet.getLastRow() < 2) return [];
+
+    const range = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1);
+    return range.getValues().flat().filter(String);
+  } catch (e) {
+    Logger.log(`Error in getCoachNames: ${e.message}`);
+    return [];
+  }
+}
+
+/**
+ * Mengesahkan maklumat login jurulatih.
+ * @param {object} credentials Objek yang mengandungi `coachName` dan `accNumber`.
+ * @returns {object} Objek yang menandakan kejayaan atau kegagalan pengesahan.
+ */
+function verifyCoachLogin(credentials) {
+  try {
+    const coachData = getCoachData();
+    const coachInfo = coachData[credentials.coachName];
+    const normalize = (str) => str ? String(str).replace(/[\s-]+/g, '') : '';
+
+    if (coachInfo && normalize(coachInfo.acc) === normalize(credentials.accNumber)) {
+      return { success: true };
+    }
+    return { success: false, message: "Nama atau nombor akaun tidak sah." };
+  } catch (e) {
+    Logger.log(`Error in verifyCoachLogin: ${e.message}`);
+    return { success: false, message: "Ralat pada sistem." };
+  }
+}
+
+/**
+ * Mendapatkan senarai ID Rujukan yang tersedia untuk jurulatih tertentu.
+ * @param {string} coachName Nama jurulatih.
+ * @returns {string[]} Senarai ID Rujukan yang unik.
+ */
+function getAvailableReferenceIDs(coachName) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(REKOD_SHEET_NAME);
+    if (sheet.getLastRow() < 2) return [];
+
+    const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues();
+    const ids = data
+      .filter(row => row[3] === coachName && row[0])
+      .map(row => row[0]);
+
+    return [...new Set(ids)]; // Pulangkan ID yang unik sahaja
+  } catch (e) {
+    Logger.log(`Error in getAvailableReferenceIDs: ${e.message}`);
+    return [];
+  }
+}
+
+/**
+ * Mendapatkan rekod elaun berdasarkan ID Rujukan dan nama jurulatih.
+ * @param {string} selectedId ID Rujukan yang dipilih.
+ * @param {string} coachName Nama jurulatih yang sedang login.
+ * @returns {object} Objek yang mengandungi data ringkasan atau mesej ralat.
+ */
+function getCoachRecords(selectedId, coachName) {
+  if (!coachName || !selectedId) {
+    return { error: "Sesi atau ID tidak sah." };
+  }
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const logSheet = ss.getSheetByName(REKOD_SHEET_NAME);
+    const textFinder = logSheet.getRange("A:A").createTextFinder(selectedId);
+    const foundCell = textFinder.findNext();
+
+    if (!foundCell) {
+      return { error: `ID Rujukan ${selectedId} tidak ditemui.` };
     }
 
-    function calculateAll() {
-        let totalFizikal = Array.from(document.querySelectorAll('#kelasContainer > div')).reduce((acc, kelas) => acc + calculateLokasiSubtotal(kelas), 0);
-        let totalPembangunan = Array.from(document.querySelectorAll('#pembangunanContainer > div')).reduce((acc, kelas) => acc + calculateLokasiSubtotal(kelas), 0);
-        let totalOnline = Array.from(document.querySelectorAll('.student-container')).reduce((acc, student) => acc + calculateOnlineSubtotal(student), 0);
-        let totalTambahanBonus = Array.from(document.querySelectorAll('.tambahan-bonus')).reduce((acc, input) => acc + (parseFloat(input.value) || 0), 0);
-        let totalPengurangan = Array.from(document.querySelectorAll('.pengurangan')).reduce((acc, input) => acc + (parseFloat(input.value) || 0), 0);
+    const summaryRowIndex = foundCell.getRow();
+    const summaryRecord = logSheet.getRange(summaryRowIndex, 1, 1, logSheet.getLastColumn()).getValues()[0];
+
+    // Sahkan bahawa rekod ini milik jurulatih yang betul
+    if (summaryRecord[3] !== coachName) {
+      return { error: "Anda tidak mempunyai akses kepada rekod ini." };
+    }
+
+    const summaryResult = [{
+      statementDate: summaryRecord[2],
+      month: summaryRecord[4],
+      netAmount: summaryRecord[10],
+      payslipUrl: summaryRecord[11]
+    }];
+
+    return { idRujukan: selectedId, summary: summaryResult };
+  } catch (e) {
+    Logger.log(`Error in getCoachRecords: ${e.message}`);
+    return { error: "Gagal membaca data rekod." };
+  }
+}
+
+
+// ================================================================= //
+//               FUNGSI BANTUAN (INTERNAL HELPERS)                   //
+// ================================================================= //
+
+/**
+ * Mengira jumlah tuntutan mileage daripada data kelas fizikal.
+ * @param {object[]} fizikalArray Senarai objek kelas fizikal.
+ * @returns {number} Jumlah tuntutan mileage.
+ */
+function calculateTotalMileage(fizikalArray) {
+  return fizikalArray.reduce((total, kelas) => {
+    return total + kelas.slots.reduce((subTotal, slot) => {
+      return subTotal + calculateMileageClaim(slot);
+    }, 0);
+  }, 0);
+}
+
+/**
+ * Mengira tuntutan mileage untuk satu slot kelas.
+ * @param {object} slot Objek slot yang mengandungi `jarakValue` dan `kenderaan`.
+ * @returns {number} Jumlah tuntutan mileage untuk slot tersebut.
+ */
+function calculateMileageClaim(slot) {
+  let mileage = parseFloat(slot.jarakValue) || 0;
+  if (mileage > 0 && slot.kenderaan === 'motor') {
+    mileage /= 2;
+  }
+  return mileage;
+}
+
+/**
+ * Mencipta baris data untuk helaian ringkasan rekod.
+ * @param {object} data Data laporan.
+ * @param {string} id ID unik untuk rekod.
+ * @param {Date} date Tarikh rekod dibuat.
+ * @param {string} url URL ke PDF slip gaji.
+ * @returns {any[]} Array yang mewakili satu baris dalam spreadsheet.
+ */
+function createSummaryRow(data, id, date, url) {
+  return [
+    id, date, new Date(data.statementDate),
+    data.coachName, data.month, data.baseAmount,
+    data.extraAllowance, data.deductions, ' ', ' ',
+    data.netAmount, url
+  ];
+}
+
+/**
+ * Mencipta barisan data untuk helaian rekod terperinci.
+ * @param {object} reportData Data laporan.
+ * @param {string} uniqueId ID unik untuk rekod.
+ * @param {Date} recordDate Tarikh rekod dibuat.
+ * @returns {any[][]} Array 2D yang mewakili semua baris terperinci.
+ */
+function createDetailRows(reportData, uniqueId, recordDate) {
+  const detailRows = [];
+  const coachName = reportData.coachName;
+  const parseCurrency = (text) => parseFloat(String(text).replace(/[^0-9.-]+/g, "")) || 0;
+  
+  const addRow = (date, type, description, amount) => {
+    detailRows.push([uniqueId, recordDate, coachName, date, type, description, amount]);
+  };
+  
+  // Elaun Kelas Fizikal & Mileage
+  reportData.fizikal.forEach(kelas => {
+    kelas.slots.forEach(slot => {
+      const kelasTarikh = slot.tarikh ? new Date(slot.tarikh) : null;
+      addRow(kelasTarikh, 'Kelas Fizikal - Elaun', kelas.nama, kelas.elaunPerSlot);
+      const mileageClaim = calculateMileageClaim(slot);
+      if (mileageClaim > 0) {
+        addRow(kelasTarikh, 'Kelas Fizikal - Mileage', `Perjalanan ke ${kelas.nama}`, mileageClaim);
+      }
+    });
+  });
+
+  // Butiran lain
+  reportData.pembangunan.forEach(item => addRow('', 'Kelas Pembangunan', item.nama, parseCurrency(item.jumlah)));
+  reportData.online.forEach(item => addRow('', 'Kelas Online', item.nama, parseCurrency(item.jumlah)));
+  reportData.tambahanBonusDetails.forEach(item => addRow('', 'Bonus/Elaun Tambahan', item.keterangan, parseCurrency(item.jumlah)));
+  reportData.penguranganDetails.forEach(item => addRow('', 'Potongan', item.keterangan, -Math.abs(parseCurrency(item.jumlah))));
+
+  return detailRows;
+}
+
+/**
+ * Menjana dan menyimpan slip gaji sebagai fail PDF di Google Drive.
+ * @param {object} reportData Data laporan untuk dipaparkan pada slip gaji.
+ * @returns {string} URL fail PDF yang telah dibuat atau mesej ralat.
+ */
+function generateAndSavePayslip(reportData) {
+  try {
+    const mainFolder = getOrCreateFolder(PDF_FOLDER_NAME);
+    const statementDate = new Date(reportData.statementDate);
+    const year = statementDate.getFullYear().toString();
+    const month = ('0' + (statementDate.getMonth() + 1)).slice(-2) + ' - ' + statementDate.toLocaleString('ms-MY', { month: 'long' });
+
+    const yearFolder = getOrCreateFolder(year, mainFolder);
+    const monthFolder = getOrCreateFolder(month, yearFolder);
+
+    const htmlContent = createPayslipHtml(reportData);
+    const fileName = `Slip-${year}-${('0' + (statementDate.getMonth() + 1)).slice(-2)}-${reportData.coachName}.pdf`;
+    const pdfBlob = Utilities.newBlob(htmlContent, MimeType.HTML, fileName).getAs(MimeType.PDF);
+    const pdfFile = monthFolder.createFile(pdfBlob);
+
+    Logger.log('PDF saved successfully: ' + pdfFile.getUrl());
+    return pdfFile.getUrl();
+  } catch (e) {
+    Logger.log(`Error in generateAndSavePayslip: ${e.message}`);
+    return `Error creating PDF: ${e.message}`;
+  }
+}
+
+/**
+ * Mencipta kandungan HTML untuk slip gaji dengan watermark dan butiran syarikat.
+ * @param {object} data Data laporan elaun.
+ * @returns {string} Rentetan HTML yang lengkap.
+ */
+function createPayslipHtml(data) {
+  // Pautan ke logo syarikat anda
+  const logoUrl = 'https://raw.githubusercontent.com/luqmanjuhar/chesstrainercalculator/main/Asset%2028.png';
+  
+  // Maklumat Syarikat
+  const companyDetails = {
+    name: 'KAMUS CATUR ENTERPRISE (CT0099869-W)',
+    address: 'NO 7A, JALAN PULAI PERDANA 11/2, TAMAN SRI PULAI PERDANA, 81300, JOHOR BAHRU, JOHOR',
+    contact: 'TEL: 018-2046224 | EMEL: kamus.catur@gmail.com'
+  };
+
+  const css = `
+    <style>
+      body { font-family: Arial, sans-serif; color: #333; font-size: 10pt; }
+      .container { 
+          border: 1px solid #ccc; 
+          padding: 25px; 
+          width: 700px; 
+          margin: auto; 
+          /* --- BAHAGIAN WATERMARK DIMASUKKAN DI SINI --- */
+          background-image: url('${logoUrl}');
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 400px; /* Saiz watermark, boleh laras */
+      }
+      .content-wrapper {
+          /* Wrapper ini memastikan kandungan tidak terjejas oleh watermark */
+          background-color: rgba(255, 255, 255, 0.95); /* Latar belakang sedikit putih untuk pastikan teks boleh dibaca */
+          padding: 20px;
+      }
+      .header { text-align: center; border-bottom: 2px solid #F37324; padding-bottom: 10px; margin-bottom: 20px; }
+      .header h2 { margin: 0; font-size: 16pt; color: #F37324; }
+      .header p { margin: 5px 0 0; }
+      .company-details { font-size: 8pt; color: #555; margin-top: 10px; line-height: 1.4; }
+      h3 { color: #E56214; border-bottom: 1px solid #FBD0A4; padding-bottom: 5px; margin-top: 25px; }
+      .info-table { width: 100%; margin-bottom: 25px; }
+      .info-table td { padding: 4px; }
+      .details-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+      .details-table th, .details-table td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
+      .details-table th { background-color: #F37324; color: white; font-weight: bold; }
+      .details-table .amount { text-align: right; }
+      .summary-section { margin-top: 20px; padding-top: 10px; border-top: 2px solid #F37324; }
+      .summary-table { width: 50%; float: right; }
+      .summary-table td { padding: 5px; }
+      .summary-table .label { text-align: right; font-weight: bold; padding-right: 15px; }
+      .summary-table .total { font-weight: bold; color: #F37324; border-top: 1px solid #333; }
+    </style>
+  `;
+
+  const buildRows = (items, descKey = 'nama', valKey = 'jumlah') => {
+    if (!items || items.length === 0) return '<tr><td colspan="2" style="text-align:center;color:#888;">Tiada rekod</td></tr>';
+    return items.map(item => `
+      <tr>
+        <td>${item[descKey]}</td>
+        <td class="amount">${item[valKey]}</td>
+      </tr>
+    `).join('');
+  };
+
+  const fizikalRows = data.fizikal.map(k => ({
+    nama: `Elaun Kelas Fizikal - ${k.nama}`,
+    jumlah: `RM ${(k.elaunPerSlot * k.slots.length).toFixed(2)}`
+  }));
+  
+  if (data.totalMileage > 0) {
+    fizikalRows.push({
+      nama: 'Tuntutan Mileage',
+      jumlah: `RM ${data.totalMileage.toFixed(2)}`
+    });
+  }
+
+  const html = `
+  <!DOCTYPE html>
+  <html>
+  <head>${css}</head>
+  <body>
+    <div class="container">
+      <div class="content-wrapper">
+        <div class="header">
+          <h2>SLIP ELAUN JURULATIH</h2>
+          <div class="company-details">
+            <p><strong>${companyDetails.name}</strong></p>
+            <p>${companyDetails.address}</p>
+            <p>${companyDetails.contact}</p>
+          </div>
+          <p style="margin-top: 15px;">Bulan: ${data.month}</p>
+        </div>
         
-        document.querySelector('.subtotal-online-jumlah').textContent = `RM${totalOnline.toFixed(2)}`;
-        document.querySelector('.subtotal-tambahan-bonus-jumlah').textContent = `RM${totalTambahanBonus.toFixed(2)}`;
-        document.querySelector('.subtotal-pengurangan-jumlah').textContent = `RM${totalPengurangan.toFixed(2)}`;
+        <table class="info-table">
+          <tr>
+            <td><b>Nama Jurulatih:</b></td><td>${data.coachName}</td>
+            <td><b>Tarikh Penyata:</b></td><td>${new Date(data.statementDate).toLocaleDateString('ms-MY')}</td>
+          </tr>
+          <tr>
+            <td><b>Bank:</b></td><td>${data.bankInfo.bank}</td>
+            <td><b>No. Akaun:</b></td><td>${data.bankInfo.acc}</td>
+          </tr>
+        </table>
         
-        document.getElementById('jumlahFizikal').textContent = totalFizikal.toFixed(2);
-        document.getElementById('jumlahPembangunan').textContent = totalPembangunan.toFixed(2);
-        document.getElementById('jumlahOnline').textContent = totalOnline.toFixed(2);
-        document.getElementById('jumlahTambahanBonus').textContent = totalTambahanBonus.toFixed(2);
-        document.getElementById('jumlahPengurangan').textContent = totalPengurangan.toFixed(2);
-        document.getElementById('jumlahBersih').textContent = (totalFizikal + totalPembangunan + totalOnline + totalTambahanBonus - totalPengurangan).toFixed(2);
-    }
-
-    function calculateLokasiSubtotal(lokasiDiv) {
-        if (!lokasiDiv.querySelector('input[type="checkbox"]').checked) {
-            lokasiDiv.querySelectorAll('.subtotal-pelajar, .subtotal-jarak, .subtotal-jumlah').forEach(el => el.textContent = 'RM0');
-            return 0;
-        }
-        const elaunPerSlot = parseFloat(lokasiDiv.querySelector('.pelajar-rate').value) || 0;
-        const slots = lokasiDiv.querySelectorAll('.slot-container');
-        let totalElaunPelajar = slots.length * elaunPerSlot;
-        let totalJarak = Array.from(slots).reduce((acc, slot) => acc + (parseFloat(slot.querySelector('.slot-jarak')?.value) || 0), 0);
+        <h3>PENDAPATAN ELAUN</h3>
+        <table class="details-table">
+          <thead><tr><th>Keterangan</th><th class="amount">Jumlah</th></tr></thead>
+          <tbody>
+            ${buildRows(fizikalRows)}
+            ${buildRows(data.pembangunan)}
+            ${buildRows(data.online)}
+            ${buildRows(data.tambahanBonusDetails, 'keterangan')}
+          </tbody>
+        </table>
         
-        const totalLokasi = totalElaunPelajar + totalJarak;
-        lokasiDiv.querySelector('.subtotal-pelajar').textContent = `RM${totalElaunPelajar.toFixed(2)}`;
-        if (lokasiDiv.querySelector('.subtotal-jarak')) {
-            lokasiDiv.querySelector('.subtotal-jarak').textContent = `RM${totalJarak.toFixed(2)}`;
-        }
-        lokasiDiv.querySelector('.subtotal-jumlah').textContent = `RM${totalLokasi.toFixed(2)}`;
-        return totalLokasi;
-    }
-
-    function calculateOnlineSubtotal(studentDiv) {
-        const type = studentDiv.querySelector('.online-class-type').value;
-        const level = studentDiv.querySelector('.online-class-level').value;
-        let fee = 0;
-        if (type === 'peribadi') {
-            if (level === 'beginner') fee = 65; else if (level === 'intermediate') fee = 75; else if (level === 'advance') fee = 25;
-        } else if (type === 'kumpulan') {
-            if (level === 'beginner') fee = 50; else if (level === 'intermediate') fee = 60;
-        }
-        studentDiv.querySelector('.online-student-fee').textContent = `RM${fee.toFixed(2)}`;
-        return fee;
-    }
-
-    function resetForm() {
-        if (confirm('Adakah anda pasti untuk reset semua maklumat?')) {
-            document.getElementById('nama').value = '';
-            document.getElementById('bulan').value = '1';
-            document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => { if (input.id !== 'nama') input.value = input.type === 'number' ? '0' : ''; });
-            document.getElementById('kelasContainer').innerHTML = '';
-            document.getElementById('pembangunanContainer').innerHTML = '';
-            document.getElementById('onlineStudentsContainer').innerHTML = '';
-            addKelas('fizikal');
-            addKelas('pembangunan');
-            addPelajarOnline();
-        }
-    }
-
-    function cetakLaporan() {
-        const nama = document.getElementById('nama').value || 'N/A';
-        const bulanSelect = document.getElementById('bulan');
-        const bulan = bulanSelect.options[bulanSelect.selectedIndex].text;
-        const jumlahFizikal = document.getElementById('jumlahFizikal').textContent;
-        const jumlahPembangunan = document.getElementById('jumlahPembangunan').textContent;
-        const jumlahOnline = document.getElementById('jumlahOnline').textContent;
-        const jumlahTambahanBonus = document.getElementById('jumlahTambahanBonus').textContent;
-        const jumlahPengurangan = document.getElementById('jumlahPengurangan').textContent;
-        const jumlahBersih = document.getElementById('jumlahBersih').textContent;
-        const jumlahKasar = (parseFloat(jumlahFizikal) + parseFloat(jumlahPembangunan) + parseFloat(jumlahOnline) + parseFloat(jumlahTambahanBonus)).toFixed(2);
-
-        let butiranFizikal = '';
-        document.querySelectorAll('#kelasContainer .border').forEach(div => {
-            if (div.querySelector('input[type="checkbox"]').checked) {
-                const namaLokasi = div.querySelector('.nama-lokasi').value || 'Lokasi Tidak Dinamakan';
-                const bulanSelect = div.querySelector('.kelas-bulan');
-                const bulanText = bulanSelect.options[bulanSelect.selectedIndex].text;
-                const jumlah = div.querySelector('.subtotal-jumlah').textContent;
-                butiranFizikal += `<tr><td class="py-1 pl-4">${namaLokasi} (${bulanText})</td><td class="py-1 text-right">${jumlah}</td></tr>`;
-            }
-        });
-
-        let butiranPembangunan = '';
-        document.querySelectorAll('#pembangunanContainer .border').forEach(div => {
-            if (div.querySelector('input[type="checkbox"]').checked) {
-                const nama = div.querySelector('.nama-lokasi').value || 'Kumpulan Tidak Dinamakan';
-                const bulanSelect = div.querySelector('.kelas-bulan');
-                const bulanText = bulanSelect.options[bulanSelect.selectedIndex].text;
-                const jumlah = div.querySelector('.subtotal-jumlah').textContent;
-                butiranPembangunan += `<tr><td class="py-1 pl-4">${nama} (${bulanText})</td><td class="py-1 text-right">${jumlah}</td></tr>`;
-            }
-        });
-
-        let butiranOnline = '';
-        document.querySelectorAll('.student-container').forEach(div => {
-            const nama = div.querySelector('.online-student-name').value || 'Pelajar Tidak Dinamakan';
-            const jumlah = div.querySelector('.online-student-fee').textContent;
-            butiranOnline += `<tr><td class="py-1 pl-4">${nama}</td><td class="py-1 text-right">${jumlah}</td></tr>`;
-        });
+        <h3>POTONGAN</h3>
+        <table class="details-table">
+          <thead><tr><th>Keterangan</th><th class="amount">Jumlah</th></tr></thead>
+          <tbody>
+            ${buildRows(data.penguranganDetails, 'keterangan')}
+          </tbody>
+        </table>
         
-        let butiranTambahanBonus = '';
-        if (parseFloat(document.getElementById('elaunKejohanan').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Elaun Penyertaan Kejohanan</td><td class="py-1 text-right">RM${document.getElementById('elaunKejohanan').value}</td></tr>`;
-        if (parseFloat(document.getElementById('elaunMakan').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Elaun Makan</td><td class="py-1 text-right">RM${document.getElementById('elaunMakan').value}</td></tr>`;
-        if (parseFloat(document.getElementById('elaunArbiter').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Elaun Arbiter</td><td class="py-1 text-right">RM${document.getElementById('elaunArbiter').value}</td></tr>`;
-        if (parseFloat(document.getElementById('elaunPembantu').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Elaun Pembantu</td><td class="py-1 text-right">RM${document.getElementById('elaunPembantu').value}</td></tr>`;
-        if (parseFloat(document.getElementById('bonusTahunan').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Bonus Tahunan</td><td class="py-1 text-right">RM${document.getElementById('bonusTahunan').value}</td></tr>`;
-        if (parseFloat(document.getElementById('bonusPerayaan').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Bonus Perayaan</td><td class="py-1 text-right">RM${document.getElementById('bonusPerayaan').value}</td></tr>`;
-        if (parseFloat(document.getElementById('bonusPelajar').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Bonus Pencapaian Pelajar</td><td class="py-1 text-right">RM${document.getElementById('bonusPelajar').value}</td></tr>`;
-        if (parseFloat(document.getElementById('bonusJurulatih').value) > 0) butiranTambahanBonus += `<tr><td class="py-1 pl-4">Bonus Pencapaian Jurulatih</td><td class="py-1 text-right">RM${document.getElementById('bonusJurulatih').value}</td></tr>`;
+        <div class="summary-section">
+          <table class="summary-table">
+            <tr><td class="label">Jumlah Pendapatan:</td><td class="amount">RM ${(data.baseAmount + data.extraAllowance).toFixed(2)}</td></tr>
+            <tr><td class="label">Jumlah Potongan:</td><td class="amount">RM ${data.deductions.toFixed(2)}</td></tr>
+            <tr><td class="label total">JUMLAH BERSIH:</td><td class="amount total">RM ${data.netAmount.toFixed(2)}</td></tr>
+          </table>
+          <div style="clear:both;"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>`;
+  return html;
+}
 
-        let butiranPengurangan = '';
-        if (parseFloat(document.getElementById('kejohanan').value) > 0) butiranPengurangan += `<tr><td class="py-1 pl-4">Penyertaan Kejohanan</td><td class="py-1 text-right">RM${document.getElementById('kejohanan').value}</td></tr>`;
-        if (parseFloat(document.getElementById('yuran').value) > 0) butiranPengurangan += `<tr><td class="py-1 pl-4">Komitmen Yuran Bulanan</td><td class="py-1 text-right">RM${document.getElementById('yuran').value}</td></tr>`;
-        if (parseFloat(document.getElementById('rakaman').value) > 0) butiranPengurangan += `<tr><td class="py-1 pl-4">Sistem Rakaman</td><td class="py-1 text-right">RM${document.getElementById('rakaman').value}</td></tr>`;
-        if (parseFloat(document.getElementById('peralatan').value) > 0) butiranPengurangan += `<tr><td class="py-1 pl-4">Pembelian Peralatan</td><td class="py-1 text-right">RM${document.getElementById('peralatan').value}</td></tr>`;
-        if (parseFloat(document.getElementById('lainPengurangan').value) > 0) butiranPengurangan += `<tr><td class="py-1 pl-4">${document.getElementById('lainKeterangan').value || 'Lain-lain'}</td><td class="py-1 text-right">RM${document.getElementById('lainPengurangan').value}</td></tr>`;
-
-        const payslipHTML = `
-            <div class="p-6 md:p-8 lg:p-10 bg-white font-sans text-sm text-gray-800 payslip-container">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold text-primary">PENYATA ELAUN JURULATIH</h1>
-                    <p class="text-lg">Bulan Laporan: ${bulan} ${new Date().getFullYear()}</p>
-                </div>
-                <div class="mb-6 p-4 border rounded-lg">
-                    <p><strong class="w-32 inline-block">Nama Jurulatih</strong>: ${nama}</p>
-                    <p><strong class="w-32 inline-block">Tarikh Penyata</strong>: ${new Date().toLocaleDateString('ms-MY', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                </div>
-                <table class="w-full mb-6">
-                    <thead><tr class="bg-gray-100 border-b-2 border-gray-300"><th class="text-left p-2 font-semibold">PENDAPATAN</th><th class="text-right p-2 font-semibold">JUMLAH (RM)</th></tr></thead>
-                    <tbody>
-                        <tr><td class="py-2 font-medium">Elaun Kelas Fizikal</td><td class="py-2 text-right font-medium">${jumlahFizikal}</td></tr>
-                        ${butiranFizikal || '<tr><td class="py-1 pl-4 text-gray-500" colspan="2">Tiada data</td></tr>'}
-                        <tr><td class="py-2 font-medium">Elaun Kelas Pembangunan</td><td class="py-2 text-right font-medium">${jumlahPembangunan}</td></tr>
-                        ${butiranPembangunan || '<tr><td class="py-1 pl-4 text-gray-500" colspan="2">Tiada data</td></tr>'}
-                        <tr><td class="py-2 font-medium">Elaun Kelas Online</td><td class="py-2 text-right font-medium">${jumlahOnline}</td></tr>
-                        ${butiranOnline || '<tr><td class="py-1 pl-4 text-gray-500" colspan="2">Tiada data</td></tr>'}
-                        <tr><td class="py-2 font-medium">Elaun Tambahan & Bonus</td><td class="py-2 text-right font-medium">${jumlahTambahanBonus}</td></tr>
-                        ${butiranTambahanBonus || '<tr><td class="py-1 pl-4 text-gray-500" colspan="2">Tiada data</td></tr>'}
-                    </tbody>
-                    <tfoot><tr class="bg-gray-100 border-t-2 border-gray-300"><th class="text-left p-2 font-bold">JUMLAH PENDAPATAN KASAR</th><th class="text-right p-2 font-bold">${jumlahKasar}</th></tr></tfoot>
-                </table>
-                <table class="w-full mb-6">
-                    <thead><tr class="bg-gray-100 border-b-2 border-gray-300"><th class="text-left p-2 font-semibold">PENGURANGAN</th><th class="text-right p-2 font-semibold">JUMLAH (RM)</th></tr></thead>
-                    <tbody>${butiranPengurangan || '<tr><td class="py-1 pl-4 text-gray-500" colspan="2">Tiada data</td></tr>'}</tbody>
-                    <tfoot><tr class="bg-gray-100 border-t-2 border-gray-300"><th class="text-left p-2 font-bold">JUMLAH PENGURANGAN</th><th class="text-right p-2 font-bold">${jumlahPengurangan}</th></tr></tfoot>
-                </table>
-                <div class="mt-8 p-4 bg-tertiary-light rounded-lg text-center">
-                    <p class="text-lg font-semibold">PENDAPATAN BERSIH</p>
-                    <p class="text-3xl font-bold text-primary">RM ${jumlahBersih}</p>
-                </div>
-                <div class="text-center text-xs text-gray-500 mt-8">
-                    <p>*** Ini adalah slip gaji janaan komputer, tandatangan tidak diperlukan. ***</p>
-                </div>
-            </div>`;
-        
-        const printArea = document.getElementById('printArea');
-        printArea.innerHTML = payslipHTML;
-        const originalPage = document.body.innerHTML;
-        document.body.innerHTML = printArea.innerHTML;
-        window.print();
-        document.body.innerHTML = originalPage;
-        // Re-attach listeners
-        document.addEventListener('DOMContentLoaded', function() {});
-    }
-
-    function saveDataToSheet() { 
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzb9g7W6c7jBUSgAcDyarubGJ1CaVEI5UWLpmojWRswk_mdOTdTpo2GqeI8SnyIybWN/exec";
-        const statusMessage = document.getElementById('statusMessage');
-        statusMessage.textContent = 'Menyimpan...';
-        statusMessage.className = 'text-center mt-4 font-medium text-blue-600 opacity-100';
-
-        const bulanSelect = document.getElementById('bulan');
-        const reportData = {
-            nama: document.getElementById('nama').value || 'Tidak Dinyatakan',
-            bulan: bulanSelect.options[bulanSelect.selectedIndex].text,
-            fizikal: [],
-            pembangunan: [],
-            online: [],
-            tambahanBonus: {
-                elaunKejohanan: document.getElementById('elaunKejohanan').value,
-                elaunMakan: document.getElementById('elaunMakan').value,
-                elaunArbiter: document.getElementById('elaunArbiter').value,
-                elaunPembantu: document.getElementById('elaunPembantu').value,
-                bonusTahunan: document.getElementById('bonusTahunan').value,
-                bonusPerayaan: document.getElementById('bonusPerayaan').value,
-                bonusPelajar: document.getElementById('bonusPelajar').value,
-                bonusJurulatih: document.getElementById('bonusJurulatih').value,
-            },
-            pengurangan: {},
-            ringkasan: {
-                fizikal: document.getElementById('jumlahFizikal').textContent,
-                pembangunan: document.getElementById('jumlahPembangunan').textContent,
-                online: document.getElementById('jumlahOnline').textContent,
-                tambahanBonus: document.getElementById('jumlahTambahanBonus').textContent,
-                pengurangan: document.getElementById('jumlahPengurangan').textContent,
-                bersih: document.getElementById('jumlahBersih').textContent,
-            }
-        };
-        // ... (rest of the data collection logic)
-
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'cors',
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportData) 
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                statusMessage.textContent = 'Laporan berjaya disimpan!';
-                statusMessage.className = 'text-center mt-4 font-medium text-green-600 opacity-100';
-            } else {
-                throw new Error(data.message || 'Ralat tidak diketahui.');
-            }
-        })
-        .catch(error => {
-            statusMessage.textContent = `Ralat: ${error.message}`;
-            statusMessage.className = 'text-center mt-4 font-medium text-red-600 opacity-100';
-        });
-
-        setTimeout(() => { statusMessage.style.opacity = '0'; }, 5000);
-     }
-    </script>
-</body>
-</html>
+/**
+ * Mendapatkan folder sedia ada atau mencipta folder baru jika tiada.
+ * @param {string} folderName Nama folder yang dicari/dicipta.
+ * @param {DriveApp.Folder} [parentFolder=DriveApp] Folder induk. Lalai adalah folder root.
+ * @returns {DriveApp.Folder} Objek folder.
+ */
+function getOrCreateFolder(folderName, parentFolder = DriveApp) {
+  const folders = parentFolder.getFoldersByName(folderName);
+  return folders.hasNext() ? folders.next() : parentFolder.createFolder(folderName);
+}
