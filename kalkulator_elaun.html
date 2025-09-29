@@ -1,480 +1,825 @@
-/**
- * @fileoverview Script untuk menguruskan dan mengira elaun jurulatih,
- * menjana slip PDF, dan menyediakan papan pemuka untuk jurulatih.
- * @version 2.0
- */
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Elaun Jurulatih</title>
 
-// ================================================================= //
-//                            KONFIGURASI                            //
-// ================================================================= //
+    <script src="https://cdn.tailwindcss.com"></script>
 
-const JURULATIH_SHEET_NAME = 'Jurulatih';
-const REKOD_SHEET_NAME = 'Rekod Elaun';
-const DETAIL_REKOD_SHEET_NAME = 'Rekod Terperinci';
-const PDF_FOLDER_NAME = 'Slip Gaji Jurulatih';
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#F37324',
+                        'primary-hover': '#E56214',
+                        'secondary': '#DC3C2C',
+                        'secondary-hover': '#C92C1C',
+                        'tertiary': '#F99E4C',
+                        'tertiary-light': '#FBD0A4',
+                        'dark-text': '#333333',
+                        'light-bg': '#FFFDF7'
+                    }
+                }
+            }
+        }
+    </script>
 
-
-// ================================================================= //
-//                        TITIK MASUK UTAMA (WEB APP)                //
-// ================================================================= //
-
-/**
- * Mengendalikan permintaan GET ke aplikasi web.
- * Bertindak sebagai penghala (router) untuk memaparkan halaman yang betul.
- * @param {object} e Objek acara daripada permintaan GET.
- * @returns {HtmlService.HtmlOutput} Output HTML untuk dipaparkan.
- */
-function doGet(e) {
-  if (e.parameter.page === 'dashboard') {
-    return HtmlService.createHtmlOutputFromFile('Dashboard.html').setTitle('Dashboard Jurulatih');
-  }
-  return HtmlService.createHtmlOutputFromFile('Index').setTitle('Kalkulator Elaun Jurulatih');
-}
-
-
-// ================================================================= //
-//                       FUNGSI UNTUK ADMIN                          //
-// ================================================================= //
-
-/**
- * Mendapatkan data semua jurulatih dari spreadsheet.
- * @returns {object} Objek yang memetakan nama jurulatih kepada maklumat bank dan akaun mereka.
- */
-function getCoachData() {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName(JURULATIH_SHEET_NAME);
-    if (!sheet || sheet.getLastRow() < 2) return {};
-
-    const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 3).getValues();
-    const coachMap = {};
-
-    data.forEach(row => {
-      const [name, bank, acc] = row;
-      if (name) {
-        coachMap[name] = { bank, acc };
-      }
-    });
-
-    return coachMap;
-  } catch (e) {
-    Logger.log(`Error in getCoachData: ${e.message}`);
-    return {};
-  }
-}
-
-/**
- * Menyimpan rekod elaun ke dalam spreadsheet dan menjana slip gaji dalam format PDF.
- * @param {object} reportData Data lengkap laporan elaun daripada antara muka pengguna (UI).
- * @returns {object} Objek status yang mengandungi mesej kejayaan/ralat dan URL PDF.
- */
-function saveRecordAndGeneratePdf(reportData) {
-  try {
-    // 1. Kira jumlah tuntutan dan jana PDF
-    reportData.totalMileage = calculateTotalMileage(reportData.fizikal);
-    const pdfUrl = generateAndSavePayslip(reportData);
-    if (!pdfUrl || pdfUrl.startsWith('Error')) {
-      throw new Error(pdfUrl || 'Gagal menjana PDF.');
-    }
-
-    // 2. Sediakan data untuk disimpan
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const uniqueId = `${new Date().toISOString().slice(0, 10)}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-    const recordDate = new Date();
-
-    // 3. Simpan ringkasan rekod
-    const summarySheet = ss.getSheetByName(REKOD_SHEET_NAME);
-    const summaryRow = createSummaryRow(reportData, uniqueId, recordDate, pdfUrl);
-    summarySheet.appendRow(summaryRow);
-
-    // 4. Simpan rekod terperinci
-    const detailSheet = ss.getSheetByName(DETAIL_REKOD_SHEET_NAME);
-    const detailRows = createDetailRows(reportData, uniqueId, recordDate);
-    if (detailRows.length > 0) {
-      detailSheet.getRange(detailSheet.getLastRow() + 1, 1, detailRows.length, detailRows[0].length).setValues(detailRows);
-    }
-
-    return {
-      status: 'success',
-      message: 'Rekod berjaya disimpan dan PDF telah dijana!',
-      pdfUrl: pdfUrl
-    };
-  } catch (e) {
-    Logger.log(`Error in saveRecordAndGeneratePdf: ${e.message} \nStack: ${e.stack}`);
-    return {
-      status: 'error',
-      message: e.message
-    };
-  }
-}
-
-
-// ================================================================= //
-//                       FUNGSI UNTUK JURULATIH                      //
-// ================================================================= //
-
-/**
- * Mendapatkan senarai nama semua jurulatih untuk paparan login.
- * @returns {string[]} Senarai nama jurulatih.
- */
-function getCoachNames() {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName(JURULATIH_SHEET_NAME);
-    if (sheet.getLastRow() < 2) return [];
-
-    const range = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1);
-    return range.getValues().flat().filter(String);
-  } catch (e) {
-    Logger.log(`Error in getCoachNames: ${e.message}`);
-    return [];
-  }
-}
-
-/**
- * Mengesahkan maklumat login jurulatih.
- * @param {object} credentials Objek yang mengandungi `coachName` dan `accNumber`.
- * @returns {object} Objek yang menandakan kejayaan atau kegagalan pengesahan.
- */
-function verifyCoachLogin(credentials) {
-  try {
-    const coachData = getCoachData();
-    const coachInfo = coachData[credentials.coachName];
-    const normalize = (str) => str ? String(str).replace(/[\s-]+/g, '') : '';
-
-    if (coachInfo && normalize(coachInfo.acc) === normalize(credentials.accNumber)) {
-      return { success: true };
-    }
-    return { success: false, message: "Nama atau nombor akaun tidak sah." };
-  } catch (e) {
-    Logger.log(`Error in verifyCoachLogin: ${e.message}`);
-    return { success: false, message: "Ralat pada sistem." };
-  }
-}
-
-/**
- * Mendapatkan senarai ID Rujukan yang tersedia untuk jurulatih tertentu.
- * @param {string} coachName Nama jurulatih.
- * @returns {string[]} Senarai ID Rujukan yang unik.
- */
-function getAvailableReferenceIDs(coachName) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName(REKOD_SHEET_NAME);
-    if (sheet.getLastRow() < 2) return [];
-
-    const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues();
-    const ids = data
-      .filter(row => row[3] === coachName && row[0])
-      .map(row => row[0]);
-
-    return [...new Set(ids)]; // Pulangkan ID yang unik sahaja
-  } catch (e) {
-    Logger.log(`Error in getAvailableReferenceIDs: ${e.message}`);
-    return [];
-  }
-}
-
-/**
- * Mendapatkan rekod elaun berdasarkan ID Rujukan dan nama jurulatih.
- * @param {string} selectedId ID Rujukan yang dipilih.
- * @param {string} coachName Nama jurulatih yang sedang login.
- * @returns {object} Objek yang mengandungi data ringkasan atau mesej ralat.
- */
-function getCoachRecords(selectedId, coachName) {
-  if (!coachName || !selectedId) {
-    return { error: "Sesi atau ID tidak sah." };
-  }
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const logSheet = ss.getSheetByName(REKOD_SHEET_NAME);
-    const textFinder = logSheet.getRange("A:A").createTextFinder(selectedId);
-    const foundCell = textFinder.findNext();
-
-    if (!foundCell) {
-      return { error: `ID Rujukan ${selectedId} tidak ditemui.` };
-    }
-
-    const summaryRowIndex = foundCell.getRow();
-    const summaryRecord = logSheet.getRange(summaryRowIndex, 1, 1, logSheet.getLastColumn()).getValues()[0];
-
-    // Sahkan bahawa rekod ini milik jurulatih yang betul
-    if (summaryRecord[3] !== coachName) {
-      return { error: "Anda tidak mempunyai akses kepada rekod ini." };
-    }
-
-    const summaryResult = [{
-      statementDate: summaryRecord[2],
-      month: summaryRecord[4],
-      netAmount: summaryRecord[10],
-      payslipUrl: summaryRecord[11]
-    }];
-
-    return { idRujukan: selectedId, summary: summaryResult };
-  } catch (e) {
-    Logger.log(`Error in getCoachRecords: ${e.message}`);
-    return { error: "Gagal membaca data rekod." };
-  }
-}
-
-
-// ================================================================= //
-//               FUNGSI BANTUAN (INTERNAL HELPERS)                   //
-// ================================================================= //
-
-/**
- * Mengira jumlah tuntutan mileage daripada data kelas fizikal.
- * @param {object[]} fizikalArray Senarai objek kelas fizikal.
- * @returns {number} Jumlah tuntutan mileage.
- */
-function calculateTotalMileage(fizikalArray) {
-  return fizikalArray.reduce((total, kelas) => {
-    return total + kelas.slots.reduce((subTotal, slot) => {
-      return subTotal + calculateMileageClaim(slot);
-    }, 0);
-  }, 0);
-}
-
-/**
- * Mengira tuntutan mileage untuk satu slot kelas.
- * @param {object} slot Objek slot yang mengandungi `jarakValue` dan `kenderaan`.
- * @returns {number} Jumlah tuntutan mileage untuk slot tersebut.
- */
-function calculateMileageClaim(slot) {
-  let mileage = parseFloat(slot.jarakValue) || 0;
-  if (mileage > 0 && slot.kenderaan === 'motor') {
-    mileage /= 2;
-  }
-  return mileage;
-}
-
-/**
- * Mencipta baris data untuk helaian ringkasan rekod.
- * @param {object} data Data laporan.
- * @param {string} id ID unik untuk rekod.
- * @param {Date} date Tarikh rekod dibuat.
- * @param {string} url URL ke PDF slip gaji.
- * @returns {any[]} Array yang mewakili satu baris dalam spreadsheet.
- */
-function createSummaryRow(data, id, date, url) {
-  return [
-    id, date, new Date(data.statementDate),
-    data.coachName, data.month, data.baseAmount,
-    data.extraAllowance, data.deductions, ' ', ' ',
-    data.netAmount, url
-  ];
-}
-
-/**
- * Mencipta barisan data untuk helaian rekod terperinci.
- * @param {object} reportData Data laporan.
- * @param {string} uniqueId ID unik untuk rekod.
- * @param {Date} recordDate Tarikh rekod dibuat.
- * @returns {any[][]} Array 2D yang mewakili semua baris terperinci.
- */
-function createDetailRows(reportData, uniqueId, recordDate) {
-  const detailRows = [];
-  const coachName = reportData.coachName;
-  const parseCurrency = (text) => parseFloat(String(text).replace(/[^0-9.-]+/g, "")) || 0;
-  
-  const addRow = (date, type, description, amount) => {
-    detailRows.push([uniqueId, recordDate, coachName, date, type, description, amount]);
-  };
-  
-  // Elaun Kelas Fizikal & Mileage
-  reportData.fizikal.forEach(kelas => {
-    kelas.slots.forEach(slot => {
-      const kelasTarikh = slot.tarikh ? new Date(slot.tarikh) : null;
-      addRow(kelasTarikh, 'Kelas Fizikal - Elaun', kelas.nama, kelas.elaunPerSlot);
-      const mileageClaim = calculateMileageClaim(slot);
-      if (mileageClaim > 0) {
-        addRow(kelasTarikh, 'Kelas Fizikal - Mileage', `Perjalanan ke ${kelas.nama}`, mileageClaim);
-      }
-    });
-  });
-
-  // Butiran lain
-  reportData.pembangunan.forEach(item => addRow('', 'Kelas Pembangunan', item.nama, parseCurrency(item.jumlah)));
-  reportData.online.forEach(item => addRow('', 'Kelas Online', item.nama, parseCurrency(item.jumlah)));
-  reportData.tambahanBonusDetails.forEach(item => addRow('', 'Bonus/Elaun Tambahan', item.keterangan, parseCurrency(item.jumlah)));
-  reportData.penguranganDetails.forEach(item => addRow('', 'Potongan', item.keterangan, -Math.abs(parseCurrency(item.jumlah))));
-
-  return detailRows;
-}
-
-/**
- * Menjana dan menyimpan slip gaji sebagai fail PDF di Google Drive.
- * @param {object} reportData Data laporan untuk dipaparkan pada slip gaji.
- * @returns {string} URL fail PDF yang telah dibuat atau mesej ralat.
- */
-function generateAndSavePayslip(reportData) {
-  try {
-    const mainFolder = getOrCreateFolder(PDF_FOLDER_NAME);
-    const statementDate = new Date(reportData.statementDate);
-    const year = statementDate.getFullYear().toString();
-    const month = ('0' + (statementDate.getMonth() + 1)).slice(-2) + ' - ' + statementDate.toLocaleString('ms-MY', { month: 'long' });
-
-    const yearFolder = getOrCreateFolder(year, mainFolder);
-    const monthFolder = getOrCreateFolder(month, yearFolder);
-
-    const htmlContent = createPayslipHtml(reportData);
-    const fileName = `Slip-${year}-${('0' + (statementDate.getMonth() + 1)).slice(-2)}-${reportData.coachName}.pdf`;
-    const pdfBlob = Utilities.newBlob(htmlContent, MimeType.HTML, fileName).getAs(MimeType.PDF);
-    const pdfFile = monthFolder.createFile(pdfBlob);
-
-    Logger.log('PDF saved successfully: ' + pdfFile.getUrl());
-    return pdfFile.getUrl();
-  } catch (e) {
-    Logger.log(`Error in generateAndSavePayslip: ${e.message}`);
-    return `Error creating PDF: ${e.message}`;
-  }
-}
-
-/**
- * Mencipta kandungan HTML untuk slip gaji dengan watermark dan butiran syarikat.
- * @param {object} data Data laporan elaun.
- * @returns {string} Rentetan HTML yang lengkap.
- */
-function createPayslipHtml(data) {
-  // Pautan ke logo syarikat anda
-  const logoUrl = 'https://raw.githubusercontent.com/luqmanjuhar/chesstrainercalculator/main/Asset%2028.png';
-  
-  // Maklumat Syarikat
-  const companyDetails = {
-    name: 'KAMUS CATUR ENTERPRISE (CT0099869-W)',
-    address: 'NO 7A, JALAN PULAI PERDANA 11/2, TAMAN SRI PULAI PERDANA, 81300, JOHOR BAHRU, JOHOR',
-    contact: 'TEL: 018-2046224 | EMEL: kamus.catur@gmail.com'
-  };
-
-  const css = `
     <style>
-      body { font-family: Arial, sans-serif; color: #333; font-size: 10pt; }
-      .container { 
-          border: 1px solid #ccc; 
-          padding: 25px; 
-          width: 700px; 
-          margin: auto; 
-          /* --- BAHAGIAN WATERMARK DIMASUKKAN DI SINI --- */
-          background-image: url('${logoUrl}');
-          background-repeat: no-repeat;
-          background-position: center;
-          background-size: 400px; /* Saiz watermark, boleh laras */
-      }
-      .content-wrapper {
-          /* Wrapper ini memastikan kandungan tidak terjejas oleh watermark */
-          background-color: rgba(255, 255, 255, 0.95); /* Latar belakang sedikit putih untuk pastikan teks boleh dibaca */
-          padding: 20px;
-      }
-      .header { text-align: center; border-bottom: 2px solid #F37324; padding-bottom: 10px; margin-bottom: 20px; }
-      .header h2 { margin: 0; font-size: 16pt; color: #F37324; }
-      .header p { margin: 5px 0 0; }
-      .company-details { font-size: 8pt; color: #555; margin-top: 10px; line-height: 1.4; }
-      h3 { color: #E56214; border-bottom: 1px solid #FBD0A4; padding-bottom: 5px; margin-top: 25px; }
-      .info-table { width: 100%; margin-bottom: 25px; }
-      .info-table td { padding: 4px; }
-      .details-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-      .details-table th, .details-table td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
-      .details-table th { background-color: #F37324; color: white; font-weight: bold; }
-      .details-table .amount { text-align: right; }
-      .summary-section { margin-top: 20px; padding-top: 10px; border-top: 2px solid #F37324; }
-      .summary-table { width: 50%; float: right; }
-      .summary-table td { padding: 5px; }
-      .summary-table .label { text-align: right; font-weight: bold; padding-right: 15px; }
-      .summary-table .total { font-weight: bold; color: #F37324; border-top: 1px solid #333; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FFFDF7;
+            color: #333333;
+        }
+
+        .chess-pattern {
+            background-image: linear-gradient(45deg, rgba(249, 158, 76, 0.2) 25%, transparent 25%), linear-gradient(-45deg, rgba(249, 158, 76, 0.2) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(249, 158, 76, 0.2) 75%), linear-gradient(-45deg, transparent 75%, rgba(249, 158, 76, 0.2) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        
+        .slot-container,
+        .student-container {
+            border-left: 3px solid #F37324;
+            padding-left: 12px;
+            margin-bottom: 12px;
+        }
+
+        .subtotal-box {
+            background-color: rgba(249, 158, 76, 0.1);
+            border-left: 4px solid #F37324;
+            padding: 8px 12px;
+            margin-top: 8px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #F37324;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(243, 115, 36, 0.2);
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #F37324;
+            border-color: #F37324;
+        }
+
+        #statusMessage {
+            transition: opacity 0.5s;
+        }
     </style>
-  `;
+</head>
 
-  const buildRows = (items, descKey = 'nama', valKey = 'jumlah') => {
-    if (!items || items.length === 0) return '<tr><td colspan="2" style="text-align:center;color:#888;">Tiada rekod</td></tr>';
-    return items.map(item => `
-      <tr>
-        <td>${item[descKey]}</td>
-        <td class="amount">${item[valKey]}</td>
-      </tr>
-    `).join('');
-  };
+<body>
+    <div class="min-h-screen">
+        <header class="bg-primary text-white py-6 chess-pattern">
+            <div class="container mx-auto px-4 flex flex-col items-center">
+                <img src="https://raw.githubusercontent.com/luqmanjuhar/chesstrainercalculator/main/Asset%2028.png" alt="Logo Akademi" class="h-16 mb-4">
+                <h1 class="text-3xl font-bold text-center">Kalkulator Elaun Jurulatih Catur</h1>
+            </div>
+        </header>
 
-  const fizikalRows = data.fizikal.map(k => ({
-    nama: `Elaun Kelas Fizikal - ${k.nama}`,
-    jumlah: `RM ${(k.elaunPerSlot * k.slots.length).toFixed(2)}`
-  }));
-  
-  if (data.totalMileage > 0) {
-    fizikalRows.push({
-      nama: 'Tuntutan Mileage',
-      jumlah: `RM ${data.totalMileage.toFixed(2)}`
-    });
-  }
+        <main class="container mx-auto px-4 py-8">
+            <section class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-primary">
+                <h2 class="text-2xl font-bold mb-4 text-primary border-b pb-2">Bahagian 1: Maklumat Jurulatih</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-dark-text mb-2" for="nama">Nama Jurulatih</label>
+                        <select id="nama" class="w-full px-4 py-2 border border-tertiary rounded-lg">
+                            <option>Memuatkan jurulatih...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-dark-text mb-2" for="bulan">Bulan Laporan</label>
+                        <select id="bulan" class="w-full px-4 py-2 border border-tertiary rounded-lg">
+                            <option value="Januari">Januari</option>
+                            <option value="Februari">Februari</option>
+                            <option value="Mac">Mac</option>
+                            <option value="April">April</option>
+                            <option value="Mei">Mei</option>
+                            <option value="Jun">Jun</option>
+                            <option value="Julai">Julai</option>
+                            <option value="Ogos">Ogos</option>
+                            <option value="September">September</option>
+                            <option value="Oktober">Oktober</option>
+                            <option value="November">November</option>
+                            <option value="Disember">Disember</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-dark-text mb-2" for="tarikhPenyata">Tarikh Penyata</label>
+                        <input type="date" id="tarikhPenyata" class="w-full px-4 py-2 border border-tertiary rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-dark-text mb-2" for="jenisBank">Jenis Bank</label>
+                        <input type="text" id="jenisBank" placeholder="Cth: Maybank, CIMB" class="w-full px-4 py-2 border border-tertiary rounded-lg bg-gray-100" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-dark-text mb-2" for="noAkaun">No. Akaun Bank</label>
+                        <input type="text" id="noAkaun" placeholder="Cth: 1234567890" class="w-full px-4 py-2 border border-tertiary rounded-lg bg-gray-100" readonly>
+                    </div>
+                </div>
+            </section>
 
-  const html = `
-  <!DOCTYPE html>
-  <html>
-  <head>${css}</head>
-  <body>
-    <div class="container">
-      <div class="content-wrapper">
-        <div class="header">
-          <h2>SLIP ELAUN JURULATIH</h2>
-          <div class="company-details">
-            <p><strong>${companyDetails.name}</strong></p>
-            <p>${companyDetails.address}</p>
-            <p>${companyDetails.contact}</p>
-          </div>
-          <p style="margin-top: 15px;">Bulan: ${data.month}</p>
-        </div>
-        
-        <table class="info-table">
-          <tr>
-            <td><b>Nama Jurulatih:</b></td><td>${data.coachName}</td>
-            <td><b>Tarikh Penyata:</b></td><td>${new Date(data.statementDate).toLocaleDateString('ms-MY')}</td>
-          </tr>
-          <tr>
-            <td><b>Bank:</b></td><td>${data.bankInfo.bank}</td>
-            <td><b>No. Akaun:</b></td><td>${data.bankInfo.acc}</td>
-          </tr>
-        </table>
-        
-        <h3>PENDAPATAN ELAUN</h3>
-        <table class="details-table">
-          <thead><tr><th>Keterangan</th><th class="amount">Jumlah</th></tr></thead>
-          <tbody>
-            ${buildRows(fizikalRows)}
-            ${buildRows(data.pembangunan)}
-            ${buildRows(data.online)}
-            ${buildRows(data.tambahanBonusDetails, 'keterangan')}
-          </tbody>
-        </table>
-        
-        <h3>POTONGAN</h3>
-        <table class="details-table">
-          <thead><tr><th>Keterangan</th><th class="amount">Jumlah</th></tr></thead>
-          <tbody>
-            ${buildRows(data.penguranganDetails, 'keterangan')}
-          </tbody>
-        </table>
-        
-        <div class="summary-section">
-          <table class="summary-table">
-            <tr><td class="label">Jumlah Pendapatan:</td><td class="amount">RM ${(data.baseAmount + data.extraAllowance).toFixed(2)}</td></tr>
-            <tr><td class="label">Jumlah Potongan:</td><td class="amount">RM ${data.deductions.toFixed(2)}</td></tr>
-            <tr><td class="label total">JUMLAH BERSIH:</td><td class="amount total">RM ${data.netAmount.toFixed(2)}</td></tr>
-          </table>
-          <div style="clear:both;"></div>
-        </div>
-      </div>
+            <section class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-primary">
+                <h2 class="text-2xl font-bold mb-4 text-primary border-b pb-2">Bahagian 2: Maklumat Kelas Catur</h2>
+                
+                <div class="mt-6">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">Kelas Fizikal</h3>
+                    <p class="text-dark-text mb-4">Tandakan sekolah atau slot kelas yang dikendalikan:</p>
+                    <div id="kelasContainer" class="space-y-6"></div>
+                    <button id="tambahKelas" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition">+ Tambah Sekolah/Lokasi (Fizikal)</button>
+                </div>
+
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">Kelas Pembangunan Catur (Online)</h3>
+                    <p class="text-dark-text mb-4">Tandakan kumpulan atau slot kelas yang dikendalikan:</p>
+                    <div id="pembangunanContainer" class="space-y-6"></div>
+                    <button id="tambahKelasPembangunan" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition">+ Tambah Kumpulan (Pembangunan)</button>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">Kelas Online (Peribadi/Kumpulan)</h3>
+                    <div id="onlineStudentsContainer" class="space-y-4"></div>
+                    <button id="tambahPelajarOnline" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition">+ Tambah Pelajar</button>
+                    <div class="subtotal-box mt-6">
+                        <h4 class="font-medium text-dark-text">Subtotal Kelas Online</h4>
+                        <div class="subtotal-details text-sm mt-1">
+                            <p class="font-medium">Jumlah: <span class="subtotal-online-jumlah">RM0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-primary">
+                <h2 class="text-2xl font-bold mb-4 text-primary border-b pb-2">Bahagian 3: Elaun, Bonus & Pengurangan</h2>
+
+                <div class="mt-6">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">Elaun Tambahan & Bonus</h3>
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-lg text-dark-text mt-4 border-b pb-2">Elaun Tambahan</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-dark-text mb-2">Elaun Penyertaan Kejohanan (RM)</label>
+                                <input type="number" id="elaunKejohanan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Elaun Makan (RM)</label>
+                                <input type="number" id="elaunMakan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Elaun Arbiter (RM)</label>
+                                <input type="number" id="elaunArbiter" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Elaun Pembantu (RM)</label>
+                                <input type="number" id="elaunPembantu" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                        </div>
+
+                        <h4 class="font-semibold text-lg text-dark-text mt-6 border-b pb-2">Bonus</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-dark-text mb-2">Bonus Tahunan (RM)</label>
+                                <input type="number" id="bonusTahunan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Bonus Perayaan (RM)</label>
+                                <input type="number" id="bonusPerayaan" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Bonus Pencapaian Pelajar (RM)</label>
+                                <input type="number" id="bonusPelajar" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Bonus Pencapaian Jurulatih (RM)</label>
+                                <input type="number" id="bonusJurulatih" class="tambahan-bonus w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                        </div>
+
+                        <div class="subtotal-box mt-4">
+                            <h4 class="font-medium text-dark-text">Subtotal Elaun Tambahan & Bonus</h4>
+                            <div class="subtotal-details text-sm mt-1">
+                                <p class="font-medium mt-1">Jumlah: <span class="subtotal-tambahan-bonus-jumlah text-primary">RM0.00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">Pengurangan</h3>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-dark-text mb-2">Penyertaan Kejohanan (RM)</label>
+                                <input type="number" id="kejohanan" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Komitmen Yuran Bulanan (RM)</label>
+                                <input type="number" id="yuran" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Sistem Rakaman (Google Workspace) (RM)</label>
+                                <input type="number" id="rakaman" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-dark-text mb-2">Pembelian Peralatan Catur (RM)</label>
+                                <input type="number" id="peralatan" class="pengurangan w-full px-4 py-2 border border-tertiary rounded-lg" value="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-dark-text mb-2">Lain-lain Pengurangan</label>
+                            <div class="flex items-center">
+                                <input type="text" id="lainKeterangan" placeholder="Keterangan" class="flex-grow px-4 py-2 border border-tertiary rounded-l-lg">
+                                <input type="number" id="lainPengurangan" class="pengurangan w-32 px-4 py-2 border-t border-b border-r border-tertiary rounded-r-lg" value="0">
+                            </div>
+                        </div>
+                        <div class="subtotal-box mt-4">
+                            <h4 class="font-medium text-dark-text">Subtotal Pengurangan</h4>
+                            <div class="subtotal-details text-sm mt-1">
+                                <p class="font-medium mt-1">Jumlah: <span class="subtotal-pengurangan-jumlah text-secondary">RM0.00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="bg-tertiary-light rounded-lg shadow-lg p-6 mb-8 border border-tertiary">
+                <h2 class="text-2xl font-semibold mb-4 text-primary">Ringkasan Elaun</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary">
+                        <h3 class="font-medium text-dark-text">Jumlah Kelas Fizikal</h3>
+                        <p class="text-2xl font-bold text-primary">RM <span id="jumlahFizikal">0.00</span></p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary">
+                        <h3 class="font-medium text-dark-text">Jumlah Kelas Pembangunan</h3>
+                        <p class="text-2xl font-bold text-primary">RM <span id="jumlahPembangunan">0.00</span></p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary">
+                        <h3 class="font-medium text-dark-text">Jumlah Kelas Online</h3>
+                        <p class="text-2xl font-bold text-primary">RM <span id="jumlahOnline">0.00</span></p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary">
+                        <h3 class="font-medium text-dark-text">Jumlah Elaun Tambahan & Bonus</h3>
+                        <p class="text-2xl font-bold text-primary">RM <span id="jumlahTambahanBonus">0.00</span></p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary">
+                        <h3 class="font-medium text-dark-text">Jumlah Pengurangan</h3>
+                        <p class="text-2xl font-bold text-secondary">RM <span id="jumlahPengurangan">0.00</span></p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border border-tertiary">
+                        <h3 class="font-medium text-dark-text">Jumlah Bersih</h3>
+                        <p class="text-2xl font-bold text-primary">RM <span id="jumlahBersih">0.00</span></p>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-3 md:space-y-0 md:space-x-4">
+                <button id="kiraButton" class="w-full md:w-auto px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition shadow-lg">Kira Elaun</button>
+                <button id="saveButton" class="w-full md:w-auto px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-lg">Cetak & Simpan PDF</button>
+                <button id="resetButton" class="w-full md:w-auto px-6 py-3 bg-dark-text text-white font-medium rounded-lg hover:bg-gray-600 transition shadow-lg">Reset</button>
+            </div>
+
+            <div id="statusMessage" class="text-center mt-4 font-medium opacity-0"></div>
+        </main>
     </div>
-  </body>
-  </html>`;
-  return html;
-}
 
-/**
- * Mendapatkan folder sedia ada atau mencipta folder baru jika tiada.
- * @param {string} folderName Nama folder yang dicari/dicipta.
- * @param {DriveApp.Folder} [parentFolder=DriveApp] Folder induk. Lalai adalah folder root.
- * @returns {DriveApp.Folder} Objek folder.
- */
-function getOrCreateFolder(folderName, parentFolder = DriveApp) {
-  const folders = parentFolder.getFoldersByName(folderName);
-  return folders.hasNext() ? folders.next() : parentFolder.createFolder(folderName);
-}
+    <script>
+        // ====================================================================
+        // SKRIP KALKULATOR ELAUN
+        // ====================================================================
+
+        // Menyimpan data bank jurulatih yang diambil dari Google Sheet
+        let coachBankDetails = {};
+
+        // --- TEMPLAT HTML DINAMIK ---
+        // Templat untuk menambah seksyen kelas fizikal baru
+        const fizikalTemplate = (counter) => `
+            <div class="border border-tertiary rounded-lg p-4 hover:bg-light-bg">
+                <div class="flex items-center mb-3">
+                    <input type="checkbox" id="kelas${counter}" class="kelas-fizikal w-5 h-5 text-primary mr-3 border-tertiary" checked>
+                    <div class="flex-grow">
+                        <label for="kelas${counter}" class="block font-medium text-lg text-dark-text">Sekolah/Lokasi ${counter}</label>
+                        <input type="text" placeholder="Nama Sekolah/Lokasi" class="nama-lokasi mt-1 w-full px-3 py-2 border border-tertiary rounded-lg">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-dark-text">Bulan</label>
+                    <select class="kelas-bulan w-full md:w-1/2 px-3 py-2 border border-tertiary rounded-lg">
+                        <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Mac">Mac</option><option value="April">April</option><option value="Mei">Mei</option><option value="Jun">Jun</option><option value="Julai">Julai</option><option value="Ogos">Ogos</option><option value="September">September</option><option value="Oktober">Oktober</option><option value="November">November</option><option value="Disember">Disember</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-dark-text">Bilangan Pelajar (Per Slot)</label>
+                        <select class="pelajar-rate w-full px-3 py-2 border border-tertiary rounded-lg">
+                            <option value="70">0 - 5 pelajar</option><option value="100">6 - 10 pelajar</option><option value="120">11 - 15 pelajar</option><option value="150" selected>16 - 20 pelajar</option><option value="170">21 - 25 pelajar</option><option value="200">26 - 30 pelajar</option><option value="220">31 - 35 pelajar</option><option value="250">36 - 40 pelajar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="slots-list space-y-3"></div>
+                <div class="flex justify-end mt-3">
+                    <button class="tambah-slot px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition" data-type="fizikal">+ Tambah Slot</button>
+                </div>
+                <div class="subtotal-box mt-4">
+                    <h4 class="font-medium text-dark-text">Subtotal Kelas Fizikal</h4>
+                    <div class="subtotal-details text-sm mt-1">
+                        <p>Elaun Jurulatih: <span class="subtotal-pelajar">RM0.00</span></p>
+                        <p>Jumlah Mileage: <span class="subtotal-jarak">RM0.00</span></p>
+                        <p class="font-medium mt-1">Jumlah Keseluruhan: <span class="subtotal-jumlah">RM0.00</span></p>
+                    </div>
+                </div>
+            </div>`;
+
+        // Templat untuk menambah seksyen kelas pembangunan baru
+        const pembangunanTemplate = (counter) => `
+            <div class="border border-tertiary rounded-lg p-4 hover:bg-light-bg">
+                <div class="flex items-center mb-3">
+                    <input type="checkbox" id="pembangunan${counter}" class="kelas-pembangunan w-5 h-5 text-primary mr-3 border-tertiary" checked>
+                    <div class="flex-grow">
+                        <label for="pembangunan${counter}" class="block font-medium text-lg text-dark-text">Kumpulan ${counter}</label>
+                        <input type="text" placeholder="Nama Kumpulan" class="nama-lokasi mt-1 w-full px-3 py-2 border border-tertiary rounded-lg">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-dark-text">Bulan</label>
+                    <select class="kelas-bulan w-full md:w-1/2 px-3 py-2 border border-tertiary rounded-lg">
+                        <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Mac">Mac</option><option value="April">April</option><option value="Mei">Mei</option><option value="Jun">Jun</option><option value="Julai">Julai</option><option value="Ogos">Ogos</option><option value="September">September</option><option value="Oktober">Oktober</option><option value="November">November</option><option value="Disember">Disember</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-dark-text">Bilangan Pelajar (Per Slot)</label>
+                        <select class="pelajar-rate w-full px-3 py-2 border border-tertiary rounded-lg">
+                            <option value="80" selected>7 - 10 pelajar</option>
+                            <option value="100">11 - 15 pelajar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="slots-list space-y-3"></div>
+                <div class="flex justify-end mt-3">
+                    <button class="tambah-slot px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition" data-type="pembangunan">+ Tambah Slot</button>
+                </div>
+                <div class="subtotal-box mt-4">
+                    <h4 class="font-medium text-dark-text">Subtotal Kelas Pembangunan</h4>
+                    <div class="subtotal-details text-sm mt-1">
+                        <p>Elaun Jurulatih: <span class="subtotal-pelajar">RM0.00</span></p>
+                        <p class="font-medium mt-1">Jumlah Keseluruhan: <span class="subtotal-jumlah">RM0.00</span></p>
+                    </div>
+                </div>
+            </div>`;
+
+        // Templat untuk slot kelas fizikal
+        const slotFizikalTemplate = (slotCounter) => `
+            <div class="slot-container">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <span class="font-medium text-dark-text">Slot ${slotCounter}:</span>
+                        <input type="date" class="slot-tarikh w-full mt-1 px-3 py-2 border border-tertiary rounded-lg">
+                    </div>
+                    <div>
+                        <span class="font-medium text-dark-text">Kenderaan:</span>
+                        <select class="slot-kenderaan w-full mt-1 px-3 py-2 border border-tertiary rounded-lg">
+                            <option value="kereta">Kereta</option>
+                            <option value="motor">Motor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <span class="font-medium text-dark-text">Jarak (KM):</span>
+                        <select class="slot-jarak w-full mt-1 px-3 py-2 border border-tertiary rounded-lg">
+                            <option value="0">0 - 5 KM</option><option value="10">6 - 10 KM</option><option value="20">11 - 20 KM</option><option value="30">21 - 30 KM</option><option value="40">31 - 40 KM</option><option value="60">41 - 50 KM</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button class="hapus-slot px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-hover transition">Hapus</button>
+                    </div>
+                </div>
+            </div>`;
+            
+        // Templat untuk slot kelas pembangunan
+        const slotPembangunanTemplate = (slotCounter) => `
+            <div class="slot-container">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <span class="font-medium text-dark-text">Slot ${slotCounter}:</span>
+                        <input type="date" class="slot-tarikh w-full mt-1 px-3 py-2 border border-tertiary rounded-lg">
+                    </div>
+                    <div class="flex items-end">
+                        <button class="hapus-slot px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-hover transition">Hapus</button>
+                    </div>
+                </div>
+            </div>`;
+
+        // Templat untuk pelajar online
+        const onlineStudentTemplate = () => `
+            <div class="student-container p-4 border border-tertiary rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm text-dark-text mb-1">Nama Pelajar</label>
+                        <input type="text" class="online-student-name w-full px-3 py-2 border border-tertiary rounded-lg" placeholder="Nama pelajar">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-dark-text mb-1">Jenis Kelas</label>
+                        <select class="online-class-type w-full px-3 py-2 border border-tertiary rounded-lg">
+                            <option value="peribadi">Kelas Peribadi</option>
+                            <option value="kumpulan">Kelas Kumpulan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-dark-text mb-1">Tahap</label>
+                        <select class="online-class-level w-full px-3 py-2 border border-tertiary rounded-lg">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advance">Advance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-3">
+                    <div class="text-sm">
+                        <span class="font-medium text-dark-text">Elaun: </span>
+                        <span class="online-student-fee text-secondary font-medium">RM65.00</span>
+                    </div>
+                    <button class="hapus-pelajar px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-hover transition">Hapus</button>
+                </div>
+            </div>`;
+
+
+        // --- FUNGSI UTAMA & EVENT LISTENERS ---
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. Inisialisasi borang
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("tarikhPenyata").value = today;
+            
+            // 2. Muat turun data jurulatih dari server
+            google.script.run.withSuccessHandler(setupCoachDropdown).getCoachData();
+
+            // 3. Pasang event listeners untuk butang utama
+            document.getElementById("nama").addEventListener("change", updateBankDetails);
+            document.getElementById("tambahKelas").addEventListener("click", () => addKelas("fizikal"));
+            document.getElementById("tambahKelasPembangunan").addEventListener("click", () => addKelas("pembangunan"));
+            document.getElementById("tambahPelajarOnline").addEventListener("click", addPelajarOnline);
+            document.getElementById("kiraButton").addEventListener("click", calculateAll);
+            document.getElementById("resetButton").addEventListener("click", resetForm);
+            document.getElementById("saveButton").addEventListener("click", generateAndSave);
+
+            // 4. Pasang event listener global untuk borang (delegation)
+            // Ini akan mengira semula setiap kali ada perubahan
+            const mainContent = document.querySelector("main");
+            mainContent.addEventListener("change", calculateAll);
+            mainContent.addEventListener("input", calculateAll);
+            mainContent.addEventListener("click", function(event) {
+                if (event.target.classList.contains("tambah-slot")) {
+                    addSlot(event.target);
+                }
+                if (event.target.classList.contains("hapus-slot")) {
+                    event.target.closest(".slot-container").remove();
+                    calculateAll();
+                }
+                if (event.target.classList.contains("hapus-pelajar")) {
+                    event.target.closest(".student-container").remove();
+                    calculateAll();
+                }
+            });
+            
+            // 5. Tambah satu blok kelas permulaan untuk setiap jenis
+            addKelas("fizikal");
+            addKelas("pembangunan");
+            addPelajarOnline();
+        });
+
+        /**
+         * Mengisi dropdown nama jurulatih dengan data dari server.
+         * @param {object} coachData Objek data jurulatih.
+         */
+        function setupCoachDropdown(coachData) {
+            coachBankDetails = coachData;
+            const coachSelect = document.getElementById("nama");
+            coachSelect.innerHTML = ""; // Kosongkan pilihan sedia ada
+
+            if (Object.keys(coachBankDetails).length === 0) {
+                coachSelect.innerHTML = "<option>Gagal memuatkan data.</option>";
+                return;
+            }
+
+            Object.keys(coachBankDetails).forEach(name => {
+                const option = document.createElement("option");
+                option.value = name;
+                option.textContent = name;
+                coachSelect.appendChild(option);
+            });
+            
+            updateBankDetails(); // Kemas kini maklumat bank untuk jurulatih pertama
+        }
+
+        /**
+         * Mengemas kini medan bank dan no. akaun berdasarkan jurulatih yang dipilih.
+         */
+        function updateBankDetails() {
+            const selectedCoach = document.getElementById("nama").value;
+            const details = coachBankDetails[selectedCoach];
+            if (details) {
+                document.getElementById("jenisBank").value = details.bank;
+                document.getElementById("noAkaun").value = details.acc;
+            } else {
+                document.getElementById("jenisBank").value = "";
+                document.getElementById("noAkaun").value = "";
+            }
+        }
+
+        /**
+         * Menambah blok kelas baru (fizikal atau pembangunan).
+         * @param {string} type Jenis kelas: 'fizikal' atau 'pembangunan'.
+         */
+        function addKelas(type) {
+            const container = document.getElementById(type === "fizikal" ? "kelasContainer" : "pembangunanContainer");
+            const classCounter = container.children.length + 1;
+            const template = type === "fizikal" ? fizikalTemplate(classCounter) : pembangunanTemplate(classCounter);
+            container.insertAdjacentHTML("beforeend", template);
+            addSlot(container.lastElementChild.querySelector(".tambah-slot"));
+        }
+        
+        /**
+         * Menambah slot masa baru ke dalam blok kelas.
+         * @param {HTMLElement} button Butang 'Tambah Slot' yang ditekan.
+         */
+        function addSlot(button) {
+            const slotsList = button.closest(".border").querySelector(".slots-list");
+            const slotCounter = slotsList.children.length + 1;
+            const type = button.dataset.type;
+            const template = type === "fizikal" ? slotFizikalTemplate(slotCounter) : slotPembangunanTemplate(slotCounter);
+            slotsList.insertAdjacentHTML("beforeend", template);
+            calculateAll();
+        }
+
+        /**
+         * Menambah blok pelajar online baru.
+         */
+        function addPelajarOnline() {
+            document.getElementById("onlineStudentsContainer").insertAdjacentHTML("beforeend", onlineStudentTemplate());
+            calculateAll();
+        }
+
+        /**
+         * Mengira semua subtotal dan jumlah keseluruhan borang.
+         */
+        function calculateAll() {
+            let totalFizikal = Array.from(document.querySelectorAll("#kelasContainer > div"))
+                .reduce((total, el) => total + calculateLokasiSubtotal(el), 0);
+
+            let totalPembangunan = Array.from(document.querySelectorAll("#pembangunanContainer > div"))
+                .reduce((total, el) => total + calculateLokasiSubtotal(el), 0);
+
+            let totalOnline = Array.from(document.querySelectorAll(".student-container"))
+                .reduce((total, el) => total + calculateOnlineSubtotal(el), 0);
+
+            let totalTambahan = Array.from(document.querySelectorAll(".tambahan-bonus"))
+                .reduce((total, el) => total + (parseFloat(el.value) || 0), 0);
+
+            let totalPengurangan = Array.from(document.querySelectorAll(".pengurangan"))
+                .reduce((total, el) => total + (parseFloat(el.value) || 0), 0);
+
+            // Kemas kini subtotal di UI
+            document.querySelector(".subtotal-online-jumlah").textContent = `RM${totalOnline.toFixed(2)}`;
+            document.querySelector(".subtotal-tambahan-bonus-jumlah").textContent = `RM${totalTambahan.toFixed(2)}`;
+            document.querySelector(".subtotal-pengurangan-jumlah").textContent = `RM${totalPengurangan.toFixed(2)}`;
+
+            // Kemas kini ringkasan akhir
+            document.getElementById("jumlahFizikal").textContent = totalFizikal.toFixed(2);
+            document.getElementById("jumlahPembangunan").textContent = totalPembangunan.toFixed(2);
+            document.getElementById("jumlahOnline").textContent = totalOnline.toFixed(2);
+            document.getElementById("jumlahTambahanBonus").textContent = totalTambahan.toFixed(2);
+            document.getElementById("jumlahPengurangan").textContent = totalPengurangan.toFixed(2);
+            
+            const jumlahBersih = totalFizikal + totalPembangunan + totalOnline + totalTambahan - totalPengurangan;
+            document.getElementById("jumlahBersih").textContent = jumlahBersih.toFixed(2);
+        }
+
+        /**
+         * Mengira subtotal untuk satu blok lokasi (fizikal atau pembangunan).
+         * @param {HTMLElement} lokasiElement Elemen div untuk satu lokasi/kumpulan.
+         * @returns {number} Jumlah subtotal untuk lokasi tersebut.
+         */
+        function calculateLokasiSubtotal(lokasiElement) {
+            const checkbox = lokasiElement.querySelector('input[type="checkbox"]');
+            if (!checkbox || !checkbox.checked) {
+                lokasiElement.querySelectorAll(".subtotal-pelajar, .subtotal-jarak, .subtotal-jumlah").forEach(el => el.textContent = "RM0.00");
+                return 0;
+            }
+
+            const rate = parseFloat(lokasiElement.querySelector(".pelajar-rate").value) || 0;
+            const slots = lokasiElement.querySelectorAll(".slot-container");
+            let elaunJurulatih = slots.length * rate;
+
+            let totalMileage = Array.from(slots).reduce((total, slot) => {
+                let mileageValue = parseFloat(slot.querySelector(".slot-jarak")?.value) || 0;
+                if (slot.querySelector(".slot-kenderaan")?.value === "motor") {
+                    mileageValue /= 2;
+                }
+                return total + mileageValue;
+            }, 0);
+
+            const subtotal = elaunJurulatih + totalMileage;
+
+            // Kemas kini UI untuk subtotal lokasi ini
+            lokasiElement.querySelector(".subtotal-pelajar").textContent = `RM${elaunJurulatih.toFixed(2)}`;
+            if (lokasiElement.querySelector(".subtotal-jarak")) {
+                lokasiElement.querySelector(".subtotal-jarak").textContent = `RM${totalMileage.toFixed(2)}`;
+            }
+            lokasiElement.querySelector(".subtotal-jumlah").textContent = `RM${subtotal.toFixed(2)}`;
+            
+            return subtotal;
+        }
+
+        /**
+         * Mengira subtotal untuk satu pelajar online.
+         * @param {HTMLElement} studentElement Elemen div untuk satu pelajar.
+         * @returns {number} Jumlah yuran untuk pelajar tersebut.
+         */
+        function calculateOnlineSubtotal(studentElement) {
+            const classType = studentElement.querySelector(".online-class-type").value;
+            const classLevel = studentElement.querySelector(".online-class-level").value;
+            let fee = 0;
+
+            if (classType === "peribadi") {
+                if (classLevel === "beginner") fee = 65;
+                else if (classLevel === "intermediate") fee = 75;
+                else if (classLevel === "advance") fee = 25;
+            } else if (classType === "kumpulan") {
+                if (classLevel === "beginner") fee = 50;
+                else if (classLevel === "intermediate") fee = 60;
+            }
+
+            studentElement.querySelector(".online-student-fee").textContent = `RM${fee.toFixed(2)}`;
+            return fee;
+        }
+
+        /**
+         * Mengosongkan dan menetapkan semula semua medan dalam borang.
+         */
+        function resetForm() {
+            if (confirm("Adakah anda pasti untuk reset semua maklumat?")) {
+                document.getElementById("nama").selectedIndex = 0;
+                document.getElementById("bulan").value = "Januari";
+
+                document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+                    if (input.id !== "nama" && input.id !== "jenisBank" && input.id !== "noAkaun") {
+                        input.value = (input.type === "number") ? "0" : "";
+                    }
+                });
+
+                document.getElementById("kelasContainer").innerHTML = "";
+                document.getElementById("pembangunanContainer").innerHTML = "";
+                document.getElementById("onlineStudentsContainer").innerHTML = "";
+
+                addKelas("fizikal");
+                addKelas("pembangunan");
+                addPelajarOnline();
+
+                updateBankDetails();
+                document.getElementById("tarikhPenyata").value = new Date().toISOString().split("T")[0];
+            }
+        }
+        
+        /**
+         * Mengumpul data borang dan menghantarnya ke Google Apps Script untuk disimpan.
+         */
+        function generateAndSave() {
+            const saveButton = document.getElementById("saveButton");
+            const statusMessage = document.getElementById("statusMessage");
+
+            saveButton.disabled = true;
+            saveButton.innerText = "Menyimpan...";
+            statusMessage.textContent = "Menjana PDF dan menyimpan rekod...";
+            statusMessage.className = "text-center mt-4 font-medium text-blue-600 opacity-100";
+            
+            const parseCurrency = (text) => parseFloat(text.replace("RM", "").trim()) || 0;
+
+            // Kumpul semua data dari borang ke dalam satu objek
+            const reportData = {
+                coachName: document.getElementById("nama").value,
+                month: document.getElementById("bulan").value,
+                statementDate: document.getElementById("tarikhPenyata").value,
+                bankInfo: {
+                    bank: document.getElementById("jenisBank").value,
+                    acc: document.getElementById("noAkaun").value
+                },
+                baseAmount: parseCurrency(document.getElementById("jumlahFizikal").textContent) +
+                            parseCurrency(document.getElementById("jumlahPembangunan").textContent) +
+                            parseCurrency(document.getElementById("jumlahOnline").textContent),
+                extraAllowance: parseCurrency(document.getElementById("jumlahTambahanBonus").textContent),
+                deductions: parseCurrency(document.getElementById("jumlahPengurangan").textContent),
+                netAmount: parseCurrency(document.getElementById("jumlahBersih").textContent),
+                fizikal: [],
+                pembangunan: [],
+                online: [],
+                tambahanBonusDetails: [],
+                penguranganDetails: []
+            };
+
+            // Kumpul butiran kelas fizikal
+            document.querySelectorAll("#kelasContainer .border").forEach(container => {
+                if (container.querySelector('input[type="checkbox"]:checked')) {
+                    const kelasData = {
+                        nama: container.querySelector(".nama-lokasi").value || "Lokasi Tidak Dinamakan",
+                        elaunPerSlot: parseFloat(container.querySelector(".pelajar-rate").value) || 0,
+                        slots: []
+                    };
+                    container.querySelectorAll(".slot-container").forEach(slot => {
+                        kelasData.slots.push({
+                            tarikh: slot.querySelector(".slot-tarikh").value,
+                            kenderaan: slot.querySelector(".slot-kenderaan").value,
+                            jarakValue: slot.querySelector(".slot-jarak").value
+                        });
+                    });
+                    reportData.fizikal.push(kelasData);
+                }
+            });
+
+            // Kumpul butiran kelas pembangunan
+            document.querySelectorAll("#pembangunanContainer .border").forEach(container => {
+                if (container.querySelector('input[type="checkbox"]:checked')) {
+                    reportData.pembangunan.push({
+                        nama: container.querySelector(".nama-lokasi").value || "Kumpulan Tidak Dinamakan",
+                        jumlah: container.querySelector(".subtotal-jumlah").textContent
+                    });
+                }
+            });
+            
+            // Kumpul butiran pelajar online
+            document.querySelectorAll(".student-container").forEach(container => {
+                const studentName = container.querySelector(".online-student-name").value;
+                if (studentName) {
+                    reportData.online.push({
+                        nama: studentName,
+                        jumlah: container.querySelector(".online-student-fee").textContent
+                    });
+                }
+            });
+            
+            // Fungsi bantuan untuk menambah butiran jika nilainya lebih besar dari 0
+            const addDetailIfPositive = (detailsArray, inputId, description) => {
+                const value = parseFloat(document.getElementById(inputId).value);
+                if (value > 0) {
+                    detailsArray.push({
+                        keterangan: description,
+                        jumlah: "RM" + value.toFixed(2)
+                    });
+                }
+            };
+            
+            // Kumpul butiran elaun tambahan & bonus
+            addDetailIfPositive(reportData.tambahanBonusDetails, "elaunKejohanan", "Elaun Penyertaan Kejohanan");
+            addDetailIfPositive(reportData.tambahanBonusDetails, "elaunMakan", "Elaun Makan");
+            addDetailIfPositive(reportData.tambahanBonusDetails, "elaunArbiter", "Elaun Arbiter");
+            addDetailIfPositive(reportData.tambahanBonusDetails, "elaunPembantu", "Elaun Pembantu");
+            addDetailIfPositive(reportData.tambahanBonusDetails, "bonusTahunan", "Bonus Tahunan");
+            addDetailIfPositive(reportData.tambahanBonusDetails, "bonusPerayaan", "Bonus Perayaan");
+            addDetailIfPositive(reportData.tambahanBonusDetails, "bonusPelajar", "Bonus Pencapaian Pelajar");
+            addDetailIfPositive(reportData.tambahanBonusDetails, "bonusJurulatih", "Bonus Pencapaian Jurulatih");
+
+            // Kumpul butiran pengurangan
+            addDetailIfPositive(reportData.penguranganDetails, "kejohanan", "Penyertaan Kejohanan");
+            addDetailIfPositive(reportData.penguranganDetails, "yuran", "Komitmen Yuran Bulanan");
+            addDetailIfPositive(reportData.penguranganDetails, "rakaman", "Sistem Rakaman");
+            addDetailIfPositive(reportData.penguranganDetails, "peralatan", "Pembelian Peralatan");
+            
+            const lainPenguranganValue = parseFloat(document.getElementById("lainPengurangan").value);
+            if (lainPenguranganValue > 0) {
+                reportData.penguranganDetails.push({
+                    keterangan: document.getElementById("lainKeterangan").value || "Lain-lain",
+                    jumlah: "RM" + lainPenguranganValue.toFixed(2)
+                });
+            }
+
+            // Panggil fungsi server Google Apps Script
+            google.script.run
+                .withSuccessHandler(response => {
+                    if (response.status === 'success') {
+                        statusMessage.textContent = response.message;
+                        statusMessage.className = "text-center mt-4 font-medium text-green-600 opacity-100";
+                        window.open(response.pdfUrl, "_blank"); // Buka PDF di tab baru
+                    } else {
+                        throw new Error(response.message || "Ralat tidak diketahui dari server.");
+                    }
+                    saveButton.disabled = false;
+                    saveButton.innerText = "Cetak & Simpan PDF";
+                })
+                .withFailureHandler(error => {
+                    statusMessage.textContent = `Ralat: ${error.message}`;
+                    statusMessage.className = "text-center mt-4 font-medium text-red-600 opacity-100";
+                    saveButton.disabled = false;
+                    saveButton.innerText = "Cetak & Simpan PDF";
+                })
+                .saveRecordAndGeneratePdf(reportData);
+                
+            // Sembunyikan mesej status selepas beberapa saat
+            setTimeout(() => {
+                statusMessage.style.opacity = '0';
+            }, 7000);
+        }
+    </script>
+</body>
+</html>
