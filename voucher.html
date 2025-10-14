@@ -37,7 +37,13 @@
     <!-- Header -->
     <header class="orange-gradient text-white shadow-lg">
         <div class="container mx-auto px-4 py-6">
-            <h1 class="text-3xl font-bold text-center">Voucher Management System</h1>
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold">Voucher Management System</h1>
+                <button onclick="document.getElementById('setupModal').classList.remove('hidden')" 
+                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition duration-200">
+                    <span class="text-sm">⚙️ Setup Guide</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -212,6 +218,97 @@
         </div>
     </main>
 
+    <!-- Setup Instructions Modal -->
+    <div id="setupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-4xl mx-4 max-h-96 overflow-y-auto">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Google Sheets Integration Setup</h3>
+            <div class="text-sm text-gray-700 space-y-4">
+                <p><strong>To enable real Google Sheets integration, follow these steps:</strong></p>
+                
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-orange-800 mb-2">Step 1: Create Google Apps Script</h4>
+                    <ol class="list-decimal list-inside space-y-1 text-sm">
+                        <li>Go to <a href="https://script.google.com" target="_blank" class="text-blue-600 underline">script.google.com</a></li>
+                        <li>Create a new project</li>
+                        <li>Replace the default code with the provided Apps Script code</li>
+                        <li>Save and deploy as a web app</li>
+                        <li>Copy the deployment URL</li>
+                    </ol>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 mb-2">Step 2: Update Website</h4>
+                    <p>Replace 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' in the code with your actual deployment URL</p>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">Apps Script Code Template:</h4>
+                    <pre class="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    
+    if (data.action === 'redeemVouchers') {
+      return redeemVouchers(data.redemptions);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: 'Unknown action'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function redeemVouchers(redemptions) {
+  const usageSheetId = 'YOUR_USAGE_SHEET_ID';
+  const driveFolder = 'YOUR_DRIVE_FOLDER_ID';
+  
+  try {
+    const sheet = SpreadsheetApp.openById(usageSheetId).getActiveSheet();
+    
+    redemptions.forEach(redemption => {
+      // Upload photo to Drive
+      const photoBlob = Utilities.newBlob(
+        Utilities.base64Decode(redemption.photoData),
+        redemption.photoType,
+        redemption.photoName
+      );
+      
+      const folder = DriveApp.getFolderById(driveFolder);
+      const file = folder.createFile(photoBlob);
+      const photoUrl = file.getUrl();
+      
+      // Add row to Usage sheet
+      sheet.appendRow([
+        redemption.voucherId,
+        redemption.dateRedeemed,
+        redemption.usageCategory,
+        redemption.details,
+        redemption.customerName,
+        photoUrl
+      ]);
+    });
+    
+    return ContentService.createTextOutput(JSON.stringify({success: true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+                </div>
+                
+                <p class="text-red-600 font-semibold">⚠️ Currently using demo mode. Redemptions won't be saved until Google Apps Script is configured.</p>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button onclick="closeSetupModal()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-8 max-w-md mx-4">
@@ -235,10 +332,25 @@
         const recordsPerPage = 10;
         let validatedVouchers = [];
 
+        // Configuration
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsTH34UKNqibhLo8r9R13rq1yqxZohMsSdX5NLg2vMwxR-0t-djBHyrOlCvHROsWg3tQ/exec';
+        const DEMO_MODE = false;
+
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             loadVouchers();
+            if (DEMO_MODE) {
+                // Show setup instructions on first load
+                setTimeout(() => {
+                    document.getElementById('setupModal').classList.remove('hidden');
+                }, 1000);
+            }
         });
+
+        // Close setup modal
+        function closeSetupModal() {
+            document.getElementById('setupModal').classList.add('hidden');
+        }
 
         // Navigation functions
         function showSection(section) {
@@ -526,53 +638,149 @@
             document.getElementById('validateLoading').classList.add('hidden');
         }
 
-        // Redeem vouchers
-        function redeemVouchers() {
+        // Redeem vouchers - Real Google Sheets Integration
+        async function redeemVouchers() {
             const usageCategory = document.getElementById('usageCategory').value;
             const customerName = document.getElementById('customerName').value;
             const details = document.getElementById('details').value;
             const photoFile = document.getElementById('photoUpload').files[0];
             
             if (!usageCategory || !customerName || !details) {
-                alert('Please fill in all required fields');
+                showNotification('Please fill in all required fields', 'error');
                 return;
             }
             
             if (!photoFile) {
-                alert('Please upload a photo');
+                showNotification('Please upload a photo', 'error');
                 return;
             }
             
             document.getElementById('redeemText').classList.add('hidden');
             document.getElementById('redeemLoading').classList.remove('hidden');
             
-            // Simulate redemption process
-            setTimeout(() => {
+            try {
                 const currentDate = new Date().toISOString().split('T')[0];
-                const voucherIds = validatedVouchers.map(v => v['Voucher ID']).join(',');
+                const currentDateTime = new Date().toLocaleString();
                 
-                // In a real implementation, this would send data to Google Sheets
-                // For demo purposes, we'll show success message
+                // Prepare data for each voucher redemption
+                const redemptionPromises = validatedVouchers.map(async (voucher) => {
+                    const photoName = `${customerName} - ${currentDate}`;
+                    
+                    // Convert photo to base64 for upload
+                    const photoBase64 = await fileToBase64(photoFile);
+                    
+                    const redemptionData = {
+                        voucherId: voucher['Voucher ID'],
+                        dateRedeemed: currentDateTime,
+                        usageCategory: usageCategory,
+                        details: details,
+                        customerName: customerName,
+                        photoName: photoName,
+                        photoData: photoBase64,
+                        photoType: photoFile.type
+                    };
+                    
+                    return redemptionData;
+                });
                 
-                document.getElementById('successMessage').textContent = 
-                    `Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0).toFixed(2)}`;
+                const allRedemptions = await Promise.all(redemptionPromises);
                 
-                document.getElementById('successModal').classList.remove('hidden');
+                if (DEMO_MODE) {
+                    // Demo mode - simulate success
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    const totalValue = validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0);
+                    
+                    document.getElementById('successMessage').textContent = 
+                        `[DEMO MODE] Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${totalValue.toFixed(2)}. Note: Data not actually saved - configure Google Apps Script for real integration.`;
+                    
+                    document.getElementById('successModal').classList.remove('hidden');
+                    
+                    // Reset form
+                    resetRedemptionForm();
+                } else {
+                    // Real mode - send to Google Apps Script
+                    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'redeemVouchers',
+                            redemptions: allRedemptions
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to redeem vouchers');
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const totalValue = validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0);
+                        
+                        document.getElementById('successMessage').textContent = 
+                            `Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${totalValue.toFixed(2)}`;
+                        
+                        document.getElementById('successModal').classList.remove('hidden');
+                        
+                        // Reset form
+                        resetRedemptionForm();
+                        
+                        // Refresh voucher data
+                        await loadVouchers();
+                    } else {
+                        throw new Error(result.error || 'Failed to redeem vouchers');
+                    }
+                }
                 
-                // Reset form
-                document.getElementById('voucherIds').value = '';
-                document.getElementById('usageCategory').value = '';
-                document.getElementById('customerName').value = '';
-                document.getElementById('details').value = '';
-                document.getElementById('photoUpload').value = '';
-                document.getElementById('validationResults').classList.add('hidden');
-                document.getElementById('redemptionForm').classList.add('hidden');
-                
+            } catch (error) {
+                console.error('Redemption error:', error);
+                showNotification('Error redeeming vouchers. Please try again.', 'error');
+            } finally {
                 document.getElementById('redeemText').classList.remove('hidden');
                 document.getElementById('redeemLoading').classList.add('hidden');
-                
-                validatedVouchers = [];
-            }, 2000);
+            }
+        }
+        
+        // Helper function to convert file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+        
+        // Reset redemption form
+        function resetRedemptionForm() {
+            document.getElementById('voucherIds').value = '';
+            document.getElementById('usageCategory').value = '';
+            document.getElementById('customerName').value = '';
+            document.getElementById('details').value = '';
+            document.getElementById('photoUpload').value = '';
+            document.getElementById('validationResults').classList.add('hidden');
+            document.getElementById('redemptionForm').classList.add('hidden');
+            validatedVouchers = [];
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+                type === 'error' ? 'bg-red-500 text-white' : 
+                type === 'success' ? 'bg-green-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
         }
 
         // Close modal
@@ -585,5 +793,5 @@
             e.target.value = e.target.value.toUpperCase();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e3dc803199a84a',t:'MTc2MDQxMTE5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e4f468e071a84a',t:'MTc2MDQyMjY1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
