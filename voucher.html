@@ -286,7 +286,7 @@
         const USAGE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=1706713915&single=true&output=csv';
         
         // IMPORTANT: Replace this with your Google Apps Script Web App URL from the README
-        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyk5VyFGNOO_plGzXepYvGB4J91GqCZ9bRdVR7cvzyjzkCzYdHsm8N-SGoxl24w6IqnA/exec';
 
         // --- State Management ---
         const state = {
@@ -546,7 +546,7 @@
                 return;
             }
 
-            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+            if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxyk5VyFGNOO_plGzXepYvGB4J91GqCZ9bRdVR7cvzyjzkCzYdHsm8N-SGoxl24w6IqnA/exec') {
                 showResult(resultDiv, 'Configuration error: Google Apps Script URL is not set in the HTML file.', 'error');
                 setButtonLoading('validateBtn', false);
                 return;
@@ -741,7 +741,7 @@
 
         // --- Utility & Helper Functions ---
         async function postToGoogleScript(payload) {
-            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+            if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxyk5VyFGNOO_plGzXepYvGB4J91GqCZ9bRdVR7cvzyjzkCzYdHsm8N-SGoxl24w6IqnA/exec') {
                 throw new Error('Google Apps Script URL is not configured.');
             }
             const response = await fetch(GOOGLE_SCRIPT_URL, {
