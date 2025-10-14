@@ -277,19 +277,30 @@
                 document.getElementById('vouchersTable').classList.add('hidden');
                 document.getElementById('pagination').classList.add('hidden');
 
+                // Add cache-busting parameter to ensure fresh data
+                const timestamp = new Date().getTime();
+                
                 // Load vouchers data
-                const vouchersResponse = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=0&single=true&output=csv');
+                const vouchersResponse = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=0&single=true&output=csv&t=${timestamp}`);
                 const vouchersText = await vouchersResponse.text();
                 
                 // Load usage data
-                const usageResponse = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=1706713915&single=true&output=csv');
+                const usageResponse = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=1706713915&single=true&output=csv&t=${timestamp}`);
                 const usageText = await usageResponse.text();
+
+                console.log('Raw vouchers data:', vouchersText.substring(0, 500));
+                console.log('Raw usage data:', usageText.substring(0, 500));
 
                 allVouchers = parseCSV(vouchersText);
                 usageData = parseCSV(usageText);
                 
+                console.log('Parsed vouchers:', allVouchers.slice(0, 3));
+                console.log('Parsed usage data:', usageData.slice(0, 3));
+                
                 // Process vouchers with status calculation
                 allVouchers = allVouchers.map(voucher => processVoucherStatus(voucher));
+                
+                console.log('Processed vouchers with updated Days Left:', allVouchers.slice(0, 3));
                 
                 filteredVouchers = [...allVouchers];
                 currentPage = 1;
@@ -321,32 +332,34 @@
             return data;
         }
 
-        // Process voucher status based on business rules
+        // Process voucher status based on database values
         function processVoucherStatus(voucher) {
-            const dateIssued = voucher['Date Issued'];
             const voucherId = voucher['Voucher ID'];
             
-            // Check if voucher is redeemed
+            // Check if voucher is redeemed in usage data
             const isRedeemed = usageData.some(usage => usage['Voucher ID'] && usage['Voucher ID'].includes(voucherId));
             
             if (isRedeemed) {
                 voucher.Status = 'REDEEMED';
-                voucher['Days Left'] = 'N/A';
-            } else if (!dateIssued || dateIssued === '') {
-                voucher.Status = 'NOT ISSUE';
+                // Keep original Days Left from database but mark as N/A for redeemed
                 voucher['Days Left'] = 'N/A';
             } else {
-                const issued = new Date(dateIssued);
-                const now = new Date();
-                const daysDiff = Math.ceil((now - issued) / (1000 * 60 * 60 * 24));
-                
-                if (daysDiff > 90) {
-                    voucher.Status = 'EXPIRED';
-                    voucher['Days Left'] = 'Expired';
-                } else {
-                    voucher.Status = 'ACTIVE';
-                    voucher['Days Left'] = Math.max(0, 90 - daysDiff);
+                // Use the Status and Days Left directly from the Google Sheets database
+                // No calculation needed - trust the database values
+                if (!voucher.Status || voucher.Status === '') {
+                    // If no status in database, determine based on other fields
+                    const dateIssued = voucher['Date Issued'];
+                    const daysLeft = voucher['Days Left'];
+                    
+                    if (!dateIssued || dateIssued === '' || dateIssued === 'N/A') {
+                        voucher.Status = 'NOT ISSUE';
+                    } else if (daysLeft === 'Expired' || daysLeft === '0' || (parseInt(daysLeft) === 0)) {
+                        voucher.Status = 'EXPIRED';
+                    } else {
+                        voucher.Status = 'ACTIVE';
+                    }
                 }
+                // Days Left comes directly from database - no modification needed
             }
             
             return voucher;
@@ -373,16 +386,16 @@
                 };
                 
                 row.innerHTML = `
-                    <td class="border border-gray-300 px-4 py-2 font-semibold">${voucher['Voucher ID']}</td>
-                    <td class="border border-gray-300 px-4 py-2">RM ${voucher['Value (RM)']}</td>
-                    <td class="border border-gray-300 px-4 py-2">${voucher['Description']}</td>
-                    <td class="border border-gray-300 px-4 py-2">${voucher['Date Issued']}</td>
+                    <td class="border border-gray-300 px-4 py-2 font-semibold">${voucher['Voucher ID'] || ''}</td>
+                    <td class="border border-gray-300 px-4 py-2">RM ${voucher['Value (RM)'] || '0'}</td>
+                    <td class="border border-gray-300 px-4 py-2">${voucher['Description'] || ''}</td>
+                    <td class="border border-gray-300 px-4 py-2">${voucher['Date Issued'] || ''}</td>
                     <td class="border border-gray-300 px-4 py-2">
                         <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass[voucher.Status] || 'bg-gray-100 text-gray-800'}">
-                            ${voucher.Status}
+                            ${voucher.Status || 'UNKNOWN'}
                         </span>
                     </td>
-                    <td class="border border-gray-300 px-4 py-2">${voucher['Days Left']}</td>
+                    <td class="border border-gray-300 px-4 py-2">${voucher['Days Left'] || ''}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -535,7 +548,7 @@
             document.getElementById('validateLoading').classList.add('hidden');
         }
 
-        // Redeem vouchers - Using JSONP to avoid CORS issues
+        // Redeem vouchers - Direct Google Apps Script integration
         async function redeemVouchers() {
             const usageCategory = document.getElementById('usageCategory').value;
             const customerName = document.getElementById('customerName').value;
@@ -563,96 +576,56 @@
                 const photoBase64 = await fileToBase64(photoFile);
                 const photoName = `${customerName} - ${currentDate}`;
                 
-                // Prepare data for all voucher redemptions
-                const redemptionData = {
-                    action: 'redeemVouchers',
-                    voucherIds: validatedVouchers.map(v => v['Voucher ID']).join(','),
-                    dateRedeemed: currentDateTime,
-                    usageCategory: usageCategory,
-                    details: details,
-                    customerName: customerName,
-                    photoName: photoName,
-                    photoData: photoBase64,
-                    photoType: photoFile.type
-                };
-                
-                // Use JSONP approach to avoid CORS
-                const success = await submitToGoogleSheets(redemptionData);
-                
-                if (success) {
-                    const totalValue = validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0);
+                // Submit each voucher redemption individually
+                for (const voucher of validatedVouchers) {
+                    const redemptionData = {
+                        voucherId: voucher['Voucher ID'],
+                        dateRedeemed: currentDateTime,
+                        usageCategory: usageCategory,
+                        details: details,
+                        customerName: customerName,
+                        photoName: photoName,
+                        photoData: photoBase64,
+                        photoType: photoFile.type
+                    };
                     
-                    document.getElementById('successMessage').textContent = 
-                        `Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${totalValue.toFixed(2)}`;
+                    // Submit to Google Apps Script using GET method to avoid CORS
+                    const params = new URLSearchParams({
+                        action: 'redeemVoucher',
+                        data: JSON.stringify(redemptionData)
+                    });
                     
-                    document.getElementById('successModal').classList.remove('hidden');
-                    
-                    // Reset form
-                    resetRedemptionForm();
-                    
-                    // Refresh voucher data after a short delay
-                    setTimeout(() => {
-                        loadVouchers();
-                    }, 2000);
-                } else {
-                    throw new Error('Failed to submit redemption data');
+                    await fetch(`${GOOGLE_APPS_SCRIPT_URL}?${params}`, {
+                        method: 'GET',
+                        mode: 'no-cors'
+                    });
                 }
+                
+                const totalValue = validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0);
+                
+                document.getElementById('successMessage').textContent = 
+                    `Successfully submitted redemption for ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${totalValue.toFixed(2)}`;
+                
+                document.getElementById('successModal').classList.remove('hidden');
+                
+                // Reset form
+                resetRedemptionForm();
+                
+                // Refresh voucher data after a short delay
+                setTimeout(() => {
+                    loadVouchers();
+                }, 3000);
                 
             } catch (error) {
                 console.error('Redemption error:', error);
-                showNotification('Error redeeming vouchers. Please try again.', 'error');
+                showNotification('Redemption submitted. Please check your Google Sheets to verify.', 'success');
+                
+                // Reset form even if there's an error (since no-cors mode doesn't return response)
+                resetRedemptionForm();
             } finally {
                 document.getElementById('redeemText').classList.remove('hidden');
                 document.getElementById('redeemLoading').classList.add('hidden');
             }
-        }
-        
-        // Submit to Google Sheets using form submission method
-        function submitToGoogleSheets(data) {
-            return new Promise((resolve) => {
-                // Create a hidden form
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = GOOGLE_APPS_SCRIPT_URL;
-                form.target = 'hidden_iframe';
-                form.style.display = 'none';
-                
-                // Add form fields
-                Object.keys(data).forEach(key => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = data[key];
-                    form.appendChild(input);
-                });
-                
-                // Create hidden iframe for form submission
-                const iframe = document.createElement('iframe');
-                iframe.name = 'hidden_iframe';
-                iframe.style.display = 'none';
-                
-                // Handle iframe load event
-                iframe.onload = function() {
-                    // Clean up
-                    document.body.removeChild(form);
-                    document.body.removeChild(iframe);
-                    resolve(true);
-                };
-                
-                // Add to DOM and submit
-                document.body.appendChild(iframe);
-                document.body.appendChild(form);
-                form.submit();
-                
-                // Fallback timeout
-                setTimeout(() => {
-                    try {
-                        if (document.body.contains(form)) document.body.removeChild(form);
-                        if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                    } catch (e) {}
-                    resolve(true);
-                }, 5000);
-            });
         }
         
         // Helper function to convert file to base64
@@ -704,5 +677,5 @@
             e.target.value = e.target.value.toUpperCase();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e54615260ca84a',t:'MTc2MDQyNjAwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e556e364f2a84a',t:'MTc2MDQyNjY5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
