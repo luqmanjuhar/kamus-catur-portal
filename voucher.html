@@ -317,6 +317,7 @@
             document.getElementById('editVoucherForm').addEventListener('submit', handleUpdateVoucher);
             // Other listeners
             document.getElementById('editVoucherSelect').addEventListener('change', loadVoucherForEdit);
+            document.getElementById('usageCategory').addEventListener('change', updateDetailsPlaceholder);
         }
 
         // --- Navigation ---
@@ -342,6 +343,23 @@
             if (section === 'manage') {
                 populateEditDropdown();
             }
+        }
+
+        // --- UI Helper Functions ---
+        function updateDetailsPlaceholder() {
+            const category = document.getElementById('usageCategory').value;
+            const detailsInput = document.getElementById('details');
+            let placeholder = 'Enter details...';
+
+            if (category === 'Chess Class') {
+                placeholder = 'e.g., Peribadi/Ogos - Coach Luqman';
+            } else if (category === 'Tournament Name') {
+                placeholder = 'e.g., Battle of Duo (Under 17) - 2nd Series';
+            } else if (category === 'Product Purchase') {
+                placeholder = 'e.g., Wooden Chess Set, Strategy Book';
+            }
+            
+            detailsInput.placeholder = placeholder;
         }
 
         // --- Data Fetching & Processing ---
@@ -546,7 +564,7 @@
                 return;
             }
 
-            if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxyk5VyFGNOO_plGzXepYvGB4J91GqCZ9bRdVR7cvzyjzkCzYdHsm8N-SGoxl24w6IqnA/exec') {
+            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
                 showResult(resultDiv, 'Configuration error: Google Apps Script URL is not set in the HTML file.', 'error');
                 setButtonLoading('validateBtn', false);
                 return;
@@ -741,7 +759,7 @@
 
         // --- Utility & Helper Functions ---
         async function postToGoogleScript(payload) {
-            if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxyk5VyFGNOO_plGzXepYvGB4J91GqCZ9bRdVR7cvzyjzkCzYdHsm8N-SGoxl24w6IqnA/exec') {
+            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
                 throw new Error('Google Apps Script URL is not configured.');
             }
             const response = await fetch(GOOGLE_SCRIPT_URL, {
