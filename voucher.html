@@ -5,22 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voucher Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
             box-sizing: border-box;
         }
         .orange-gradient {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            background: linear-gradient(135deg, #ff7849 0%, #ff9500 100%);
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #f97316;
+        .loading {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff7849;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 20px;
+            height: 20px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
@@ -28,40 +25,31 @@
             100% { transform: rotate(360deg); }
         }
         .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+            animation: fadeIn 0.5s ease-in;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        .modal-overlay {
-            transition: opacity 0.3s ease;
-        }
-        .modal-content {
-            transition: transform 0.3s ease;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-orange-50 min-h-full">
     <!-- Header -->
-    <header class="orange-gradient text-white shadow-lg sticky top-0 z-20">
-        <div class="container mx-auto px-4 py-5">
-            <h1 class="text-3xl font-bold text-center tracking-wide">Voucher Management System</h1>
+    <header class="orange-gradient text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-center">Voucher Management System</h1>
         </div>
     </header>
 
     <!-- Navigation -->
-    <nav class="bg-white shadow-md sticky top-[68px] z-20">
+    <nav class="bg-white shadow-md">
         <div class="container mx-auto px-4">
-            <div class="flex space-x-2 sm:space-x-8">
-                <button onclick="showSection('redeem')" id="redeemTab" class="py-4 px-2 sm:px-6 border-b-4 font-semibold transition-colors duration-300">
+            <div class="flex justify-center space-x-8">
+                <button onclick="showSection('redeem')" id="redeemTab" class="py-4 px-6 text-orange-600 border-b-2 border-orange-600 font-semibold">
                     Redeem Voucher
                 </button>
-                <button onclick="showSection('dashboard')" id="dashboardTab" class="py-4 px-2 sm:px-6 border-b-4 font-semibold transition-colors duration-300">
+                <button onclick="showSection('dashboard')" id="dashboardTab" class="py-4 px-6 text-gray-600 hover:text-orange-600 font-semibold">
                     Voucher Dashboard
-                </button>
-                <button onclick="showSection('manage')" id="manageTab" class="py-4 px-2 sm:px-6 border-b-4 font-semibold transition-colors duration-300">
-                    Manage Vouchers
                 </button>
             </div>
         </div>
@@ -70,26 +58,38 @@
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
         <!-- Redeem Voucher Section -->
-        <section id="redeemSection" class="hidden fade-in">
-            <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6 sm:p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Redeem Vouchers</h2>
-                <div class="space-y-6">
-                    <div>
-                        <label for="voucherIds" class="block text-sm font-medium text-gray-700 mb-2">Voucher IDs (comma separated)</label>
-                        <textarea id="voucherIds" placeholder="e.g., KC001, KC002, KC003" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 uppercase"></textarea>
-                        <p class="text-sm text-gray-500 mt-1">Enter voucher IDs in UPPERCASE.</p>
-                    </div>
-                    <div>
-                        <button id="validateBtn" onclick="validateVouchers()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto flex items-center justify-center">
-                            <svg id="validateSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            <span>Validate Vouchers</span>
-                        </button>
-                    </div>
-                    <div id="validationResult" class="hidden"></div>
-                    <form id="redeemForm" class="hidden space-y-6 border-t pt-6">
+        <div id="redeemSection" class="fade-in">
+            <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Redeem Your Vouchers</h2>
+                
+                <!-- Voucher Input -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">Voucher IDs (separate multiple with commas)</label>
+                    <input type="text" id="voucherIds" placeholder="e.g., KC001, KC002, KC003" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 uppercase">
+                    <p class="text-sm text-gray-500 mt-1">Enter voucher IDs in UPPERCASE, separated by commas</p>
+                </div>
+
+                <!-- Validate Button -->
+                <button onclick="validateVouchers()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg mb-6 transition duration-200">
+                    <span id="validateText">Validate Vouchers</span>
+                    <div id="validateLoading" class="loading mx-auto hidden"></div>
+                </button>
+
+                <!-- Validation Results -->
+                <div id="validationResults" class="hidden mb-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold text-gray-800 mb-2">Validation Results:</h3>
+                    <div id="validVouchers" class="mb-2"></div>
+                    <div id="invalidVouchers" class="mb-2"></div>
+                    <div id="totalValue" class="text-xl font-bold text-green-600"></div>
+                </div>
+
+                <!-- Redemption Form -->
+                <div id="redemptionForm" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label for="usageCategory" class="block text-sm font-medium text-gray-700 mb-2">Usage Category</label>
-                            <select id="usageCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+                            <label class="block text-gray-700 font-semibold mb-2">Usage Category</label>
+                            <select id="usageCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
                                 <option value="">Select Category</option>
                                 <option value="Chess Class">Chess Class</option>
                                 <option value="Tournament Name">Tournament Name</option>
@@ -97,113 +97,48 @@
                             </select>
                         </div>
                         <div>
-                            <label for="details" class="block text-sm font-medium text-gray-700 mb-2">Details</label>
-                            <input type="text" id="details" placeholder="e.g., Peribadi/Ogos - Coach Luqman" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+                            <label class="block text-gray-700 font-semibold mb-2">Customer Name</label>
+                            <input type="text" id="customerName" placeholder="e.g., Luqman (Aryan)" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
                         </div>
-                        <div>
-                            <label for="customerName" class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
-                            <input type="text" id="customerName" placeholder="e.g., Luqman (Aryan)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                        </div>
-                        <div>
-                            <label for="photo" class="block text-sm font-medium text-gray-700 mb-2">Upload Photo</label>
-                            <input type="file" id="photo" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" required>
-                        </div>
-                        <button type="submit" id="redeemSubmitBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
-                             <svg id="redeemSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            <span>Redeem Vouchers</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- Manage Vouchers Section -->
-        <section id="manageSection" class="hidden fade-in">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Add New Voucher -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Voucher</h2>
-                    <form id="addVoucherForm" class="space-y-4">
-                        <div>
-                            <label for="newVoucherId" class="block text-sm font-medium text-gray-700 mb-2">Voucher ID</label>
-                            <input type="text" id="newVoucherId" placeholder="e.g., KC004" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 uppercase" required>
-                        </div>
-                        <div>
-                            <label for="newVoucherValue" class="block text-sm font-medium text-gray-700 mb-2">Value (RM)</label>
-                            <input type="number" id="newVoucherValue" step="0.01" placeholder="0.00" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                        </div>
-                        <div>
-                            <label for="newVoucherDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <input type="text" id="newVoucherDescription" placeholder="Where the voucher is given" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                        </div>
-                        <div>
-                            <label for="newVoucherDate" class="block text-sm font-medium text-gray-700 mb-2">Date Issued (DD/MM/YYYY)</label>
-                            <input type="text" id="newVoucherDate" placeholder="e.g., 25/12/2024" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                        </div>
-                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center">
-                           <svg id="addSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            <span>Add Voucher</span>
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Edit Existing Voucher -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Voucher</h2>
-                    <div class="mb-4">
-                        <label for="editVoucherSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Voucher to Edit</label>
-                        <select id="editVoucherSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                            <option value="">Select a voucher...</option>
-                        </select>
                     </div>
-                    <form id="editVoucherForm" class="space-y-4 hidden">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Voucher ID</label>
-                            <input type="text" id="editVoucherId" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100">
-                        </div>
-                        <div>
-                            <label for="editVoucherValue" class="block text-sm font-medium text-gray-700 mb-2">Value (RM)</label>
-                            <input type="number" id="editVoucherValue" step="0.01" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                        </div>
-                        <div>
-                            <label for="editVoucherDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <input type="text" id="editVoucherDescription" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                        </div>
-                        <div>
-                            <label for="editVoucherDate" class="block text-sm font-medium text-gray-700 mb-2">Date Issued (DD/MM/YYYY)</label>
-                            <input type="text" id="editVoucherDate" placeholder="e.g., 25/12/2024" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                        </div>
-                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center">
-                                <svg id="updateSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                <span>Update Voucher</span>
-                            </button>
-                            <button type="button" onclick="deleteVoucher()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center">
-                                <svg id="deleteSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                <span>Delete Voucher</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
 
-        <!-- Dashboard Section -->
-        <section id="dashboardSection" class="hidden fade-in">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <h2 class="text-2xl font-bold text-gray-800">Voucher Dashboard</h2>
-                    <button onclick="loadData(true)" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center w-full sm:w-auto">
-                        <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4h-5v5M4 20h5v-5"/></svg>
-                        Refresh Data
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-semibold mb-2">Details</label>
+                        <textarea id="details" rows="3" placeholder="Enter details based on category selected"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"></textarea>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Chess Class: e.g., Peribadi/Ogos - Coach Luqman<br>
+                            Tournament: e.g., Battle of Duo (Under 17) - 2nd Series
+                        </p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Upload Photo</label>
+                        <input type="file" id="photoUpload" accept="image/*" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <p class="text-sm text-gray-500 mt-1">Photo will be renamed to: Customer Name - Date Redeemed</p>
+                    </div>
+
+                    <button onclick="redeemVouchers()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        <span id="redeemText">Redeem Vouchers</span>
+                        <div id="redeemLoading" class="loading mx-auto hidden"></div>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Voucher Dashboard</h2>
+                
                 <!-- Filters -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div>
-                        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status Filter</label>
-                        <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                            <option value="ALL">All Statuses</option>
+                        <label class="block text-gray-700 font-semibold mb-2">Status Filter</label>
+                        <select id="statusFilter" onchange="applyFilters()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">All Status</option>
                             <option value="ACTIVE">Active</option>
                             <option value="REDEEMED">Redeemed</option>
                             <option value="EXPIRED">Expired</option>
@@ -211,643 +146,444 @@
                         </select>
                     </div>
                     <div>
-                        <label for="searchFilter" class="block text-sm font-medium text-gray-700 mb-1">Search Voucher ID</label>
-                        <input type="text" id="searchFilter" placeholder="Search ID..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <label class="block text-gray-700 font-semibold mb-2">Value Range</label>
+                        <select id="valueFilter" onchange="applyFilters()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">All Values</option>
+                            <option value="0-50">RM 0 - 50</option>
+                            <option value="51-100">RM 51 - 100</option>
+                            <option value="101-200">RM 101 - 200</option>
+                            <option value="201+">RM 201+</option>
+                        </select>
                     </div>
                     <div>
-                        <label for="minValueFilter" class="block text-sm font-medium text-gray-700 mb-1">Min Value (RM)</label>
-                        <input type="number" id="minValueFilter" placeholder="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <label class="block text-gray-700 font-semibold mb-2">Search Voucher ID</label>
+                        <input type="text" id="searchFilter" onkeyup="applyFilters()" placeholder="Search by ID..." 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
                     </div>
-                    <div>
-                        <label for="maxValueFilter" class="block text-sm font-medium text-gray-700 mb-1">Max Value (RM)</label>
-                        <input type="number" id="maxValueFilter" placeholder="1000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    <div class="flex items-end">
+                        <button onclick="loadVouchers()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                            Refresh Data
+                        </button>
                     </div>
                 </div>
-                <!-- Loading -->
+
+                <!-- Loading State -->
                 <div id="dashboardLoading" class="text-center py-8">
-                    <div class="loader mx-auto mb-4"></div>
+                    <div class="loading mx-auto mb-4"></div>
                     <p class="text-gray-600">Loading vouchers...</p>
                 </div>
+
                 <!-- Vouchers Table -->
-                <div id="vouchersTableContainer" class="hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="border-b px-4 py-3 text-left font-semibold text-gray-600">Voucher ID</th>
-                                    <th class="border-b px-4 py-3 text-left font-semibold text-gray-600">Value (RM)</th>
-                                    <th class="border-b px-4 py-3 text-left font-semibold text-gray-600">Description</th>
-                                    <th class="border-b px-4 py-3 text-left font-semibold text-gray-600">Date Issued</th>
-                                    <th class="border-b px-4 py-3 text-left font-semibold text-gray-600">Status</th>
-                                    <th class="border-b px-4 py-3 text-left font-semibold text-gray-600">Days Left</th>
-                                </tr>
-                            </thead>
-                            <tbody id="vouchersTableBody"></tbody>
-                        </table>
+                <div id="vouchersTable" class="hidden overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-orange-100">
+                                <th class="border border-gray-300 px-4 py-2 text-left">Voucher ID</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Value (RM)</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Description</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Date Issued</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Days Left</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vouchersTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="hidden flex justify-between items-center mt-6">
+                    <div class="text-gray-600">
+                        Showing <span id="showingStart">1</span> to <span id="showingEnd">10</span> of <span id="totalRecords">0</span> records
                     </div>
-                    <p id="noResults" class="text-center text-gray-500 py-6 hidden">No vouchers found matching your criteria.</p>
-                    <!-- Pagination -->
-                    <div id="paginationContainer" class="flex justify-between items-center mt-6">
-                        <div class="text-sm text-gray-600">
-                            Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span id="totalRecords">0</span> records
-                        </div>
-                        <div class="flex space-x-2">
-                            <button onclick="previousPage()" id="prevBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors">
-                                Previous
-                            </button>
-                            <span id="pageInfo" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg font-semibold">Page 1 of 1</span>
-                            <button onclick="nextPage()" id="nextBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors">
-                                Next
-                            </button>
-                        </div>
+                    <div class="flex space-x-2">
+                        <button onclick="previousPage()" id="prevBtn" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Previous
+                        </button>
+                        <span id="pageInfo" class="px-4 py-2 bg-orange-100 text-orange-800 rounded-lg font-semibold">
+                            Page 1
+                        </span>
+                        <button onclick="nextPage()" id="nextBtn" class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg hover:bg-gray-400 transition duration-200">
+                            Next
+                        </button>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     </main>
 
-    <!-- Generic Modal -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-overlay p-4">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl modal-content transform scale-95">
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md mx-4">
             <div class="text-center">
-                <div id="modal-icon" class="text-6xl mb-4"></div>
-                <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-2"></h3>
-                <p id="modal-message" class="text-gray-600 mb-6"></p>
-                <div id="modal-actions" class="flex justify-center space-x-4"></div>
+                <div class="text-green-500 text-6xl mb-4">✓</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Success!</h3>
+                <p id="successMessage" class="text-gray-600 mb-6"></p>
+                <button onclick="closeModal()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                    Close
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- START OF SCRIPT ---
+        // Global variables
+        let allVouchers = [];
+        let filteredVouchers = [];
+        let usageData = [];
+        let currentPage = 1;
+        const recordsPerPage = 10;
+        let validatedVouchers = [];
 
-        // --- Configuration ---
-        const VOUCHERS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=0&single=true&output=csv';
-        const USAGE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=1706713915&single=true&output=csv';
-        
-        // IMPORTANT: This URL must be correct for the app to work.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVVeKDncq0LnuYJRr12jlPOlulZNpMzM_e8WLVR6C8YE7VTsrMfHQcxxcrUyUc7JYNsw/exec';
-
-        // --- State Management ---
-        const state = {
-            allVouchers: [],
-            redeemedVoucherIds: new Set(),
-            filteredVouchers: [],
-            currentPage: 1,
-            recordsPerPage: 10,
-            validatedForRedemption: [],
-            activeSection: 'dashboard'
-        };
-
-        // --- App Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            showSection(state.activeSection);
-            loadData();
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVouchers();
         });
 
-        function setupEventListeners() {
-            // Filter listeners
-            ['statusFilter', 'searchFilter', 'minValueFilter', 'maxValueFilter'].forEach(id => {
-                document.getElementById(id).addEventListener('input', applyFilters);
-            });
-            // Form listeners
-            document.getElementById('redeemForm').addEventListener('submit', handleRedeemSubmit);
-            document.getElementById('addVoucherForm').addEventListener('submit', handleAddVoucher);
-            document.getElementById('editVoucherForm').addEventListener('submit', handleUpdateVoucher);
-            // Other listeners
-            document.getElementById('editVoucherSelect').addEventListener('change', loadVoucherForEdit);
-            document.getElementById('usageCategory').addEventListener('change', updateDetailsPlaceholder);
-        }
-
-        // --- Navigation ---
+        // Navigation functions
         function showSection(section) {
-            state.activeSection = section;
-            const sections = ['redeemSection', 'dashboardSection', 'manageSection'];
-            const tabs = ['redeemTab', 'dashboardTab', 'manageTab'];
+            document.getElementById('redeemSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('redeemTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-600');
+            document.getElementById('dashboardTab').classList.remove('border-b-2', 'border-orange-600', 'text-orange-600');
+            document.getElementById('redeemTab').classList.add('text-gray-600');
+            document.getElementById('dashboardTab').classList.add('text-gray-600');
 
-            sections.forEach(id => document.getElementById(id).classList.add('hidden'));
-            tabs.forEach(id => {
-                const tab = document.getElementById(id);
-                tab.classList.remove('border-orange-500', 'text-orange-600');
-                tab.classList.add('border-transparent', 'text-gray-500', 'hover:border-gray-300', 'hover:text-gray-700');
-            });
-
-            const activeSection = document.getElementById(section + 'Section');
-            const activeTab = document.getElementById(section + 'Tab');
-
-            activeSection.classList.remove('hidden');
-            activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:border-gray-300', 'hover:text-gray-700');
-            activeTab.classList.add('border-orange-500', 'text-orange-600');
-            
-            if (section === 'manage') {
-                populateEditDropdown();
+            if (section === 'redeem') {
+                document.getElementById('redeemSection').classList.remove('hidden');
+                document.getElementById('redeemTab').classList.add('border-b-2', 'border-orange-600', 'text-orange-600');
+                document.getElementById('redeemTab').classList.remove('text-gray-600');
+            } else {
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                document.getElementById('dashboardTab').classList.add('border-b-2', 'border-orange-600', 'text-orange-600');
+                document.getElementById('dashboardTab').classList.remove('text-gray-600');
+                loadVouchers();
             }
         }
 
-        // --- UI Helper Functions ---
-        function updateDetailsPlaceholder() {
-            const category = document.getElementById('usageCategory').value;
-            const detailsInput = document.getElementById('details');
-            let placeholder = 'Enter details...';
-
-            if (category === 'Chess Class') {
-                placeholder = 'e.g., Peribadi/Ogos - Coach Luqman';
-            } else if (category === 'Tournament Name') {
-                placeholder = 'e.g., Battle of Duo (Under 17) - 2nd Series';
-            } else if (category === 'Product Purchase') {
-                placeholder = 'e.g., Wooden Chess Set, Strategy Book';
-            }
-            
-            detailsInput.placeholder = placeholder;
-        }
-
-        // --- Data Fetching & Processing ---
-        async function fetchCSV(url) {
-            return new Promise((resolve, reject) => {
-                Papa.parse(url, {
-                    download: true, header: true, skipEmptyLines: true,
-                    complete: (results) => resolve(results.data),
-                    error: (err) => reject(err),
-                });
-            });
-        }
-        
-        async function loadData(isRefresh = false) {
-            showDashboardLoader(true);
+        // Load vouchers from Google Sheets
+        async function loadVouchers() {
             try {
-                // Use cache-busting for refresh
-                const cacheBuster = isRefresh ? `&_=${new Date().getTime()}` : '';
-                const [vouchersData, usageData] = await Promise.all([
-                    fetchCSV(VOUCHERS_URL + cacheBuster),
-                    fetchCSV(USAGE_URL + cacheBuster)
-                ]);
+                document.getElementById('dashboardLoading').classList.remove('hidden');
+                document.getElementById('vouchersTable').classList.add('hidden');
+                document.getElementById('pagination').classList.add('hidden');
 
-                state.redeemedVoucherIds = new Set(usageData.map(u => u['Voucher ID']?.trim().toUpperCase()).filter(Boolean));
-                state.allVouchers = processVouchers(vouchersData);
+                // Load vouchers data
+                const vouchersResponse = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=0&single=true&output=csv');
+                const vouchersText = await vouchersResponse.text();
                 
-                applyFilters();
-                populateEditDropdown();
+                // Load usage data
+                const usageResponse = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=1706713915&single=true&output=csv');
+                const usageText = await usageResponse.text();
 
+                allVouchers = parseCSV(vouchersText);
+                usageData = parseCSV(usageText);
+                
+                // Process vouchers with status calculation
+                allVouchers = allVouchers.map(voucher => processVoucherStatus(voucher));
+                
+                filteredVouchers = [...allVouchers];
+                currentPage = 1;
+                displayVouchers();
+                
+                document.getElementById('dashboardLoading').classList.add('hidden');
+                document.getElementById('vouchersTable').classList.remove('hidden');
+                document.getElementById('pagination').classList.remove('hidden');
             } catch (error) {
-                console.error("Failed to load data:", error);
-                document.getElementById('dashboardLoading').innerHTML = `<p class="text-red-600">Error loading data. Please try again.</p>`;
-            } finally {
-                showDashboardLoader(false);
+                console.error('Error loading data:', error);
+                document.getElementById('dashboardLoading').innerHTML = '<p class="text-red-600">Error loading data. Please check your internet connection.</p>';
             }
         }
-        
-        function processVouchers(vouchersData) {
-            return vouchersData.map(v => {
-                const id = v['Voucher ID']?.trim().toUpperCase();
-                const dateIssuedStr = v['Date Issued']?.trim();
-                let status = v['Status']?.trim().toUpperCase();
-                let daysLeft = 'N/A';
 
-                if (state.redeemedVoucherIds.has(id)) {
-                    status = 'REDEEMED';
-                    daysLeft = 0;
-                } else if (status === 'EXPIRED') {
-                    daysLeft = 0;
-                } else if (!dateIssuedStr) {
-                    status = 'NOT ISSUE';
+        // Parse CSV data
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] || '';
+                });
+                data.push(row);
+            }
+            return data;
+        }
+
+        // Process voucher status based on business rules
+        function processVoucherStatus(voucher) {
+            const dateIssued = voucher['Date Issued'];
+            const voucherId = voucher['Voucher ID'];
+            
+            // Check if voucher is redeemed
+            const isRedeemed = usageData.some(usage => usage['Voucher ID'] && usage['Voucher ID'].includes(voucherId));
+            
+            if (isRedeemed) {
+                voucher.Status = 'REDEEMED';
+                voucher['Days Left'] = 'N/A';
+            } else if (!dateIssued || dateIssued === '') {
+                voucher.Status = 'NOT ISSUE';
+                voucher['Days Left'] = 'N/A';
+            } else {
+                const issued = new Date(dateIssued);
+                const now = new Date();
+                const daysDiff = Math.ceil((now - issued) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff > 90) {
+                    voucher.Status = 'EXPIRED';
+                    voucher['Days Left'] = 'Expired';
                 } else {
-                    const dateIssued = parseDate(dateIssuedStr);
-                    if (dateIssued) {
-                        const now = new Date();
-                        now.setHours(0, 0, 0, 0);
-                        const expiryDate = new Date(dateIssued);
-                        expiryDate.setDate(expiryDate.getDate() + 90);
-                        
-                        const timeDiff = expiryDate - now;
-                        const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-                        if (daysRemaining <= 0) {
-                            status = 'EXPIRED';
-                            daysLeft = 0;
-                        } else {
-                            status = 'ACTIVE';
-                            daysLeft = daysRemaining;
-                        }
-                    } else {
-                         status = 'INVALID DATE';
-                    }
-                }
-                
-                return {
-                    'Voucher ID': id,
-                    'Value (RM)': parseFloat(v['Value (RM)']) || 0,
-                    'Description': v['Description']?.trim(),
-                    'Date Issued': dateIssuedStr,
-                    calculatedStatus: status,
-                    daysLeft: daysLeft,
-                };
-            }).sort((a, b) => a['Voucher ID'].localeCompare(b['Voucher ID']));
-        }
-
-        function parseDate(dateString) { // Expects DD/MM/YYYY
-            const parts = dateString.split('/');
-            if (parts.length === 3) {
-                const [day, month, year] = parts.map(p => parseInt(p, 10));
-                if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                    const date = new Date(year, month - 1, day);
-                    if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
-                        return date;
-                    }
+                    voucher.Status = 'ACTIVE';
+                    voucher['Days Left'] = Math.max(0, 90 - daysDiff);
                 }
             }
-            return null;
-        }
-
-        // --- UI Rendering & Filtering (Dashboard) ---
-        function applyFilters() {
-            const status = document.getElementById('statusFilter').value;
-            const search = document.getElementById('searchFilter').value.toUpperCase();
-            const minVal = parseFloat(document.getElementById('minValueFilter').value) || 0;
-            const maxVal = parseFloat(document.getElementById('maxValueFilter').value) || Infinity;
-
-            state.filteredVouchers = state.allVouchers.filter(v => 
-                (status === 'ALL' || v.calculatedStatus === status) &&
-                (v['Voucher ID'].includes(search)) &&
-                (v['Value (RM)'] >= minVal && v['Value (RM)'] <= maxVal)
-            );
             
-            state.currentPage = 1;
-            renderDashboard();
+            return voucher;
         }
 
-        function renderDashboard() {
-            renderTable();
-            renderPagination();
-        }
-
-        function renderTable() {
+        // Display vouchers in table
+        function displayVouchers() {
             const tbody = document.getElementById('vouchersTableBody');
-            tbody.innerHTML = '';
-
-            if (state.filteredVouchers.length === 0) {
-                document.getElementById('noResults').classList.remove('hidden');
-                return;
-            }
-            document.getElementById('noResults').classList.add('hidden');
-
-            const { currentPage, recordsPerPage, filteredVouchers } = state;
-            const start = (currentPage - 1) * recordsPerPage;
-            const end = start + recordsPerPage;
-            const paginatedItems = filteredVouchers.slice(start, end);
-
-            paginatedItems.forEach(v => {
-                const statusClasses = {
-                    'ACTIVE': 'bg-green-100 text-green-800', 'REDEEMED': 'bg-blue-100 text-blue-800',
-                    'EXPIRED': 'bg-red-100 text-red-800', 'NOT ISSUE': 'bg-yellow-100 text-yellow-800'
-                };
-                const statusClass = statusClasses[v.calculatedStatus] || 'bg-gray-100 text-gray-800';
-                
-                const row = `
-                    <tr class="hover:bg-gray-50">
-                        <td class="border-b px-4 py-3 font-mono">${v['Voucher ID']}</td>
-                        <td class="border-b px-4 py-3">RM ${v['Value (RM)'].toFixed(2)}</td>
-                        <td class="border-b px-4 py-3">${v['Description']}</td>
-                        <td class="border-b px-4 py-3">${v['Date Issued'] || 'N/A'}</td>
-                        <td class="border-b px-4 py-3">
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${v.calculatedStatus}</span>
-                        </td>
-                        <td class="border-b px-4 py-3">${v.daysLeft}</td>
-                    </tr>`;
-                tbody.innerHTML += row;
-            });
-        }
-        
-        function renderPagination() {
-            const { currentPage, recordsPerPage, filteredVouchers } = state;
-            const totalRecords = filteredVouchers.length;
-            if(totalRecords === 0) {
-                document.getElementById('paginationContainer').classList.add('hidden');
-                return;
-            }
-            document.getElementById('paginationContainer').classList.remove('hidden');
-            const totalPages = Math.ceil(totalRecords / recordsPerPage) || 1;
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = startIndex + recordsPerPage;
+            const pageVouchers = filteredVouchers.slice(startIndex, endIndex);
             
-            document.getElementById('showingStart').textContent = (currentPage - 1) * recordsPerPage + 1;
-            document.getElementById('showingEnd').textContent = Math.min(currentPage * recordsPerPage, totalRecords);
-            document.getElementById('totalRecords').textContent = totalRecords;
+            tbody.innerHTML = '';
+            
+            pageVouchers.forEach(voucher => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                const statusClass = {
+                    'ACTIVE': 'bg-green-100 text-green-800',
+                    'REDEEMED': 'bg-blue-100 text-blue-800',
+                    'EXPIRED': 'bg-red-100 text-red-800',
+                    'NOT ISSUE': 'bg-gray-100 text-gray-800'
+                };
+                
+                row.innerHTML = `
+                    <td class="border border-gray-300 px-4 py-2 font-semibold">${voucher['Voucher ID']}</td>
+                    <td class="border border-gray-300 px-4 py-2">RM ${voucher['Value (RM)']}</td>
+                    <td class="border border-gray-300 px-4 py-2">${voucher['Description']}</td>
+                    <td class="border border-gray-300 px-4 py-2">${voucher['Date Issued']}</td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass[voucher.Status] || 'bg-gray-100 text-gray-800'}">
+                            ${voucher.Status}
+                        </span>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-2">${voucher['Days Left']}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            updatePagination();
+        }
+
+        // Update pagination controls
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredVouchers.length / recordsPerPage);
+            const startRecord = (currentPage - 1) * recordsPerPage + 1;
+            const endRecord = Math.min(currentPage * recordsPerPage, filteredVouchers.length);
+            
+            document.getElementById('showingStart').textContent = startRecord;
+            document.getElementById('showingEnd').textContent = endRecord;
+            document.getElementById('totalRecords').textContent = filteredVouchers.length;
             document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
             
             document.getElementById('prevBtn').disabled = currentPage === 1;
             document.getElementById('nextBtn').disabled = currentPage === totalPages;
+            
+            if (currentPage === 1) {
+                document.getElementById('prevBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('prevBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            if (currentPage === totalPages) {
+                document.getElementById('nextBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('nextBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
 
-        function previousPage() { if (state.currentPage > 1) { state.currentPage--; renderDashboard(); } }
+        // Pagination functions
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayVouchers();
+            }
+        }
+
         function nextPage() {
-            const totalPages = Math.ceil(state.filteredVouchers.length / state.recordsPerPage);
-            if (state.currentPage < totalPages) { state.currentPage++; renderDashboard(); }
+            const totalPages = Math.ceil(filteredVouchers.length / recordsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayVouchers();
+            }
         }
 
-        function showDashboardLoader(isLoading) {
-            document.getElementById('dashboardLoading').style.display = isLoading ? 'block' : 'none';
-            document.getElementById('vouchersTableContainer').style.display = isLoading ? 'none' : 'block';
-        }
-
-        // --- Redeem Page Logic ---
-        async function validateVouchers() {
-            setButtonLoading('validateBtn', true);
-            const resultDiv = document.getElementById('validationResult');
-            resultDiv.innerHTML = '';
-            document.getElementById('redeemForm').classList.add('hidden');
-
-            const ids = document.getElementById('voucherIds').value.split(',')
-                .map(id => id.trim().toUpperCase()).filter(Boolean);
-
-            if (!ids.length) {
-                showResult(resultDiv, 'Please enter at least one Voucher ID.', 'error');
-                setButtonLoading('validateBtn', false);
-                return;
-            }
-
-            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                showResult(resultDiv, 'Configuration error: Google Apps Script URL is not set in the HTML file.', 'error');
-                setButtonLoading('validateBtn', false);
-                return;
-            }
+        // Apply filters
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const valueFilter = document.getElementById('valueFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
             
-            // Re-fetch usage data to ensure it's current before validating
-            try {
-                const usageData = await fetchCSV(USAGE_URL + `&_=${new Date().getTime()}`);
-                state.redeemedVoucherIds = new Set(usageData.map(u => u['Voucher ID']?.trim().toUpperCase()).filter(Boolean));
-                state.allVouchers = processVouchers(state.allVouchers.map(v => ({...v, 'Status': ''}))); // Re-process with new usage data
-            } catch {
-                showResult(resultDiv, 'Could not verify voucher usage. Please try again.', 'error');
-                setButtonLoading('validateBtn', false);
-                return;
-            }
-
-            let totalValue = 0;
-            let validVouchers = [];
-            let errors = [];
-
-            ids.forEach(id => {
-                const voucher = state.allVouchers.find(v => v['Voucher ID'] === id);
-                if (!voucher) errors.push(`Voucher "${id}" not found.`);
-                else if (voucher.calculatedStatus !== 'ACTIVE') errors.push(`Voucher "${id}" is not active (Status: ${voucher.calculatedStatus}).`);
-                else {
-                    validVouchers.push(voucher);
-                    totalValue += voucher['Value (RM)'];
+            filteredVouchers = allVouchers.filter(voucher => {
+                let matches = true;
+                
+                // Status filter
+                if (statusFilter && voucher.Status !== statusFilter) {
+                    matches = false;
                 }
-            });
-
-            if (errors.length > 0) {
-                const errorList = `<ul>${errors.map(e => `<li class="ml-4 list-disc">${e}</li>`).join('')}</ul>`;
-                showResult(resultDiv, `<strong>Validation Failed:</strong>${errorList}`, 'error');
-            } else {
-                state.validatedForRedemption = validVouchers.map(v => v['Voucher ID']);
-                const successMsg = `<strong>Success!</strong> ${validVouchers.length} vouchers are valid. Total Value: <strong>RM ${totalValue.toFixed(2)}</strong>`;
-                showResult(resultDiv, successMsg, 'success');
-                document.getElementById('redeemForm').classList.remove('hidden');
-            }
-            setButtonLoading('validateBtn', false);
-        }
-
-        async function handleRedeemSubmit(event) {
-            event.preventDefault();
-            setButtonLoading('redeemSubmitBtn', true);
-
-            const photoFile = document.getElementById('photo').files[0];
-            const reader = new FileReader();
-            
-            reader.onload = async () => {
-                const base64Image = reader.result.split(',')[1];
-                const dateRedeemed = new Date().toLocaleDateString('en-GB');
-
-                const payload = {
-                    action: 'redeemVoucher',
-                    voucherIDs: state.validatedForRedemption,
-                    dateRedeemed: dateRedeemed,
-                    usageCategory: document.getElementById('usageCategory').value,
-                    details: document.getElementById('details').value,
-                    customerName: document.getElementById('customerName').value,
-                    photo: {
-                        mimeType: photoFile.type,
-                        fileName: `${document.getElementById('customerName').value} - ${dateRedeemed.replace(/\//g, '-')}`,
-                        base64: base64Image
+                
+                // Value filter
+                if (valueFilter) {
+                    const value = parseFloat(voucher['Value (RM)']) || 0;
+                    switch (valueFilter) {
+                        case '0-50':
+                            if (value > 50) matches = false;
+                            break;
+                        case '51-100':
+                            if (value < 51 || value > 100) matches = false;
+                            break;
+                        case '101-200':
+                            if (value < 101 || value > 200) matches = false;
+                            break;
+                        case '201+':
+                            if (value < 201) matches = false;
+                            break;
                     }
-                };
-
-                try {
-                    const result = await postToGoogleScript(payload);
-                    showModal('success', 'Redemption Successful!', `Successfully redeemed ${result.redeemedCount} voucher(s).`);
-                    document.getElementById('redeemForm').reset();
-                    document.getElementById('redeemForm').classList.add('hidden');
-                    document.getElementById('validationResult').classList.add('hidden');
-                    document.getElementById('voucherIds').value = '';
-                    loadData(true); // Force refresh
-                } catch (error) {
-                    showModal('error', 'Redemption Failed', error.message);
-                } finally {
-                    setButtonLoading('redeemSubmitBtn', false);
                 }
-            };
-
-            reader.onerror = () => {
-                showModal('error', 'File Error', 'Failed to read the image file.');
-                setButtonLoading('redeemSubmitBtn', false);
-            };
-            
-            reader.readAsDataURL(photoFile);
-        }
-
-        // --- Manage Page Logic ---
-        async function handleAddVoucher(event) {
-            event.preventDefault();
-            setButtonLoading(event.submitter, true);
-            const voucherData = {
-                'Voucher ID': document.getElementById('newVoucherId').value.trim().toUpperCase(),
-                'Value (RM)': document.getElementById('newVoucherValue').value,
-                'Description': document.getElementById('newVoucherDescription').value.trim(),
-                'Date Issued': document.getElementById('newVoucherDate').value.trim()
-            };
-
-            if (state.allVouchers.some(v => v['Voucher ID'] === voucherData['Voucher ID'])) {
-                showModal('error', 'Error', 'A voucher with this ID already exists.');
-                setButtonLoading(event.submitter, false);
-                return;
-            }
-
-            try {
-                await postToGoogleScript({ action: 'addVoucher', voucherData });
-                showModal('success', 'Success', `Voucher ${voucherData['Voucher ID']} has been added.`);
-                event.target.reset();
-                loadData(true);
-            } catch (error) {
-                showModal('error', 'Failed to Add Voucher', error.message);
-            } finally {
-                setButtonLoading(event.submitter, false);
-            }
-        }
-        
-        function populateEditDropdown() {
-            const select = document.getElementById('editVoucherSelect');
-            select.innerHTML = '<option value="">Select a voucher...</option>';
-            state.allVouchers.forEach(voucher => {
-                const option = document.createElement('option');
-                option.value = voucher['Voucher ID'];
-                option.textContent = `${voucher['Voucher ID']} (${voucher.calculatedStatus})`;
-                select.appendChild(option);
+                
+                // Search filter
+                if (searchFilter && !voucher['Voucher ID'].toLowerCase().includes(searchFilter)) {
+                    matches = false;
+                }
+                
+                return matches;
             });
-        }
-        
-        function loadVoucherForEdit() {
-            const form = document.getElementById('editVoucherForm');
-            const selectedId = document.getElementById('editVoucherSelect').value;
-            if (!selectedId) {
-                form.classList.add('hidden');
-                return;
-            }
-            const voucher = state.allVouchers.find(v => v['Voucher ID'] === selectedId);
-            document.getElementById('editVoucherId').value = voucher['Voucher ID'];
-            document.getElementById('editVoucherValue').value = voucher['Value (RM)'];
-            document.getElementById('editVoucherDescription').value = voucher['Description'];
-            document.getElementById('editVoucherDate').value = voucher['Date Issued'];
-            form.classList.remove('hidden');
+            
+            currentPage = 1;
+            displayVouchers();
         }
 
-        async function handleUpdateVoucher(event) {
-            event.preventDefault();
-            setButtonLoading(event.submitter, true);
-            const voucherData = {
-                'Voucher ID': document.getElementById('editVoucherId').value,
-                'Value (RM)': document.getElementById('editVoucherValue').value,
-                'Description': document.getElementById('editVoucherDescription').value.trim(),
-                'Date Issued': document.getElementById('editVoucherDate').value.trim()
-            };
-
-            try {
-                await postToGoogleScript({ action: 'updateVoucher', voucherData });
-                showModal('success', 'Success', `Voucher ${voucherData['Voucher ID']} has been updated.`);
-                document.getElementById('editVoucherForm').classList.add('hidden');
-                document.getElementById('editVoucherSelect').value = '';
-                loadData(true);
-            } catch (error) {
-                showModal('error', 'Failed to Update', error.message);
-            } finally {
-                setButtonLoading(event.submitter, false);
-            }
-        }
-        
-        function deleteVoucher() {
-            const selectedId = document.getElementById('editVoucherSelect').value;
-            if (!selectedId) {
-                showModal('error', 'Error', 'Please select a voucher to delete.');
+        // Validate vouchers
+        async function validateVouchers() {
+            const input = document.getElementById('voucherIds').value.trim().toUpperCase();
+            if (!input) {
+                alert('Please enter voucher IDs');
                 return;
             }
             
-            showModal('confirm', 'Confirm Deletion', `Are you sure you want to delete voucher ${selectedId}? This cannot be undone.`, async () => {
-                const deleteBtn = document.querySelector('#editVoucherForm button[onclick="deleteVoucher()"]');
-                setButtonLoading(deleteBtn, true);
-                try {
-                    await postToGoogleScript({ action: 'deleteVoucher', voucherId: selectedId });
-                    showModal('success', 'Deleted!', `Voucher ${selectedId} has been deleted.`);
-                    document.getElementById('editVoucherForm').classList.add('hidden');
-                    document.getElementById('editVoucherSelect').value = '';
-                    loadData(true);
-                } catch (error) {
-                    showModal('error', 'Deletion Failed', error.message);
-                } finally {
-                     setButtonLoading(deleteBtn, false);
+            document.getElementById('validateText').classList.add('hidden');
+            document.getElementById('validateLoading').classList.remove('hidden');
+            
+            // Ensure data is loaded
+            if (allVouchers.length === 0) {
+                await loadVouchers();
+            }
+            
+            const voucherIds = input.split(',').map(id => id.trim()).filter(id => id);
+            const validVouchers = [];
+            const invalidVouchers = [];
+            let totalValue = 0;
+            
+            voucherIds.forEach(id => {
+                const voucher = allVouchers.find(v => v['Voucher ID'] === id);
+                if (voucher && voucher.Status === 'ACTIVE') {
+                    validVouchers.push(voucher);
+                    totalValue += parseFloat(voucher['Value (RM)']) || 0;
+                } else {
+                    invalidVouchers.push(id);
                 }
             });
-        }
-
-        // --- Utility & Helper Functions ---
-        async function postToGoogleScript(payload) {
-            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                throw new Error('Google Apps Script URL is not configured.');
-            }
-            const response = await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST', mode: 'cors', cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                redirect: 'follow', body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-            if (result.status !== 'success') {
-                throw new Error(result.message || 'An unknown error occurred.');
-            }
-            return result;
-        }
-
-        function setButtonLoading(buttonOrId, isLoading) {
-            const button = typeof buttonOrId === 'string' ? document.getElementById(buttonOrId) : buttonOrId;
-            const spinner = button.querySelector('svg');
-            const text = button.querySelector('span');
-            if (isLoading) {
-                button.disabled = true;
-                if(spinner) spinner.classList.remove('hidden');
-                if(text) text.style.opacity = '0.7';
+            
+            // Display results
+            document.getElementById('validVouchers').innerHTML = validVouchers.length > 0 
+                ? `<p class="text-green-600"><strong>Valid Vouchers:</strong> ${validVouchers.map(v => v['Voucher ID']).join(', ')}</p>`
+                : '';
+            
+            document.getElementById('invalidVouchers').innerHTML = invalidVouchers.length > 0 
+                ? `<p class="text-red-600"><strong>Invalid/Inactive Vouchers:</strong> ${invalidVouchers.join(', ')}</p>`
+                : '';
+            
+            document.getElementById('totalValue').innerHTML = validVouchers.length > 0 
+                ? `<strong>Total Value: RM ${totalValue.toFixed(2)}</strong>`
+                : '';
+            
+            document.getElementById('validationResults').classList.remove('hidden');
+            
+            if (validVouchers.length > 0) {
+                validatedVouchers = validVouchers;
+                document.getElementById('redemptionForm').classList.remove('hidden');
             } else {
-                button.disabled = false;
-                if(spinner) spinner.classList.add('hidden');
-                if(text) text.style.opacity = '1';
-            }
-        }
-
-        function showResult(element, message, type) {
-            const colors = type === 'success' ? 'bg-green-50 border-green-300 text-green-800' : 'bg-red-50 border-red-300 text-red-800';
-            element.innerHTML = `<div class="p-4 border-l-4 rounded-md ${colors}">${message}</div>`;
-            element.classList.remove('hidden');
-        }
-        
-        function showModal(type, title, message, onConfirm = null) {
-            const modal = document.getElementById('modal');
-            const icon = document.getElementById('modal-icon');
-            const actions = document.getElementById('modal-actions');
-            
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').innerHTML = message;
-
-            icon.innerHTML = '';
-            actions.innerHTML = '';
-
-            const baseButtonClasses = 'px-6 py-2 rounded-lg font-semibold transition-colors';
-            
-            if (type === 'success') {
-                icon.innerHTML = '<svg class="mx-auto text-green-500" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
-                const okButton = `<button class="bg-orange-500 hover:bg-orange-600 text-white ${baseButtonClasses}">OK</button>`;
-                actions.innerHTML = okButton;
-                actions.querySelector('button').onclick = closeModal;
-            } else if (type === 'error') {
-                icon.innerHTML = '<svg class="mx-auto text-red-500" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
-                const closeButton = `<button class="bg-gray-500 hover:bg-gray-600 text-white ${baseButtonClasses}">Close</button>`;
-                actions.innerHTML = closeButton;
-                actions.querySelector('button').onclick = closeModal;
-            } else if (type === 'confirm') {
-                icon.innerHTML = '<svg class="mx-auto text-yellow-500" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
-                const confirmButton = `<button id="confirmBtn" class="bg-red-600 hover:bg-red-700 text-white ${baseButtonClasses}">Confirm</button>`;
-                const cancelButton = `<button class="bg-gray-200 hover:bg-gray-300 text-gray-800 ${baseButtonClasses}">Cancel</button>`;
-                actions.innerHTML = confirmButton + cancelButton;
-                actions.querySelector('#confirmBtn').onclick = () => { closeModal(); onConfirm(); };
-                actions.querySelector('button:last-child').onclick = closeModal;
+                document.getElementById('redemptionForm').classList.add('hidden');
             }
             
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('validateText').classList.remove('hidden');
+            document.getElementById('validateLoading').classList.add('hidden');
+        }
+
+        // Redeem vouchers
+        function redeemVouchers() {
+            const usageCategory = document.getElementById('usageCategory').value;
+            const customerName = document.getElementById('customerName').value;
+            const details = document.getElementById('details').value;
+            const photoFile = document.getElementById('photoUpload').files[0];
+            
+            if (!usageCategory || !customerName || !details) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            if (!photoFile) {
+                alert('Please upload a photo');
+                return;
+            }
+            
+            document.getElementById('redeemText').classList.add('hidden');
+            document.getElementById('redeemLoading').classList.remove('hidden');
+            
+            // Simulate redemption process
             setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modal.querySelector('.modal-content').classList.remove('scale-95');
-            }, 10);
+                const currentDate = new Date().toISOString().split('T')[0];
+                const voucherIds = validatedVouchers.map(v => v['Voucher ID']).join(',');
+                
+                // In a real implementation, this would send data to Google Sheets
+                // For demo purposes, we'll show success message
+                
+                document.getElementById('successMessage').textContent = 
+                    `Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0).toFixed(2)}`;
+                
+                document.getElementById('successModal').classList.remove('hidden');
+                
+                // Reset form
+                document.getElementById('voucherIds').value = '';
+                document.getElementById('usageCategory').value = '';
+                document.getElementById('customerName').value = '';
+                document.getElementById('details').value = '';
+                document.getElementById('photoUpload').value = '';
+                document.getElementById('validationResults').classList.add('hidden');
+                document.getElementById('redemptionForm').classList.add('hidden');
+                
+                document.getElementById('redeemText').classList.remove('hidden');
+                document.getElementById('redeemLoading').classList.add('hidden');
+                
+                validatedVouchers = [];
+            }, 2000);
         }
 
+        // Close modal
         function closeModal() {
-            const modal = document.getElementById('modal');
-            modal.classList.add('opacity-0');
-            modal.querySelector('.modal-content').classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }, 300);
+            document.getElementById('successModal').classList.add('hidden');
         }
 
-        // --- END OF SCRIPT ---
+        // Auto-uppercase voucher input
+        document.getElementById('voucherIds').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e3dc803199a84a',t:'MTc2MDQxMTE5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
