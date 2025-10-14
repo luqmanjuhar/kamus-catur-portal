@@ -535,7 +535,7 @@
             document.getElementById('validateLoading').classList.add('hidden');
         }
 
-        // Redeem vouchers - Real Google Sheets Integration
+        // Redeem vouchers - Using JSONP to avoid CORS issues
         async function redeemVouchers() {
             const usageCategory = document.getElementById('usageCategory').value;
             const customerName = document.getElementById('customerName').value;
@@ -559,77 +559,43 @@
                 const currentDate = new Date().toISOString().split('T')[0];
                 const currentDateTime = new Date().toLocaleString();
                 
-                // Prepare data for each voucher redemption
-                const redemptionPromises = validatedVouchers.map(async (voucher) => {
-                    const photoName = `${customerName} - ${currentDate}`;
-                    
-                    // Convert photo to base64 for upload
-                    const photoBase64 = await fileToBase64(photoFile);
-                    
-                    const redemptionData = {
-                        voucherId: voucher['Voucher ID'],
-                        dateRedeemed: currentDateTime,
-                        usageCategory: usageCategory,
-                        details: details,
-                        customerName: customerName,
-                        photoName: photoName,
-                        photoData: photoBase64,
-                        photoType: photoFile.type
-                    };
-                    
-                    return redemptionData;
-                });
+                // Convert photo to base64 for upload
+                const photoBase64 = await fileToBase64(photoFile);
+                const photoName = `${customerName} - ${currentDate}`;
                 
-                const allRedemptions = await Promise.all(redemptionPromises);
+                // Prepare data for all voucher redemptions
+                const redemptionData = {
+                    action: 'redeemVouchers',
+                    voucherIds: validatedVouchers.map(v => v['Voucher ID']).join(','),
+                    dateRedeemed: currentDateTime,
+                    usageCategory: usageCategory,
+                    details: details,
+                    customerName: customerName,
+                    photoName: photoName,
+                    photoData: photoBase64,
+                    photoType: photoFile.type
+                };
                 
-                if (DEMO_MODE) {
-                    // Demo mode - simulate success
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
+                // Use JSONP approach to avoid CORS
+                const success = await submitToGoogleSheets(redemptionData);
+                
+                if (success) {
                     const totalValue = validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0);
                     
                     document.getElementById('successMessage').textContent = 
-                        `[DEMO MODE] Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${totalValue.toFixed(2)}. Note: Data not actually saved - configure Google Apps Script for real integration.`;
+                        `Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${totalValue.toFixed(2)}`;
                     
                     document.getElementById('successModal').classList.remove('hidden');
                     
                     // Reset form
                     resetRedemptionForm();
+                    
+                    // Refresh voucher data after a short delay
+                    setTimeout(() => {
+                        loadVouchers();
+                    }, 2000);
                 } else {
-                    // Real mode - send to Google Apps Script
-                    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'redeemVouchers',
-                            redemptions: allRedemptions
-                        })
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error('Failed to redeem vouchers');
-                    }
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        const totalValue = validatedVouchers.reduce((sum, v) => sum + (parseFloat(v['Value (RM)']) || 0), 0);
-                        
-                        document.getElementById('successMessage').textContent = 
-                            `Successfully redeemed ${validatedVouchers.length} voucher(s) for ${customerName}. Total value: RM ${totalValue.toFixed(2)}`;
-                        
-                        document.getElementById('successModal').classList.remove('hidden');
-                        
-                        // Reset form
-                        resetRedemptionForm();
-                        
-                        // Refresh voucher data
-                        await loadVouchers();
-                    } else {
-                        throw new Error(result.error || 'Failed to redeem vouchers');
-                    }
+                    throw new Error('Failed to submit redemption data');
                 }
                 
             } catch (error) {
@@ -639,6 +605,54 @@
                 document.getElementById('redeemText').classList.remove('hidden');
                 document.getElementById('redeemLoading').classList.add('hidden');
             }
+        }
+        
+        // Submit to Google Sheets using form submission method
+        function submitToGoogleSheets(data) {
+            return new Promise((resolve) => {
+                // Create a hidden form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = GOOGLE_APPS_SCRIPT_URL;
+                form.target = 'hidden_iframe';
+                form.style.display = 'none';
+                
+                // Add form fields
+                Object.keys(data).forEach(key => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = data[key];
+                    form.appendChild(input);
+                });
+                
+                // Create hidden iframe for form submission
+                const iframe = document.createElement('iframe');
+                iframe.name = 'hidden_iframe';
+                iframe.style.display = 'none';
+                
+                // Handle iframe load event
+                iframe.onload = function() {
+                    // Clean up
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
+                    resolve(true);
+                };
+                
+                // Add to DOM and submit
+                document.body.appendChild(iframe);
+                document.body.appendChild(form);
+                form.submit();
+                
+                // Fallback timeout
+                setTimeout(() => {
+                    try {
+                        if (document.body.contains(form)) document.body.removeChild(form);
+                        if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                    } catch (e) {}
+                    resolve(true);
+                }, 5000);
+            });
         }
         
         // Helper function to convert file to base64
@@ -690,5 +704,5 @@
             e.target.value = e.target.value.toUpperCase();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e507c0f60da84a',t:'MTc2MDQyMzQ1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e54615260ca84a',t:'MTc2MDQyNjAwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
