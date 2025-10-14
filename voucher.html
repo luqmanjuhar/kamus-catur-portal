@@ -39,10 +39,7 @@
         <div class="container mx-auto px-4 py-6">
             <div class="flex justify-between items-center">
                 <h1 class="text-3xl font-bold">Voucher Management System</h1>
-                <button onclick="document.getElementById('setupModal').classList.remove('hidden')" 
-                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition duration-200">
-                    <span class="text-sm">⚙️ Setup Guide</span>
-                </button>
+
             </div>
         </div>
     </header>
@@ -218,96 +215,7 @@
         </div>
     </main>
 
-    <!-- Setup Instructions Modal -->
-    <div id="setupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-4xl mx-4 max-h-96 overflow-y-auto">
-            <h3 class="text-2xl font-bold text-gray-800 mb-4">Google Sheets Integration Setup</h3>
-            <div class="text-sm text-gray-700 space-y-4">
-                <p><strong>To enable real Google Sheets integration, follow these steps:</strong></p>
-                
-                <div class="bg-orange-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-orange-800 mb-2">Step 1: Create Google Apps Script</h4>
-                    <ol class="list-decimal list-inside space-y-1 text-sm">
-                        <li>Go to <a href="https://script.google.com" target="_blank" class="text-blue-600 underline">script.google.com</a></li>
-                        <li>Create a new project</li>
-                        <li>Replace the default code with the provided Apps Script code</li>
-                        <li>Save and deploy as a web app</li>
-                        <li>Copy the deployment URL</li>
-                    </ol>
-                </div>
-                
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-blue-800 mb-2">Step 2: Update Website</h4>
-                    <p>Replace 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' in the code with your actual deployment URL</p>
-                </div>
-                
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-green-800 mb-2">Apps Script Code Template:</h4>
-                    <pre class="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    
-    if (data.action === 'redeemVouchers') {
-      return redeemVouchers(data.redemptions);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({success: false, error: 'Unknown action'}))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
 
-function redeemVouchers(redemptions) {
-  const usageSheetId = 'YOUR_USAGE_SHEET_ID';
-  const driveFolder = 'YOUR_DRIVE_FOLDER_ID';
-  
-  try {
-    const sheet = SpreadsheetApp.openById(usageSheetId).getActiveSheet();
-    
-    redemptions.forEach(redemption => {
-      // Upload photo to Drive
-      const photoBlob = Utilities.newBlob(
-        Utilities.base64Decode(redemption.photoData),
-        redemption.photoType,
-        redemption.photoName
-      );
-      
-      const folder = DriveApp.getFolderById(driveFolder);
-      const file = folder.createFile(photoBlob);
-      const photoUrl = file.getUrl();
-      
-      // Add row to Usage sheet
-      sheet.appendRow([
-        redemption.voucherId,
-        redemption.dateRedeemed,
-        redemption.usageCategory,
-        redemption.details,
-        redemption.customerName,
-        photoUrl
-      ]);
-    });
-    
-    return ContentService.createTextOutput(JSON.stringify({success: true}))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}</pre>
-                </div>
-                
-                <p class="text-red-600 font-semibold">⚠️ Currently using demo mode. Redemptions won't be saved until Google Apps Script is configured.</p>
-            </div>
-            <div class="flex justify-end mt-6">
-                <button onclick="closeSetupModal()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
-                    Got it!
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Success Modal -->
     <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -339,18 +247,7 @@ function redeemVouchers(redemptions) {
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             loadVouchers();
-            if (DEMO_MODE) {
-                // Show setup instructions on first load
-                setTimeout(() => {
-                    document.getElementById('setupModal').classList.remove('hidden');
-                }, 1000);
-            }
         });
-
-        // Close setup modal
-        function closeSetupModal() {
-            document.getElementById('setupModal').classList.add('hidden');
-        }
 
         // Navigation functions
         function showSection(section) {
@@ -793,5 +690,5 @@ function redeemVouchers(redemptions) {
             e.target.value = e.target.value.toUpperCase();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e4f468e071a84a',t:'MTc2MDQyMjY1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e507c0f60da84a',t:'MTc2MDQyMzQ1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
