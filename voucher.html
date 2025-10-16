@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voucher Management System</title>
+    <title>Voucher Management System - Kamus Catur</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23ea580c'/%3E%3Crect x='6' y='8' width='20' height='16' rx='2' fill='none' stroke='white' stroke-width='2'/%3E%3Ccircle cx='22' cy='16' r='2' fill='white'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             box-sizing: border-box;
         }
-        .orange-gradient {
-            background: linear-gradient(135deg, #ff7849 0%, #ff9500 100%);
+        .professional-gradient {
+            background: #ea580c;
+        }
+        .accent-gradient {
+            background: #ea580c;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .loading {
             animation: spin 1s linear infinite;
@@ -26,98 +33,153 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .nav-btn.active {
+            background: #ea580c;
+            color: white;
+            border-radius: 0.5rem;
+        }
+        .professional-input:focus {
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+        }
+        .status-badge {
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        .upload-progress {
+            transition: width 0.3s ease;
+        }
+        .photo-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
     </style>
 </head>
-<body class="bg-orange-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen">
     <!-- Header -->
-    <header class="orange-gradient text-white shadow-lg">
-        <div class="container mx-auto px-6 py-4">
-            <h1 class="text-3xl font-bold">🎫 Voucher Management System</h1>
-            <p class="text-orange-100 mt-2">Manage, redeem, and track your vouchers efficiently</p>
+    <header class="professional-gradient text-white shadow-2xl">
+        <div class="container mx-auto px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-xl">
+                        <div class="text-2xl font-bold text-white">📋</div>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold tracking-tight">Voucher Management System</h1>
+                        <p class="text-orange-100 mt-1 font-medium">Professional Business Solution</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-4 text-sm">
+                    <div class="bg-white bg-opacity-10 px-4 py-2 rounded-lg">
+                        <span class="font-semibold">Kamus Catur</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- Navigation -->
-    <nav class="bg-white shadow-md border-b-2 border-orange-200">
-        <div class="container mx-auto px-6">
-            <div class="flex space-x-8">
-                <button onclick="showSection('dashboard')" class="nav-btn py-4 px-2 border-b-2 border-transparent hover:border-orange-500 transition-colors duration-200 font-medium text-gray-700 hover:text-orange-600" id="dashboard-tab">
-                    📊 Dashboard
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="container mx-auto px-8">
+            <div class="flex space-x-2">
+                <button onclick="showSection('dashboard')" class="nav-btn py-4 px-6 font-semibold text-gray-600 hover:text-orange-600 transition-all duration-200 flex items-center space-x-2" id="dashboard-tab">
+                    <span class="text-lg">📊</span>
+                    <span>Dashboard</span>
                 </button>
-                <button onclick="showSection('update')" class="nav-btn py-4 px-2 border-b-2 border-transparent hover:border-orange-500 transition-colors duration-200 font-medium text-gray-700 hover:text-orange-600" id="update-tab">
-                    ✏️ Update Voucher
+                <button onclick="showSection('update')" class="nav-btn py-4 px-6 font-semibold text-gray-600 hover:text-orange-600 transition-all duration-200 flex items-center space-x-2" id="update-tab">
+                    <span class="text-lg">✏️</span>
+                    <span>Update Voucher</span>
                 </button>
-                <button onclick="showSection('redeem')" class="nav-btn py-4 px-2 border-b-2 border-transparent hover:border-orange-500 transition-colors duration-200 font-medium text-gray-700 hover:text-orange-600" id="redeem-tab">
-                    🎁 Redeem Voucher
+                <button onclick="showSection('redeem')" class="nav-btn py-4 px-6 font-semibold text-gray-600 hover:text-orange-600 transition-all duration-200 flex items-center space-x-2" id="redeem-tab">
+                    <span class="text-lg">🎫</span>
+                    <span>Redeem Voucher</span>
                 </button>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
+    <main class="container mx-auto px-8 py-10 bg-gray-50 min-h-screen">
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="section">
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Voucher Dashboard</h2>
+            <div class="bg-white rounded-2xl card-shadow p-8 mb-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center">
+                        <div class="bg-orange-500 p-3 rounded-xl mr-4">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Voucher Dashboard</h2>
+                            <p class="text-gray-600 mt-1">Comprehensive voucher management overview</p>
+                        </div>
+                    </div>
+                    <button onclick="loadData()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
+                        🔄 Refresh Data
+                    </button>
+                </div>
                 
                 <!-- Filters -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div>
-                        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
-                        <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option value="">All Status</option>
-                            <option value="ACTIVE">Active</option>
-                            <option value="REDEEMED">Redeemed</option>
-                            <option value="EXPIRED">Expired</option>
-                            <option value="NOT ISSUE">Not Issued</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="valueFilter" class="block text-sm font-medium text-gray-700 mb-2">Voucher ID</label>
-                        <input type="text" id="valueFilter" placeholder="Enter voucher ID..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    <div>
-                        <label for="searchFilter" class="block text-sm font-medium text-gray-700 mb-2">Search Description</label>
-                        <input type="text" id="searchFilter" placeholder="Search..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="applyFilters()" class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                            Apply Filters
-                        </button>
+                <div class="bg-gray-50 rounded-xl p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Filter & Search</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div>
+                            <label for="statusFilter" class="block text-sm font-semibold text-gray-700 mb-2">Filter by Status</label>
+                            <select id="statusFilter" class="professional-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none transition-all duration-200 bg-white">
+                                <option value="">All Status</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="REDEEMED">Redeemed</option>
+                                <option value="EXPIRED">Expired</option>
+                                <option value="NOT ISSUE">Not Issued</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="valueFilter" class="block text-sm font-semibold text-gray-700 mb-2">Voucher ID</label>
+                            <input type="text" id="valueFilter" placeholder="Enter voucher ID..." class="professional-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none transition-all duration-200">
+                        </div>
+                        <div>
+                            <label for="searchFilter" class="block text-sm font-semibold text-gray-700 mb-2">Search Description</label>
+                            <input type="text" id="searchFilter" placeholder="Search..." class="professional-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none transition-all duration-200">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="applyFilters()" class="w-full bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
+                                🔍 Apply Filters
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Vouchers Table -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                        <thead class="bg-orange-100">
+                <div class="overflow-x-auto rounded-xl border border-gray-200">
+                    <table class="min-w-full bg-white">
+                        <thead class="bg-orange-500 text-white">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Voucher ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Description</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Voucher Details</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Usage Details</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Voucher ID</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Description</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Voucher Details</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Usage Details</th>
                             </tr>
                         </thead>
-                        <tbody id="vouchersTableBody" class="bg-white divide-y divide-gray-200">
+                        <tbody id="vouchersTableBody" class="bg-white divide-y divide-gray-100">
                             <!-- Vouchers will be loaded here -->
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Pagination -->
-                <div class="flex justify-between items-center mt-6">
-                    <div class="text-sm text-gray-700">
-                        Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span id="totalRecords">0</span> results
+                <div class="flex justify-between items-center mt-8 p-4 bg-gray-50 rounded-xl">
+                    <div class="text-sm font-medium text-gray-700">
+                        Showing <span id="showingStart" class="font-bold text-orange-600">0</span> to <span id="showingEnd" class="font-bold text-orange-600">0</span> of <span id="totalRecords" class="font-bold text-orange-600">0</span> results
                     </div>
-                    <div class="flex space-x-2">
-                        <button onclick="previousPage()" id="prevBtn" class="px-3 py-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50">
-                            Previous
+                    <div class="flex space-x-3">
+                        <button onclick="previousPage()" id="prevBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-orange-50 hover:border-orange-300 transition-all duration-200 disabled:opacity-50 font-medium">
+                            ← Previous
                         </button>
-                        <span id="pageInfo" class="px-3 py-2 text-gray-700">Page 1</span>
-                        <button onclick="nextPage()" id="nextBtn" class="px-3 py-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50">
-                            Next
+                        <span id="pageInfo" class="px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold">Page 1</span>
+                        <button onclick="nextPage()" id="nextBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-orange-50 hover:border-orange-300 transition-all duration-200 disabled:opacity-50 font-medium">
+                            Next →
                         </button>
                     </div>
                 </div>
@@ -126,59 +188,157 @@
 
         <!-- Update Voucher Section -->
         <section id="update-section" class="section hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Update Voucher</h2>
+            <div class="bg-white rounded-2xl card-shadow p-8">
+                <div class="flex items-center mb-8">
+                    <div class="bg-orange-500 p-3 rounded-xl mr-4">
+                        <span class="text-2xl">✏️</span>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">Update Voucher</h2>
+                        <p class="text-gray-600 mt-1">Modify voucher details and usage information</p>
+                    </div>
+                </div>
                 
-                <form id="updateForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="updateVoucherId" class="block text-sm font-medium text-gray-700 mb-2">Voucher ID</label>
-                            <input type="text" id="updateVoucherId" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        </div>
-                        <div>
-                            <label for="updateValue" class="block text-sm font-medium text-gray-700 mb-2">Value (RM)</label>
-                            <input type="number" id="updateValue" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label for="updateDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea id="updateDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
-                        </div>
-                        <div>
-                            <label for="updateDateIssued" class="block text-sm font-medium text-gray-700 mb-2">Date Issued</label>
-                            <input type="date" id="updateDateIssued" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        </div>
-                        <div>
-                            <label for="updateStatus" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                            <select id="updateStatus" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                <option value="">Select Status</option>
-                                <option value="ACTIVE">Active</option>
-                                <option value="REDEEMED">Redeemed</option>
-                                <option value="EXPIRED">Expired</option>
-                                <option value="NOT ISSUE">Not Issued</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="updateDaysLeft" class="block text-sm font-medium text-gray-700 mb-2">Days Left</label>
-                            <input type="number" id="updateDaysLeft" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        </div>
+                <!-- Admin Authentication -->
+                <div id="adminAuthSection" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-center mb-3">
+                        <span class="text-yellow-600 text-lg mr-2">🔒</span>
+                        <h3 class="text-lg font-semibold text-yellow-800">Admin Access Required</h3>
                     </div>
-                    
+                    <p class="text-yellow-700 mb-4">This section requires admin privileges. Please enter the admin password to continue.</p>
                     <div class="flex space-x-4">
-                        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
-                            Update Voucher
-                        </button>
-                        <button type="button" onclick="clearUpdateForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
-                            Clear Form
+                        <input type="password" id="adminPassword" placeholder="Enter admin password..." class="flex-1 px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <button type="button" onclick="authenticateAdmin()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
+                            Authenticate
                         </button>
                     </div>
-                </form>
+                </div>
+
+                <!-- Update Form (Hidden until authenticated) -->
+                <div id="updateFormContainer" class="hidden">
+                    <form id="updateForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="updateVoucherId" class="block text-sm font-medium text-gray-700 mb-2">Voucher ID</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="updateVoucherId" required class="professional-input flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none transition-all duration-200" onchange="loadVoucherDetails()">
+                                    <button type="button" onclick="loadVoucherDetails()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
+                                        📥 Load
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Enter voucher ID and click Load to auto-fill existing details</p>
+                            </div>
+                            <div>
+                                <label for="updateValue" class="block text-sm font-medium text-gray-700 mb-2">Value (RM)</label>
+                                <input type="number" id="updateValue" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="updateDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <textarea id="updateDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="updateDateIssued" class="block text-sm font-medium text-gray-700 mb-2">Date Issued</label>
+                                <input type="date" id="updateDateIssued" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            </div>
+                            <div>
+                                <label for="updateStatus" class="block text-sm font-medium text-gray-700 mb-2">Status (Auto-calculated)</label>
+                                <select id="updateStatus" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500">
+                                    <option value="">Will be calculated automatically</option>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="REDEEMED">Redeemed</option>
+                                    <option value="EXPIRED">Expired</option>
+                                    <option value="NOT ISSUE">Not Issued</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Status and days left are automatically calculated based on business rules</p>
+                            </div>
+                            <div>
+                                <label for="updateDaysLeft" class="block text-sm font-medium text-gray-700 mb-2">Days Left (Auto-calculated)</label>
+                                <input type="number" id="updateDaysLeft" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500" placeholder="Will be calculated automatically">
+                            </div>
+                        </div>
+                        
+                        <!-- Usage Details Section (shown only if voucher has usage data) -->
+                        <div id="usageDetailsSection" class="hidden mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex items-center mb-4">
+                                <span class="text-blue-600 text-lg mr-2">ℹ️</span>
+                                <h3 class="text-lg font-semibold text-blue-800">Usage Details</h3>
+                            </div>
+                            <p class="text-blue-700 mb-4">This voucher has been redeemed. You can view and update the usage information below.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="updateUsageCategory" class="block text-sm font-medium text-gray-700 mb-2">Usage Category</label>
+                                    <select id="updateUsageCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" onchange="updateUsageDetailsPlaceholderInUpdate()">
+                                        <option value="">Select Category</option>
+                                        <option value="Chess Class">Chess Class</option>
+                                        <option value="Tournament Name">Tournament Name</option>
+                                        <option value="Product Purchase">Product Purchase</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="updateRedemptionDate" class="block text-sm font-medium text-gray-700 mb-2">Redemption Date</label>
+                                    <input type="date" id="updateRedemptionDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                </div>
+                                <div>
+                                    <label for="updateCustomerName" class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
+                                    <input type="text" id="updateCustomerName" placeholder="e.g., Luqman (Aryan)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                    <p class="text-xs text-gray-500 mt-1">Format: Parent Name (Child Name) if applicable</p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="updateUsageDetails" class="block text-sm font-medium text-gray-700 mb-2">Usage Details</label>
+                                    <textarea id="updateUsageDetails" rows="3" placeholder="Select a category above to see specific examples..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="updatePhotos" class="block text-sm font-medium text-gray-700 mb-2">Photos (Optional)</label>
+                                    <div class="space-y-3">
+                                        <input type="file" id="updatePhotoUpload" multiple accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                        <div id="updatePhotoPreview" class="flex flex-wrap gap-2 hidden"></div>
+                                        <div id="updateUploadProgress" class="hidden">
+                                            <div class="bg-gray-200 rounded-full h-2">
+                                                <div id="updateProgressBar" class="bg-blue-600 h-2 rounded-full upload-progress" style="width: 0%"></div>
+                                            </div>
+                                            <p id="updateProgressText" class="text-sm text-gray-600 mt-1">Uploading...</p>
+                                        </div>
+                                        <button type="button" onclick="uploadPhotosUpdate()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center">
+                                            <span class="mr-2">📤</span>
+                                            Upload Photos to Drive
+                                        </button>
+                                        <input type="text" id="updatePhotos" placeholder="Uploaded photo links will appear here..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" readonly>
+                                        <p class="text-xs text-gray-500">Photos will be automatically renamed as: Date-CustomerName-Category</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
+                                Update Voucher
+                            </button>
+                            <button type="button" onclick="sendUpdateToWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition-colors duration-200 flex items-center">
+                                <span class="mr-2 text-lg">💬</span>
+                                Send to WhatsApp
+                            </button>
+                            <button type="button" onclick="clearUpdateForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </section>
 
         <!-- Redeem Voucher Section -->
         <section id="redeem-section" class="section hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Redeem Voucher</h2>
+            <div class="bg-white rounded-2xl card-shadow p-8">
+                <div class="flex items-center mb-8">
+                    <div class="bg-orange-500 p-3 rounded-xl mr-4">
+                        <span class="text-2xl">🎫</span>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">Redeem Voucher</h2>
+                        <p class="text-gray-600 mt-1">Process voucher redemptions with detailed tracking</p>
+                    </div>
+                </div>
                 
                 <!-- Step 1: Voucher Input -->
                 <div id="voucherInputSection" class="mb-6">
@@ -201,8 +361,6 @@
                         <!-- Validation result will appear here -->
                     </div>
                 </div>
-
-
 
                 <!-- Selected Vouchers Summary -->
                 <div id="selectedVouchersSection" class="mb-6 hidden">
@@ -244,7 +402,22 @@
                             </div>
                             <div class="md:col-span-2">
                                 <label for="photos" class="block text-sm font-medium text-gray-700 mb-2">Photos (Optional)</label>
-                                <input type="text" id="photos" placeholder="Photo URLs or descriptions..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <div class="space-y-3">
+                                    <input type="file" id="photoUpload" multiple accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                    <div id="photoPreview" class="flex flex-wrap gap-2 hidden"></div>
+                                    <div id="uploadProgress" class="hidden">
+                                        <div class="bg-gray-200 rounded-full h-2">
+                                            <div id="progressBar" class="bg-blue-600 h-2 rounded-full upload-progress" style="width: 0%"></div>
+                                        </div>
+                                        <p id="progressText" class="text-sm text-gray-600 mt-1">Uploading...</p>
+                                    </div>
+                                    <button type="button" onclick="uploadPhotos()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center">
+                                        <span class="mr-2">📤</span>
+                                        Upload Photos to Drive
+                                    </button>
+                                    <input type="text" id="photos" placeholder="Uploaded photo links will appear here..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" readonly>
+                                    <p class="text-xs text-gray-500">Photos will be automatically renamed as: Date-CustomerName-Category</p>
+                                </div>
                             </div>
                         </div>
                         
@@ -281,13 +454,17 @@
         let currentPage = 1;
         const recordsPerPage = 10;
         let selectedVouchers = [];
+        let isAdminAuthenticated = false;
 
         // URLs for Google Sheets
         const VOUCHERS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=0&single=true&output=csv';
         const USAGE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=1706713915&single=true&output=csv';
         
-        // Google Apps Script URL for real-time updates
+        // Google Apps Script URL for real-time updates and photo uploads
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKagwZ3z67ZGjAxcejbvoKNtEcOXGIcCTJWPDlVo5CT0AdHt7Re6kjBjwchl5m-zLm/exec';
+        
+        // Google Drive folder ID for photo uploads
+        const DRIVE_FOLDER_ID = '1NQIMufEkUxnPvljpUXOmWVxXgukb4FFv';
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -303,9 +480,50 @@
                     validateVouchers();
                 }
             });
-            
 
+            // Add Enter key support for admin password
+            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    authenticateAdmin();
+                }
+            });
+
+            // Add file input change listeners for photo preview
+            document.getElementById('photoUpload').addEventListener('change', function(e) {
+                previewPhotos(e.target.files, 'photoPreview');
+            });
+
+            document.getElementById('updatePhotoUpload').addEventListener('change', function(e) {
+                previewPhotos(e.target.files, 'updatePhotoPreview');
+            });
         });
+
+        // Photo preview function
+        function previewPhotos(files, previewContainerId) {
+            const container = document.getElementById(previewContainerId);
+            container.innerHTML = '';
+            
+            if (files.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'photo-preview border border-gray-300';
+                        img.title = file.name;
+                        container.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
 
         // Navigation functions
         function showSection(sectionName) {
@@ -316,7 +534,7 @@
             
             // Remove active class from all nav buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('border-orange-500', 'text-orange-600');
+                btn.classList.remove('active');
             });
             
             // Show selected section
@@ -324,11 +542,147 @@
             document.getElementById(sectionName + '-section').classList.add('fade-in');
             
             // Add active class to selected nav button
-            document.getElementById(sectionName + '-tab').classList.add('border-orange-500', 'text-orange-600');
+            document.getElementById(sectionName + '-tab').classList.add('active');
             
             // Load specific section data
             if (sectionName === 'redeem') {
                 resetRedemption();
+            } else if (sectionName === 'update') {
+                resetAdminAuth();
+            }
+        }
+
+        // Admin authentication functions
+        function authenticateAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            const correctPassword = 'kamuscatur';
+            
+            if (password === correctPassword) {
+                isAdminAuthenticated = true;
+                document.getElementById('adminAuthSection').classList.add('hidden');
+                document.getElementById('updateFormContainer').classList.remove('hidden');
+                document.getElementById('adminPassword').value = '';
+                showMessage('Admin access granted! You can now update vouchers.', 'success');
+            } else {
+                showMessage('Incorrect password. Access denied.', 'error');
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function resetAdminAuth() {
+            isAdminAuthenticated = false;
+            document.getElementById('adminAuthSection').classList.remove('hidden');
+            document.getElementById('updateFormContainer').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+            clearUpdateForm();
+        }
+
+        // Load voucher details when voucher ID is entered
+        function loadVoucherDetails() {
+            const voucherId = document.getElementById('updateVoucherId').value.trim().toUpperCase();
+            
+            if (!voucherId) {
+                showMessage('Please enter a voucher ID', 'error');
+                return;
+            }
+            
+            // Find voucher in data
+            const voucher = vouchersData.find(v => v['Voucher ID'].toUpperCase() === voucherId);
+            
+            if (!voucher) {
+                showMessage('Voucher not found. You can create a new voucher with this ID.', 'error');
+                // Clear form except voucher ID
+                document.getElementById('updateValue').value = '';
+                document.getElementById('updateDescription').value = '';
+                document.getElementById('updateDateIssued').value = '';
+                document.getElementById('updateStatus').value = '';
+                document.getElementById('updateDaysLeft').value = '';
+                hideUsageDetails();
+                return;
+            }
+            
+            // Auto-fill form with existing voucher data
+            document.getElementById('updateVoucherId').value = voucher['Voucher ID'];
+            document.getElementById('updateValue').value = parseFloat(voucher['Value (RM)'] || 0);
+            document.getElementById('updateDescription').value = voucher.Description || '';
+            
+            // Convert database date format (DD/MM/YYYY) to HTML date input format (YYYY-MM-DD)
+            const dateIssued = voucher['Date Issued'] || '';
+            if (dateIssued) {
+                const dateParts = dateIssued.split('/');
+                if (dateParts.length === 3) {
+                    // Convert DD/MM/YYYY to YYYY-MM-DD
+                    const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+                    document.getElementById('updateDateIssued').value = formattedDate;
+                } else {
+                    document.getElementById('updateDateIssued').value = '';
+                }
+            } else {
+                document.getElementById('updateDateIssued').value = '';
+            }
+            
+            document.getElementById('updateStatus').value = voucher.Status || '';
+            document.getElementById('updateDaysLeft').value = parseInt(voucher['Days Left'] || 0);
+            
+            // Load and display usage details if voucher is redeemed
+            loadUsageDetails(voucherId);
+            
+            showMessage('Voucher details loaded successfully!', 'success');
+        }
+
+        // Load usage details for a specific voucher
+        function loadUsageDetails(voucherId) {
+            const usageRecord = usageData.find(usage => usage['Voucher ID'].toUpperCase() === voucherId.toUpperCase());
+            const usageSection = document.getElementById('usageDetailsSection');
+            
+            if (usageRecord) {
+                // Show usage details section
+                usageSection.classList.remove('hidden');
+                
+                // Fill usage form with existing data
+                document.getElementById('updateUsageCategory').value = usageRecord['Usage Category'] || '';
+                document.getElementById('updateCustomerName').value = usageRecord['Customer Name'] || '';
+                document.getElementById('updateRedemptionDate').value = usageRecord['Date Redeemed'] || '';
+                document.getElementById('updateUsageDetails').value = usageRecord['Details'] || '';
+                document.getElementById('updatePhotos').value = usageRecord['Photos'] || '';
+                
+                // Update placeholder for usage details
+                updateUsageDetailsPlaceholderInUpdate();
+            } else {
+                // Hide usage details section if no usage record found
+                hideUsageDetails();
+            }
+        }
+
+        function hideUsageDetails() {
+            const usageSection = document.getElementById('usageDetailsSection');
+            usageSection.classList.add('hidden');
+            
+            // Clear usage form
+            document.getElementById('updateUsageCategory').value = '';
+            document.getElementById('updateCustomerName').value = '';
+            document.getElementById('updateRedemptionDate').value = '';
+            document.getElementById('updateUsageDetails').value = '';
+            document.getElementById('updatePhotos').value = '';
+        }
+
+        // Update usage details placeholder in update form
+        function updateUsageDetailsPlaceholderInUpdate() {
+            const category = document.getElementById('updateUsageCategory').value;
+            const usageDetails = document.getElementById('updateUsageDetails');
+            
+            switch(category) {
+                case 'Chess Class':
+                    usageDetails.placeholder = "e.g., 'Peribadi / Ogos – Coach Luqman' or 'Centre Pagi / April – Coach Marlia'";
+                    break;
+                case 'Tournament Name':
+                    usageDetails.placeholder = "e.g., 'Battle of Duo (Under 17) – 2nd Series'";
+                    break;
+                case 'Product Purchase':
+                    usageDetails.placeholder = "Describe the product purchased...";
+                    break;
+                default:
+                    usageDetails.placeholder = "Select a category above to see specific examples...";
             }
         }
 
@@ -428,11 +782,11 @@
 
         function getStatusClass(status) {
             switch (status) {
-                case 'ACTIVE': return 'bg-green-100 text-green-800';
-                case 'REDEEMED': return 'bg-blue-100 text-blue-800';
-                case 'EXPIRED': return 'bg-red-100 text-red-800';
-                case 'NOT ISSUE': return 'bg-gray-100 text-gray-800';
-                default: return 'bg-gray-100 text-gray-800';
+                case 'ACTIVE': return 'status-badge bg-green-100 text-green-800 border border-green-200';
+                case 'REDEEMED': return 'status-badge bg-blue-100 text-blue-800 border border-blue-200';
+                case 'EXPIRED': return 'status-badge bg-red-100 text-red-800 border border-red-200';
+                case 'NOT ISSUE': return 'status-badge bg-gray-100 text-gray-800 border border-gray-200';
+                default: return 'status-badge bg-gray-100 text-gray-800 border border-gray-200';
             }
         }
 
@@ -492,10 +846,19 @@
                 voucherId: document.getElementById('updateVoucherId').value,
                 value: parseFloat(document.getElementById('updateValue').value),
                 description: document.getElementById('updateDescription').value,
-                dateIssued: document.getElementById('updateDateIssued').value,
-                status: document.getElementById('updateStatus').value,
-                daysLeft: parseInt(document.getElementById('updateDaysLeft').value)
+                dateIssued: document.getElementById('updateDateIssued').value
             };
+            
+            // Check if usage details section is visible and include usage data
+            const usageSection = document.getElementById('usageDetailsSection');
+            if (!usageSection.classList.contains('hidden')) {
+                formData.updateUsage = true;
+                formData.usageCategory = document.getElementById('updateUsageCategory').value;
+                formData.customerName = document.getElementById('updateCustomerName').value;
+                formData.redemptionDate = document.getElementById('updateRedemptionDate').value;
+                formData.usageDetails = document.getElementById('updateUsageDetails').value;
+                formData.photos = document.getElementById('updatePhotos').value;
+            }
             
             try {
                 showLoading(true);
@@ -519,7 +882,11 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showMessage('Voucher updated successfully!', 'success');
+                    let message = `Voucher updated successfully! Status: ${result.calculatedStatus}, Days Left: ${result.calculatedDaysLeft}`;
+                    if (formData.updateUsage) {
+                        message += ' Usage details also updated.';
+                    }
+                    showMessage(message, 'success');
                     clearUpdateForm();
                     // Reload data to show updated information
                     setTimeout(async () => {
@@ -538,6 +905,10 @@
 
         function clearUpdateForm() {
             document.getElementById('updateForm').reset();
+            hideUsageDetails();
+            // Clear photo previews
+            document.getElementById('updatePhotoPreview').innerHTML = '';
+            document.getElementById('updatePhotoPreview').classList.add('hidden');
         }
 
         // Redeem voucher functions
@@ -595,7 +966,7 @@
                 resultHTML += `
                     <div class="mb-4 p-4 rounded-lg bg-green-50 border border-green-200">
                         <div class="flex items-center mb-3">
-                            <span class="text-green-500 text-2xl mr-3">✅</span>
+                            <span class="text-green-500 text-lg mr-3">✅</span>
                             <h4 class="text-lg font-semibold text-green-800">Valid Vouchers (${validVouchers.length})</h4>
                         </div>
                         <div class="space-y-2">
@@ -637,7 +1008,7 @@
                 resultHTML += `
                     <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200">
                         <div class="flex items-center mb-2">
-                            <span class="text-red-500 text-2xl mr-3">❌</span>
+                            <span class="text-red-500 text-lg mr-3">❌</span>
                             <h4 class="text-lg font-semibold text-red-800">Vouchers Not Found (${invalidVouchers.length})</h4>
                         </div>
                         <p class="text-red-700 mb-2">The following voucher IDs do not exist in our system:</p>
@@ -653,7 +1024,7 @@
                 resultHTML += `
                     <div class="mb-4 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
                         <div class="flex items-center mb-2">
-                            <span class="text-yellow-500 text-2xl mr-3">⚠️</span>
+                            <span class="text-yellow-500 text-lg mr-3">⚠️</span>
                             <h4 class="text-lg font-semibold text-yellow-800">Inactive Vouchers (${inactiveVouchers.length})</h4>
                         </div>
                         <p class="text-yellow-700 mb-2">The following vouchers are not available for redemption:</p>
@@ -688,7 +1059,7 @@
                 resultHTML += `
                     <div class="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
                         <div class="flex items-center mb-2">
-                            <span class="text-blue-500 text-2xl mr-3">ℹ️</span>
+                            <span class="text-blue-500 text-lg mr-3">ℹ️</span>
                             <h4 class="text-lg font-semibold text-blue-800">Already Selected (${duplicateVouchers.length})</h4>
                         </div>
                         <p class="text-blue-700 mb-2">The following vouchers are already in your selection:</p>
@@ -772,9 +1143,7 @@
             showAdditionalSections();
             showMessage('Voucher added to selection!', 'success');
         }
-        
 
-        
         function showAdditionalSections() {
             document.getElementById('selectedVouchersSection').classList.remove('hidden');
             document.getElementById('redemptionFormSection').classList.remove('hidden');
@@ -793,6 +1162,9 @@
             document.getElementById('redeemForm').reset();
             document.getElementById('redeemDate').valueAsDate = new Date();
             updateSelectedVouchers();
+            // Clear photo previews
+            document.getElementById('photoPreview').innerHTML = '';
+            document.getElementById('photoPreview').classList.add('hidden');
         }
 
         function updateSelectedVouchers() {
@@ -823,7 +1195,7 @@
                     <div class="flex items-center space-x-2">
                         <span class="font-semibold text-orange-600">RM ${value.toFixed(2)}</span>
                         <button onclick="removeVoucher('${voucher['Voucher ID']}')" class="text-red-500 hover:text-red-700">
-                            ✕
+                            🗑️
                         </button>
                     </div>
                 `;
@@ -878,7 +1250,8 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showMessage(`Successfully redeemed ${selectedVouchers.length} voucher(s)!`, 'success');
+                    // Show success message with WhatsApp option
+                    showRedemptionSuccessMessage();
                     
                     // Reset form and selections
                     selectedVouchers = [];
@@ -887,6 +1260,9 @@
                     document.getElementById('redeemDate').valueAsDate = new Date();
                     hideAdditionalSections();
                     document.getElementById('validationResultSection').classList.add('hidden');
+                    // Clear photo previews
+                    document.getElementById('photoPreview').innerHTML = '';
+                    document.getElementById('photoPreview').classList.add('hidden');
                     
                     // Reload data to show updated information
                     setTimeout(async () => {
@@ -921,6 +1297,328 @@
                 default:
                     usageDetails.placeholder = "Select a category above to see specific examples...";
             }
+        }
+
+        // Photo upload functions with progress tracking
+        async function uploadPhotos() {
+            const fileInput = document.getElementById('photoUpload');
+            const files = fileInput.files;
+            
+            if (files.length === 0) {
+                showMessage('Please select photos to upload', 'error');
+                return;
+            }
+            
+            const customerName = document.getElementById('customerName').value;
+            const redemptionDate = document.getElementById('redeemDate').value;
+            const usageCategory = document.getElementById('usageCategory').value;
+            
+            if (!customerName || !redemptionDate || !usageCategory) {
+                showMessage('Please fill in customer name, date, and category before uploading photos', 'error');
+                return;
+            }
+            
+            try {
+                showUploadProgress('uploadProgress', 'progressBar', 'progressText', true);
+                const uploadedLinks = [];
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileName = generatePhotoFileName(redemptionDate, customerName, usageCategory, i + 1, file.name);
+                    
+                    // Update progress
+                    const progress = ((i + 1) / files.length) * 100;
+                    updateUploadProgress('progressBar', 'progressText', progress, `Uploading ${file.name}...`);
+                    
+                    const formData = new FormData();
+                    formData.append('action', 'uploadPhoto');
+                    formData.append('file', file);
+                    formData.append('fileName', fileName);
+                    formData.append('folderId', DRIVE_FOLDER_ID);
+                    
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        uploadedLinks.push(result.fileUrl);
+                    } else {
+                        throw new Error(`Failed to upload ${file.name}: ${result.error}`);
+                    }
+                }
+                
+                // Update the photos field with uploaded links
+                document.getElementById('photos').value = uploadedLinks.join(', ');
+                showMessage(`Successfully uploaded ${uploadedLinks.length} photo(s) to Google Drive!`, 'success');
+                
+                // Clear the file input and preview
+                fileInput.value = '';
+                document.getElementById('photoPreview').innerHTML = '';
+                document.getElementById('photoPreview').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showMessage('Error uploading photos: ' + error.message, 'error');
+            } finally {
+                showUploadProgress('uploadProgress', 'progressBar', 'progressText', false);
+            }
+        }
+        
+        async function uploadPhotosUpdate() {
+            const fileInput = document.getElementById('updatePhotoUpload');
+            const files = fileInput.files;
+            
+            if (files.length === 0) {
+                showMessage('Please select photos to upload', 'error');
+                return;
+            }
+            
+            const customerName = document.getElementById('updateCustomerName').value;
+            const redemptionDate = document.getElementById('updateRedemptionDate').value;
+            const usageCategory = document.getElementById('updateUsageCategory').value;
+            
+            if (!customerName || !redemptionDate || !usageCategory) {
+                showMessage('Please fill in customer name, date, and category before uploading photos', 'error');
+                return;
+            }
+            
+            try {
+                showUploadProgress('updateUploadProgress', 'updateProgressBar', 'updateProgressText', true);
+                const uploadedLinks = [];
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileName = generatePhotoFileName(redemptionDate, customerName, usageCategory, i + 1, file.name);
+                    
+                    // Update progress
+                    const progress = ((i + 1) / files.length) * 100;
+                    updateUploadProgress('updateProgressBar', 'updateProgressText', progress, `Uploading ${file.name}...`);
+                    
+                    const formData = new FormData();
+                    formData.append('action', 'uploadPhoto');
+                    formData.append('file', file);
+                    formData.append('fileName', fileName);
+                    formData.append('folderId', DRIVE_FOLDER_ID);
+                    
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        uploadedLinks.push(result.fileUrl);
+                    } else {
+                        throw new Error(`Failed to upload ${file.name}: ${result.error}`);
+                    }
+                }
+                
+                // Update the photos field with uploaded links
+                const existingPhotos = document.getElementById('updatePhotos').value;
+                const allPhotos = existingPhotos ? existingPhotos + ', ' + uploadedLinks.join(', ') : uploadedLinks.join(', ');
+                document.getElementById('updatePhotos').value = allPhotos;
+                
+                showMessage(`Successfully uploaded ${uploadedLinks.length} photo(s) to Google Drive!`, 'success');
+                
+                // Clear the file input and preview
+                fileInput.value = '';
+                document.getElementById('updatePhotoPreview').innerHTML = '';
+                document.getElementById('updatePhotoPreview').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showMessage('Error uploading photos: ' + error.message, 'error');
+            } finally {
+                showUploadProgress('updateUploadProgress', 'updateProgressBar', 'updateProgressText', false);
+            }
+        }
+
+        // Upload progress functions
+        function showUploadProgress(containerId, progressBarId, progressTextId, show) {
+            const container = document.getElementById(containerId);
+            if (show) {
+                container.classList.remove('hidden');
+                updateUploadProgress(progressBarId, progressTextId, 0, 'Starting upload...');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function updateUploadProgress(progressBarId, progressTextId, percentage, text) {
+            const progressBar = document.getElementById(progressBarId);
+            const progressText = document.getElementById(progressTextId);
+            
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+            }
+            
+            if (progressText) {
+                progressText.textContent = text || `${Math.round(percentage)}% complete`;
+            }
+        }
+        
+        function generatePhotoFileName(date, customerName, category, photoNumber, originalFileName) {
+            // Format date as DD-MM-YYYY
+            const dateObj = new Date(date);
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const formattedDate = `${day}-${month}-${year}`;
+            
+            // Clean customer name and category (remove special characters)
+            const cleanCustomerName = customerName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-');
+            const cleanCategory = category.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-');
+            
+            // Get file extension
+            const extension = originalFileName.split('.').pop();
+            
+            // Generate filename: Date-CustomerName-Category-PhotoNumber.extension
+            return `${formattedDate}-${cleanCustomerName}-${cleanCategory}-${photoNumber}.${extension}`;
+        }
+        
+        // WhatsApp function for update form
+        function sendUpdateToWhatsApp() {
+            const voucherId = document.getElementById('updateVoucherId').value;
+            const customerName = document.getElementById('updateCustomerName').value;
+            const usageCategory = document.getElementById('updateUsageCategory').value;
+            const usageDetails = document.getElementById('updateUsageDetails').value;
+            const redemptionDate = document.getElementById('updateRedemptionDate').value;
+            
+            if (!voucherId || !customerName || !usageCategory || !redemptionDate) {
+                showMessage('Please fill in all required fields before sending to WhatsApp', 'error');
+                return;
+            }
+
+            // Get voucher value for total calculation
+            const voucher = vouchersData.find(v => v['Voucher ID'].toUpperCase() === voucherId.toUpperCase());
+            const voucherValue = voucher ? parseFloat(voucher['Value (RM)'] || 0) : 0;
+
+            // Format the redemption date (DD/MM/YYYY)
+            const dateObj = new Date(redemptionDate);
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const formattedDate = `${day}/${month}/${year}`;
+
+            // Clean usage details
+            const cleanUsageDetails = usageDetails.replace(/['"]/g, '').trim();
+
+            // Build message text exactly as specified
+            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :
+
+*Usage details* : ${cleanUsageDetails}
+*Date Redeemed* : ${formattedDate}
+*Total Voucher Redeemed* : 1
+*Total Value* : RM ${voucherValue.toFixed(2)}
+
+Thank You !!`;
+
+            // Encode message using encodeURIComponent
+            const encoded = encodeURIComponent(message);
+            
+            // Construct WhatsApp URL using wa.me format
+            const url = `https://wa.me/60182046224?text=${encoded}`;
+
+            // Open WhatsApp in new tab/window
+            window.open(url, '_blank', 'noopener,noreferrer');
+            
+            showMessage('WhatsApp opened! Send the message from there.', 'success');
+        }
+
+        // WhatsApp integration functions
+        function showRedemptionSuccessMessage() {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            
+            // Get redemption details for WhatsApp message
+            const customerName = document.getElementById('customerName').value;
+            const totalVouchers = selectedVouchers.length;
+            const redemptionDate = document.getElementById('redeemDate').value;
+            const usageCategory = document.getElementById('usageCategory').value;
+            const usageDetails = document.getElementById('usageDetails').value;
+            
+            messageDiv.className = 'bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg mb-2 fade-in max-w-md';
+            messageDiv.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">✅</span>
+                        <span class="font-semibold">Redemption Successful!</span>
+                    </div>
+                    <p class="text-sm">Successfully redeemed ${totalVouchers} voucher(s) for ${customerName}</p>
+                    <div class="flex space-x-2">
+                        <button onclick="sendRedemptionToWhatsApp(); this.parentElement.parentElement.parentElement.remove();" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
+                            <span class="mr-2">📱</span>
+                            Send to WhatsApp
+                        </button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                class="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(messageDiv);
+            
+            // Auto remove after 15 seconds if not interacted with
+            setTimeout(() => {
+                if (messageDiv.parentElement) {
+                    messageDiv.remove();
+                }
+            }, 15000);
+        }
+
+        function sendRedemptionToWhatsApp() {
+            const customerName = document.getElementById('customerName').value;
+            const totalVouchers = selectedVouchers.length;
+            const redemptionDate = document.getElementById('redeemDate').value;
+            const usageCategory = document.getElementById('usageCategory').value;
+            const usageDetails = document.getElementById('usageDetails').value;
+            
+            sendToWhatsApp(customerName, totalVouchers, redemptionDate, usageCategory, usageDetails);
+        }
+
+        function sendToWhatsApp(customerName, totalVouchers, redemptionDate, usageCategory, usageDetails) {
+            // Format the redemption date (DD/MM/YYYY)
+            const dateObj = new Date(redemptionDate);
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const formattedDate = `${day}/${month}/${year}`;
+
+            // Calculate total value from selected vouchers
+            const totalValue = selectedVouchers.reduce((sum, voucher) => {
+                return sum + parseFloat(voucher['Value (RM)'] || 0);
+            }, 0);
+
+            // Clean usage details
+            const cleanUsageDetails = usageDetails.replace(/['"]/g, '').trim();
+
+            // Build message text exactly as specified
+            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :
+
+*Usage details* : ${cleanUsageDetails}
+*Date Redeemed* : ${formattedDate}
+*Total Voucher Redeemed* : ${totalVouchers}
+*Total Value* : RM ${totalValue.toFixed(2)}
+
+Thank You !!`;
+
+            // Encode message using encodeURIComponent
+            const encoded = encodeURIComponent(message);
+            
+            // Construct WhatsApp URL using wa.me format
+            const url = `https://wa.me/60182046224?text=${encoded}`;
+
+            // Open WhatsApp in new tab/window
+            window.open(url, '_blank', 'noopener,noreferrer');
+
+            showMessage('WhatsApp opened! Send the message from there.', 'success');
         }
 
         // Utility functions
@@ -959,5 +1657,5 @@
             }, 5000);
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98f418db348fa84c',t:'MTc2MDU4MTQzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98f82ff645e2a84a',t:'MTc2MDYyNDMyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
