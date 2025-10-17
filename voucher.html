@@ -1,1503 +1,343 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kamus Catur - Chess Academy & Store</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            box-sizing: border-box;
+// Google Apps Script for Voucher Management System with Automation
+// This script handles voucher updates, redemptions, and automatic calculations
+
+function doPost(e) {
+  try {
+    // Parse the incoming data
+    const data = e.parameter;
+    const action = data.action;
+    
+    // Get the spreadsheet
+    const spreadsheet = SpreadsheetApp.openById('1YYz6hTQCGn0XfNNgJ0k_FpzqfSUWIiQOIBR3g_c4RHc');
+    
+    let result = {};
+    
+    if (action === 'updateVoucher') {
+      result = updateVoucher(spreadsheet, data);
+    } else if (action === 'redeemVouchers') {
+      result = redeemVouchers(spreadsheet, data);
+    } else if (action === 'refreshCalculations') {
+      result = refreshAllCalculations(spreadsheet);
+    } else {
+      result = { success: false, error: 'Invalid action' };
+    }
+    
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    Logger.log('Error in doPost: ' + error.toString());
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: false, 
+        error: error.toString() 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  // Handle GET requests and trigger automatic calculations
+  try {
+    const spreadsheet = SpreadsheetApp.openById('1YYz6hTQCGn0XfNNgJ0k_FpzqfSUWIiQOIBR3g_c4RHc');
+    refreshAllCalculations(spreadsheet);
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: true, 
+        message: 'Voucher Management API is running - calculations updated' 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: false, 
+        error: error.toString() 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function updateVoucher(spreadsheet, data) {
+  try {
+    const vouchersSheet = spreadsheet.getSheetByName('VOUCHERS');
+    
+    if (!vouchersSheet) {
+      return { success: false, error: 'VOUCHERS sheet not found' };
+    }
+    
+    // Get all data from vouchers sheet
+    const vouchersData = vouchersSheet.getDataRange().getValues();
+    const headers = vouchersData[0];
+    
+    // Find the voucher row by Voucher ID
+    let voucherRowIndex = -1;
+    for (let i = 1; i < vouchersData.length; i++) {
+      if (vouchersData[i][0] === data.voucherId) { // Voucher ID is in column A (index 0)
+        voucherRowIndex = i;
+        break;
+      }
+    }
+    
+    // Calculate days left and status automatically
+    const calculatedData = calculateVoucherStatus(spreadsheet, data.voucherId, data.dateIssued);
+    
+    if (voucherRowIndex === -1) {
+      // Voucher doesn't exist, add new row
+      const newRow = [
+        data.voucherId,
+        parseFloat(data.value),
+        data.description,
+        data.dateIssued,
+        calculatedData.status,
+        calculatedData.daysLeft
+      ];
+      vouchersSheet.appendRow(newRow);
+    } else {
+      // Update existing voucher
+      const rowNumber = voucherRowIndex + 1; // Convert to 1-based indexing
+      vouchersSheet.getRange(rowNumber, 1, 1, 6).setValues([[
+        data.voucherId,
+        parseFloat(data.value),
+        data.description,
+        data.dateIssued,
+        calculatedData.status,
+        calculatedData.daysLeft
+      ]]);
+    }
+    
+    return { 
+      success: true, 
+      message: 'Voucher updated successfully',
+      calculatedStatus: calculatedData.status,
+      calculatedDaysLeft: calculatedData.daysLeft
+    };
+    
+  } catch (error) {
+    Logger.log('Error in updateVoucher: ' + error.toString());
+    return { success: false, error: error.toString() };
+  }
+}
+
+function redeemVouchers(spreadsheet, data) {
+  try {
+    const vouchersSheet = spreadsheet.getSheetByName('VOUCHERS');
+    const usageSheet = spreadsheet.getSheetByName('USAGE');
+    
+    if (!vouchersSheet) {
+      return { success: false, error: 'VOUCHERS sheet not found' };
+    }
+    
+    if (!usageSheet) {
+      return { success: false, error: 'USAGE sheet not found' };
+    }
+    
+    // Parse vouchers data from the request
+    const vouchers = JSON.parse(data.vouchers);
+    
+    // Get all data from vouchers sheet
+    const vouchersData = vouchersSheet.getDataRange().getValues();
+    
+    // Process each voucher
+    for (let voucher of vouchers) {
+      // Find and update voucher status to REDEEMED with 0 days left
+      for (let i = 1; i < vouchersData.length; i++) {
+        if (vouchersData[i][0] === voucher.voucherId) { // Voucher ID is in column A
+          // Update status to REDEEMED (column E, index 4) and days left to 0 (column F, index 5)
+          vouchersSheet.getRange(i + 1, 5).setValue('REDEEMED');
+          vouchersSheet.getRange(i + 1, 6).setValue(0);
+          break;
         }
-        .chess-gradient {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+      }
+      
+      // Add usage record
+      const usageRow = [
+        voucher.voucherId,           // Voucher ID
+        data.redemptionDate,         // Date Redeemed
+        data.usageCategory,          // Usage Category
+        data.usageDetails,           // Details
+        data.customerName,           // Customer Name
+        data.photos || ''            // Photos
+      ];
+      
+      usageSheet.appendRow(usageRow);
+    }
+    
+    return { 
+      success: true, 
+      message: `Successfully redeemed ${vouchers.length} voucher(s)` 
+    };
+    
+  } catch (error) {
+    Logger.log('Error in redeemVouchers: ' + error.toString());
+    return { success: false, error: error.toString() };
+  }
+}
+
+function calculateVoucherStatus(spreadsheet, voucherId, dateIssued) {
+  try {
+    const usageSheet = spreadsheet.getSheetByName('USAGE');
+    
+    // Check if voucher is redeemed (exists in USAGE table)
+    if (usageSheet) {
+      const usageData = usageSheet.getDataRange().getValues();
+      for (let i = 1; i < usageData.length; i++) {
+        if (usageData[i][0] === voucherId && usageData[i][1]) { // Voucher ID matches and Date Redeemed exists
+          return {
+            status: 'REDEEMED',
+            daysLeft: 0
+          };
         }
-        .accent-gradient {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        .loading {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center space-x-4">
-                <div class="text-4xl">🎫</div>
-                <div>
-                    <h1 class="text-3xl font-bold">Voucher Management</h1>
-                    <p class="text-orange-100 mt-1">Professional Voucher System</p>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Navigation -->
-    <nav class="bg-white shadow-md border-b-2 border-orange-200">
-        <div class="container mx-auto px-6">
-            <div class="flex space-x-8">
-                <button onclick="showSection('dashboard')" class="nav-btn py-4 px-2 border-b-2 border-transparent hover:border-orange-500 transition-colors duration-200 font-medium text-gray-700 hover:text-orange-600" id="dashboard-tab">
-                    📊 Dashboard
-                </button>
-                <button onclick="showSection('update')" class="nav-btn py-4 px-2 border-b-2 border-transparent hover:border-orange-500 transition-colors duration-200 font-medium text-gray-700 hover:text-orange-600" id="update-tab">
-                    ✏️ Update Voucher
-                </button>
-                <button onclick="showSection('redeem')" class="nav-btn py-4 px-2 border-b-2 border-transparent hover:border-orange-500 transition-colors duration-200 font-medium text-gray-700 hover:text-orange-600" id="redeem-tab">
-                    🎫 Redeem Voucher
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
-        <!-- Dashboard Section -->
-        <section id="dashboard-section" class="section">
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <div class="flex items-center mb-6">
-                    <span class="text-3xl mr-3">📊</span>
-                    <h2 class="text-2xl font-bold text-gray-800">Voucher Dashboard</h2>
-                </div>
-                
-                <!-- Filters -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div>
-                        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
-                        <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option value="">All Status</option>
-                            <option value="ACTIVE">Active</option>
-                            <option value="REDEEMED">Redeemed</option>
-                            <option value="EXPIRED">Expired</option>
-                            <option value="NOT ISSUE">Not Issued</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="valueFilter" class="block text-sm font-medium text-gray-700 mb-2">Voucher ID</label>
-                        <input type="text" id="valueFilter" placeholder="Enter voucher ID..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    <div>
-                        <label for="searchFilter" class="block text-sm font-medium text-gray-700 mb-2">Search Description</label>
-                        <input type="text" id="searchFilter" placeholder="Search..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="applyFilters()" class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                            Apply Filters
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Vouchers Table -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                        <thead class="bg-orange-100">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Voucher ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Description</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Voucher Details</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Usage Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vouchersTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Vouchers will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="flex justify-between items-center mt-6">
-                    <div class="text-sm text-gray-700">
-                        Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span id="totalRecords">0</span> results
-                    </div>
-                    <div class="flex space-x-2">
-                        <button onclick="previousPage()" id="prevBtn" class="px-3 py-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50">
-                            Previous
-                        </button>
-                        <span id="pageInfo" class="px-3 py-2 text-gray-700">Page 1</span>
-                        <button onclick="nextPage()" id="nextBtn" class="px-3 py-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50">
-                            Next
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Update Voucher Section -->
-        <section id="update-section" class="section hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex items-center mb-6">
-                    <span class="text-3xl mr-3">✏️</span>
-                    <h2 class="text-2xl font-bold text-gray-800">Update Voucher</h2>
-                </div>
-                
-                <!-- Admin Authentication -->
-                <div id="adminAuthSection" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div class="flex items-center mb-3">
-                        <span class="text-yellow-600 text-xl mr-2">🔐</span>
-                        <h3 class="text-lg font-semibold text-yellow-800">Admin Access Required</h3>
-                    </div>
-                    <p class="text-yellow-700 mb-4">This section requires admin privileges. Please enter the admin password to continue.</p>
-                    <div class="flex space-x-4">
-                        <input type="password" id="adminPassword" placeholder="Enter admin password..." class="flex-1 px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        <button type="button" onclick="authenticateAdmin()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
-                            Authenticate
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Update Form (Hidden until authenticated) -->
-                <div id="updateFormContainer" class="hidden">
-                    <form id="updateForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="updateVoucherId" class="block text-sm font-medium text-gray-700 mb-2">Voucher ID</label>
-                                <div class="flex space-x-2">
-                                    <input type="text" id="updateVoucherId" required class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" onchange="loadVoucherDetails()">
-                                    <button type="button" onclick="loadVoucherDetails()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                        Load
-                                    </button>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Enter voucher ID and click Load to auto-fill existing details</p>
-                            </div>
-                            <div>
-                                <label for="updateValue" class="block text-sm font-medium text-gray-700 mb-2">Value (RM)</label>
-                                <input type="number" id="updateValue" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="updateDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <textarea id="updateDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
-                            </div>
-                            <div>
-                                <label for="updateDateIssued" class="block text-sm font-medium text-gray-700 mb-2">Date Issued</label>
-                                <input type="date" id="updateDateIssued" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            </div>
-                            <div>
-                                <label for="updateStatus" class="block text-sm font-medium text-gray-700 mb-2">Status (Auto-calculated)</label>
-                                <select id="updateStatus" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500">
-                                    <option value="">Will be calculated automatically</option>
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="REDEEMED">Redeemed</option>
-                                    <option value="EXPIRED">Expired</option>
-                                    <option value="NOT ISSUE">Not Issued</option>
-                                </select>
-                                <p class="text-xs text-gray-500 mt-1">Status and days left are automatically calculated based on business rules</p>
-                            </div>
-                            <div>
-                                <label for="updateDaysLeft" class="block text-sm font-medium text-gray-700 mb-2">Days Left (Auto-calculated)</label>
-                                <input type="number" id="updateDaysLeft" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500" placeholder="Will be calculated automatically">
-                            </div>
-                        </div>
-                        
-                        <!-- Usage Details Section (shown only if voucher has usage data) -->
-                        <div id="usageDetailsSection" class="hidden mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div class="flex items-center mb-4">
-                                <span class="text-blue-600 text-xl mr-2">📋</span>
-                                <h3 class="text-lg font-semibold text-blue-800">Usage Details</h3>
-                            </div>
-                            <p class="text-blue-700 mb-4">This voucher has been redeemed. You can view and update the usage information below.</p>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="updateUsageCategory" class="block text-sm font-medium text-gray-700 mb-2">Usage Category</label>
-                                    <select id="updateUsageCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" onchange="updateUsageDetailsPlaceholderInUpdate()">
-                                        <option value="">Select Category</option>
-                                        <option value="Chess Class">Chess Class</option>
-                                        <option value="Tournament Name">Tournament Name</option>
-                                        <option value="Product Purchase">Product Purchase</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="updateRedemptionDate" class="block text-sm font-medium text-gray-700 mb-2">Redemption Date</label>
-                                    <input type="date" id="updateRedemptionDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                </div>
-                                <div>
-                                    <label for="updateCustomerName" class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
-                                    <input type="text" id="updateCustomerName" placeholder="e.g., Luqman (Aryan)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <p class="text-xs text-gray-500 mt-1">Format: Parent Name (Child Name) if applicable</p>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label for="updateUsageDetails" class="block text-sm font-medium text-gray-700 mb-2">Usage Details</label>
-                                    <textarea id="updateUsageDetails" rows="3" placeholder="Select a category above to see specific examples..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label for="updatePhotos" class="block text-sm font-medium text-gray-700 mb-2">Photos (Optional)</label>
-                                    <div class="space-y-3">
-                                        <input type="file" id="updatePhotoUpload" multiple accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                        <button type="button" onclick="uploadPhotosUpdate()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                            📤 Upload Photos to Drive
-                                        </button>
-                                        <input type="text" id="updatePhotos" placeholder="Uploaded photo links will appear here..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" readonly>
-                                        <p class="text-xs text-gray-500">Photos will be automatically renamed as: Date-CustomerName-Category</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex space-x-4">
-                            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
-                                Update Voucher
-                            </button>
-                            <button type="button" onclick="sendUpdateToWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition-colors duration-200 flex items-center">
-                                <span class="mr-2">📱</span>
-                                Send to WhatsApp
-                            </button>
-                            <button type="button" onclick="clearUpdateForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
-                                Clear Form
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- Redeem Voucher Section -->
-        <section id="redeem-section" class="section hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex items-center mb-6">
-                    <span class="text-3xl mr-3">🎫</span>
-                    <h2 class="text-2xl font-bold text-gray-800">Redeem Voucher</h2>
-                </div>
-                
-                <!-- Step 1: Voucher Input -->
-                <div id="voucherInputSection" class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Step 1: Enter Your Voucher ID(s)</h3>
-                    <div class="flex space-x-4">
-                        <div class="flex-1">
-                            <input type="text" id="voucherIdInput" placeholder="Enter voucher ID(s) - e.g., KC001, KC002, KC003" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg">
-                        </div>
-                        <button type="button" onclick="validateVouchers()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md transition-colors duration-200">
-                            Validate Vouchers
-                        </button>
-                    </div>
-                    <p class="text-sm text-gray-600 mt-2">Enter one or more voucher IDs separated by commas to check if they're valid and available for redemption.</p>
-                </div>
-
-                <!-- Step 2: Voucher Validation Result -->
-                <div id="validationResultSection" class="mb-6 hidden">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Validation Result</h3>
-                    <div id="validationResult" class="p-4 rounded-lg">
-                        <!-- Validation result will appear here -->
-                    </div>
-                </div>
-
-                <!-- Selected Vouchers Summary -->
-                <div id="selectedVouchersSection" class="mb-6 hidden">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Selected Vouchers for Redemption</h3>
-                    <div id="selectedVouchers" class="space-y-2">
-                        <!-- Selected vouchers will appear here -->
-                    </div>
-                    <div class="mt-4 p-4 bg-orange-50 rounded-lg">
-                        <p class="text-lg font-semibold text-gray-800">Total Value: RM <span id="totalValue">0.00</span></p>
-                    </div>
-                </div>
-
-                <!-- Step 3: Redemption Details Form -->
-                <div id="redemptionFormSection" class="hidden">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Step 2: Redemption Details</h3>
-                    <form id="redeemForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="usageCategory" class="block text-sm font-medium text-gray-700 mb-2">Usage Category</label>
-                                <select id="usageCategory" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" onchange="updateUsageDetailsPlaceholder()">
-                                    <option value="">Select Category</option>
-                                    <option value="Chess Class">Chess Class</option>
-                                    <option value="Tournament Name">Tournament Name</option>
-                                    <option value="Product Purchase">Product Purchase</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="redeemDate" class="block text-sm font-medium text-gray-700 mb-2">Redemption Date</label>
-                                <input type="date" id="redeemDate" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            </div>
-                            <div>
-                                <label for="customerName" class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
-                                <input type="text" id="customerName" placeholder="e.g., Luqman (Aryan)" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                <p class="text-xs text-gray-500 mt-1">Format: Parent Name (Child Name) if applicable</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="usageDetails" class="block text-sm font-medium text-gray-700 mb-2">Usage Details</label>
-                                <textarea id="usageDetails" rows="3" placeholder="Select a category above to see specific examples..." required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="photos" class="block text-sm font-medium text-gray-700 mb-2">Photos (Optional)</label>
-                                <div class="space-y-3">
-                                    <input type="file" id="photoUpload" multiple accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <button type="button" onclick="uploadPhotos()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                        📤 Upload Photos to Drive
-                                    </button>
-                                    <input type="text" id="photos" placeholder="Uploaded photo links will appear here..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" readonly>
-                                    <p class="text-xs text-gray-500">Photos will be automatically renamed as: Date-CustomerName-Category</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex space-x-4">
-                            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
-                                Complete Redemption
-                            </button>
-                            <button type="button" onclick="resetRedemption()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors duration-200">
-                                Start Over
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 text-center">
-            <div class="loading w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p class="text-gray-700">Loading data...</p>
-        </div>
-    </div>
-
-    <!-- Success/Error Messages -->
-    <div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
-
-    <script>
-        // Global variables
-        let vouchersData = [];
-        let usageData = [];
-        let filteredVouchers = [];
-        let currentPage = 1;
-        const recordsPerPage = 10;
-        let selectedVouchers = [];
-        let isAdminAuthenticated = false;
-
-        // URLs for Google Sheets
-        const VOUCHERS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=0&single=true&output=csv';
-        const USAGE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5cuf5grWyzDNcioLXA6OqeGTC4cBLkqW4sJHviXCK1FI2E4BY3YWPlicYd8DonlD5uIEFGfoEivl/pub?gid=1706713915&single=true&output=csv';
-        
-        // Google Apps Script URL for real-time updates
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKagwZ3z67ZGjAxcejbvoKNtEcOXGIcCTJWPDlVo5CT0AdHt7Re6kjBjwchl5m-zLm/exec';
-        
-        // Google Drive folder ID for photo uploads
-        const DRIVE_FOLDER_ID = '1NQIMufEkUxnPvljpUXOmWVxXgukb4FFv';
-
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            showSection('dashboard');
-            loadData();
-            
-            // Set today's date as default for redemption
-            document.getElementById('redeemDate').valueAsDate = new Date();
-            
-            // Add Enter key support for voucher validation
-            document.getElementById('voucherIdInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    validateVouchers();
-                }
-            });
-
-            // Add Enter key support for admin password
-            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    authenticateAdmin();
-                }
-            });
-        });
-
-        // Navigation functions
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            // Remove active class from all nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('border-orange-500', 'text-orange-600');
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
-            document.getElementById(sectionName + '-section').classList.add('fade-in');
-            
-            // Add active class to selected nav button
-            document.getElementById(sectionName + '-tab').classList.add('border-orange-500', 'text-orange-600');
-            
-            // Load specific section data
-            if (sectionName === 'redeem') {
-                resetRedemption();
-            } else if (sectionName === 'update') {
-                resetAdminAuth();
-            }
-        }
-
-        // Admin authentication functions
-        function authenticateAdmin() {
-            const password = document.getElementById('adminPassword').value;
-            const correctPassword = 'kamuscatur';
-            
-            if (password === correctPassword) {
-                isAdminAuthenticated = true;
-                document.getElementById('adminAuthSection').classList.add('hidden');
-                document.getElementById('updateFormContainer').classList.remove('hidden');
-                document.getElementById('adminPassword').value = '';
-                showMessage('Admin access granted! You can now update vouchers.', 'success');
-            } else {
-                showMessage('Incorrect password. Access denied.', 'error');
-                document.getElementById('adminPassword').value = '';
-            }
-        }
-
-        function resetAdminAuth() {
-            isAdminAuthenticated = false;
-            document.getElementById('adminAuthSection').classList.remove('hidden');
-            document.getElementById('updateFormContainer').classList.add('hidden');
-            document.getElementById('adminPassword').value = '';
-            clearUpdateForm();
-        }
-
-        // Load voucher details when voucher ID is entered
-        function loadVoucherDetails() {
-            const voucherId = document.getElementById('updateVoucherId').value.trim().toUpperCase();
-            
-            if (!voucherId) {
-                showMessage('Please enter a voucher ID', 'error');
-                return;
-            }
-            
-            // Find voucher in data
-            const voucher = vouchersData.find(v => v['Voucher ID'].toUpperCase() === voucherId);
-            
-            if (!voucher) {
-                showMessage('Voucher not found. You can create a new voucher with this ID.', 'error');
-                // Clear form except voucher ID
-                document.getElementById('updateValue').value = '';
-                document.getElementById('updateDescription').value = '';
-                document.getElementById('updateDateIssued').value = '';
-                document.getElementById('updateStatus').value = '';
-                document.getElementById('updateDaysLeft').value = '';
-                hideUsageDetails();
-                return;
-            }
-            
-            // Auto-fill form with existing voucher data
-            document.getElementById('updateVoucherId').value = voucher['Voucher ID'];
-            document.getElementById('updateValue').value = parseFloat(voucher['Value (RM)'] || 0);
-            document.getElementById('updateDescription').value = voucher.Description || '';
-            
-            // Convert database date format (DD/MM/YYYY) to HTML date input format (YYYY-MM-DD)
-            const dateIssued = voucher['Date Issued'] || '';
-            if (dateIssued) {
-                const dateParts = dateIssued.split('/');
-                if (dateParts.length === 3) {
-                    // Convert DD/MM/YYYY to YYYY-MM-DD
-                    const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-                    document.getElementById('updateDateIssued').value = formattedDate;
-                } else {
-                    document.getElementById('updateDateIssued').value = '';
-                }
-            } else {
-                document.getElementById('updateDateIssued').value = '';
-            }
-            
-            document.getElementById('updateStatus').value = voucher.Status || '';
-            document.getElementById('updateDaysLeft').value = parseInt(voucher['Days Left'] || 0);
-            
-            // Load and display usage details if voucher is redeemed
-            loadUsageDetails(voucherId);
-            
-            showMessage('Voucher details loaded successfully!', 'success');
-        }
-
-        // Load usage details for a specific voucher
-        function loadUsageDetails(voucherId) {
-            const usageRecord = usageData.find(usage => usage['Voucher ID'].toUpperCase() === voucherId.toUpperCase());
-            const usageSection = document.getElementById('usageDetailsSection');
-            
-            if (usageRecord) {
-                // Show usage details section
-                usageSection.classList.remove('hidden');
-                
-                // Fill usage form with existing data
-                document.getElementById('updateUsageCategory').value = usageRecord['Usage Category'] || '';
-                document.getElementById('updateCustomerName').value = usageRecord['Customer Name'] || '';
-                document.getElementById('updateRedemptionDate').value = usageRecord['Date Redeemed'] || '';
-                document.getElementById('updateUsageDetails').value = usageRecord['Details'] || '';
-                document.getElementById('updatePhotos').value = usageRecord['Photos'] || '';
-                
-                // Update placeholder for usage details
-                updateUsageDetailsPlaceholderInUpdate();
-            } else {
-                // Hide usage details section if no usage record found
-                hideUsageDetails();
-            }
-        }
-
-        function hideUsageDetails() {
-            const usageSection = document.getElementById('usageDetailsSection');
-            usageSection.classList.add('hidden');
-            
-            // Clear usage form
-            document.getElementById('updateUsageCategory').value = '';
-            document.getElementById('updateCustomerName').value = '';
-            document.getElementById('updateRedemptionDate').value = '';
-            document.getElementById('updateUsageDetails').value = '';
-            document.getElementById('updatePhotos').value = '';
-        }
-
-        // Update usage details placeholder in update form
-        function updateUsageDetailsPlaceholderInUpdate() {
-            const category = document.getElementById('updateUsageCategory').value;
-            const usageDetails = document.getElementById('updateUsageDetails');
-            
-            switch(category) {
-                case 'Chess Class':
-                    usageDetails.placeholder = "e.g., 'Peribadi / Ogos – Coach Luqman' or 'Centre Pagi / April – Coach Marlia'";
-                    break;
-                case 'Tournament Name':
-                    usageDetails.placeholder = "e.g., 'Battle of Duo (Under 17) – 2nd Series'";
-                    break;
-                case 'Product Purchase':
-                    usageDetails.placeholder = "Describe the product purchased...";
-                    break;
-                default:
-                    usageDetails.placeholder = "Select a category above to see specific examples...";
-            }
-        }
-
-        // Data loading functions
-        async function loadData() {
-            showLoading(true);
-            try {
-                await Promise.all([loadVouchers(), loadUsage()]);
-                displayVouchers();
-                showMessage('Data loaded successfully!', 'success');
-            } catch (error) {
-                showMessage('Error loading data: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        async function loadVouchers() {
-            const response = await fetch(VOUCHERS_URL);
-            const csvText = await response.text();
-            vouchersData = parseCSV(csvText);
-            filteredVouchers = [...vouchersData];
-        }
-
-        async function loadUsage() {
-            const response = await fetch(USAGE_URL);
-            const csvText = await response.text();
-            usageData = parseCSV(csvText);
-        }
-
-        function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-            const data = [];
-            
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-                const row = {};
-                headers.forEach((header, index) => {
-                    row[header] = values[index] || '';
-                });
-                data.push(row);
-            }
-            
-            return data;
-        }
-
-        // Dashboard functions
-        function displayVouchers() {
-            const tbody = document.getElementById('vouchersTableBody');
-            const startIndex = (currentPage - 1) * recordsPerPage;
-            const endIndex = startIndex + recordsPerPage;
-            const pageVouchers = filteredVouchers.slice(startIndex, endIndex);
-            
-            tbody.innerHTML = '';
-            
-            pageVouchers.forEach(voucher => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                
-                const statusClass = getStatusClass(voucher.Status);
-                
-                // Find usage details for this voucher
-                const usageRecord = usageData.find(usage => usage['Voucher ID'] === voucher['Voucher ID']);
-                const usageDetails = usageRecord ? 
-                    `<div class="text-sm">
-                        <div class="font-medium text-gray-900">${usageRecord['Customer Name'] || 'N/A'}</div>
-                        <div class="text-gray-600">${usageRecord['Usage Category'] || 'N/A'}</div>
-                        <div class="text-gray-500 text-xs">${usageRecord['Details'] || 'No details'}</div>
-                        ${usageRecord['Date Redeemed'] ? `<div class="text-gray-500 text-xs">Redeemed: ${usageRecord['Date Redeemed']}</div>` : ''}
-                    </div>` : 
-                    '<span class="text-gray-400 text-sm">Not used</span>';
-
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${voucher['Voucher ID']}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${voucher.Description}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                        <div class="space-y-1">
-                            <div class="font-medium">${voucher['Date Issued']}</div>
-                            <div class="text-orange-600 font-semibold">RM ${parseFloat(voucher['Value (RM)'] || 0).toFixed(2)}</div>
-                            <div class="text-gray-500 text-xs">${voucher['Days Left']} days left</div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">
-                            ${voucher.Status}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm">${usageDetails}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-            
-            updatePaginationInfo();
-        }
-
-        function getStatusClass(status) {
-            switch (status) {
-                case 'ACTIVE': return 'bg-green-100 text-green-800';
-                case 'REDEEMED': return 'bg-blue-100 text-blue-800';
-                case 'EXPIRED': return 'bg-red-100 text-red-800';
-                case 'NOT ISSUE': return 'bg-gray-100 text-gray-800';
-                default: return 'bg-gray-100 text-gray-800';
-            }
-        }
-
-        function applyFilters() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const voucherIdFilter = document.getElementById('valueFilter').value.trim().toLowerCase();
-            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
-            
-            filteredVouchers = vouchersData.filter(voucher => {
-                const matchesStatus = !statusFilter || voucher.Status === statusFilter;
-                const matchesVoucherId = !voucherIdFilter || voucher['Voucher ID'].toLowerCase().includes(voucherIdFilter);
-                const matchesSearch = !searchFilter || voucher.Description.toLowerCase().includes(searchFilter);
-                
-                return matchesStatus && matchesVoucherId && matchesSearch;
-            });
-            
-            currentPage = 1;
-            displayVouchers();
-        }
-
-        function updatePaginationInfo() {
-            const totalRecords = filteredVouchers.length;
-            const startIndex = (currentPage - 1) * recordsPerPage + 1;
-            const endIndex = Math.min(currentPage * recordsPerPage, totalRecords);
-            const totalPages = Math.ceil(totalRecords / recordsPerPage);
-            
-            document.getElementById('showingStart').textContent = totalRecords > 0 ? startIndex : 0;
-            document.getElementById('showingEnd').textContent = endIndex;
-            document.getElementById('totalRecords').textContent = totalRecords;
-            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
-            
-            document.getElementById('prevBtn').disabled = currentPage === 1;
-            document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
-        }
-
-        function previousPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                displayVouchers();
-            }
-        }
-
-        function nextPage() {
-            const totalPages = Math.ceil(filteredVouchers.length / recordsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                displayVouchers();
-            }
-        }
-
-        // Update voucher functions
-        document.getElementById('updateForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = {
-                action: 'updateVoucher',
-                voucherId: document.getElementById('updateVoucherId').value,
-                value: parseFloat(document.getElementById('updateValue').value),
-                description: document.getElementById('updateDescription').value,
-                dateIssued: document.getElementById('updateDateIssued').value
-            };
-            
-            // Check if usage details section is visible and include usage data
-            const usageSection = document.getElementById('usageDetailsSection');
-            if (!usageSection.classList.contains('hidden')) {
-                formData.updateUsage = true;
-                formData.usageCategory = document.getElementById('updateUsageCategory').value;
-                formData.customerName = document.getElementById('updateCustomerName').value;
-                formData.redemptionDate = document.getElementById('updateRedemptionDate').value;
-                formData.usageDetails = document.getElementById('updateUsageDetails').value;
-                formData.photos = document.getElementById('updatePhotos').value;
-            }
-            
-            try {
-                showLoading(true);
-                
-                // Use form data approach for better CORS compatibility
-                const formDataToSend = new FormData();
-                Object.keys(formData).forEach(key => {
-                    formDataToSend.append(key, formData[key]);
-                });
-                
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: formDataToSend
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    let message = `Voucher updated successfully! Status: ${result.calculatedStatus}, Days Left: ${result.calculatedDaysLeft}`;
-                    if (formData.updateUsage) {
-                        message += ' Usage details also updated.';
-                    }
-                    showMessage(message, 'success');
-                    clearUpdateForm();
-                    // Reload data to show updated information
-                    setTimeout(async () => {
-                        await loadData();
-                    }, 1000);
-                } else {
-                    showMessage('Error updating voucher: ' + (result.error || 'Unknown error'), 'error');
-                }
-            } catch (error) {
-                console.error('Update error:', error);
-                showMessage('Connection error. Please check your internet connection and try again.', 'error');
-            } finally {
-                showLoading(false);
-            }
-        });
-
-        function clearUpdateForm() {
-            document.getElementById('updateForm').reset();
-            hideUsageDetails();
-        }
-
-        // Redeem voucher functions
-        function validateVouchers() {
-            const voucherInput = document.getElementById('voucherIdInput').value.trim();
-            
-            if (!voucherInput) {
-                showMessage('Please enter at least one voucher ID', 'error');
-                return;
-            }
-            
-            // Split by comma and clean up each voucher ID
-            const voucherIds = voucherInput.split(',').map(id => id.trim().toUpperCase()).filter(id => id.length > 0);
-            
-            if (voucherIds.length === 0) {
-                showMessage('Please enter valid voucher IDs', 'error');
-                return;
-            }
-            
-            const resultSection = document.getElementById('validationResultSection');
-            const resultDiv = document.getElementById('validationResult');
-            
-            resultSection.classList.remove('hidden');
-            
-            let validVouchers = [];
-            let invalidVouchers = [];
-            let inactiveVouchers = [];
-            let duplicateVouchers = [];
-            
-            // Process each voucher ID
-            voucherIds.forEach(voucherId => {
-                // Check for duplicates in current selection
-                if (selectedVouchers.find(v => v['Voucher ID'].toUpperCase() === voucherId)) {
-                    duplicateVouchers.push(voucherId);
-                    return;
-                }
-                
-                // Find voucher in data
-                const voucher = vouchersData.find(v => v['Voucher ID'].toUpperCase() === voucherId);
-                
-                if (!voucher) {
-                    invalidVouchers.push(voucherId);
-                } else if (voucher.Status !== 'ACTIVE') {
-                    inactiveVouchers.push({id: voucherId, voucher: voucher});
-                } else {
-                    validVouchers.push(voucher);
-                }
-            });
-            
-            // Display results
-            let resultHTML = '';
-            
-            // Valid vouchers
-            if (validVouchers.length > 0) {
-                resultHTML += `
-                    <div class="mb-4 p-4 rounded-lg bg-green-50 border border-green-200">
-                        <div class="flex items-center mb-3">
-                            <span class="text-green-500 text-2xl mr-3">✅</span>
-                            <h4 class="text-lg font-semibold text-green-800">Valid Vouchers (${validVouchers.length})</h4>
-                        </div>
-                        <div class="space-y-2">
-                `;
-                
-                validVouchers.forEach(voucher => {
-                    resultHTML += `
-                        <div class="flex items-center p-2 bg-white rounded border">
-                            <input type="checkbox" id="select-${voucher['Voucher ID']}" class="mr-3 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded" onchange="toggleVoucherSelection('${voucher['Voucher ID']}')">
-                            <label for="select-${voucher['Voucher ID']}" class="flex-1 cursor-pointer">
-                                <span class="font-medium">${voucher['Voucher ID']}</span>
-                                <span class="text-sm text-gray-600 ml-2">${voucher.Description}</span>
-                                <span class="text-sm font-semibold text-green-600 ml-2">RM ${parseFloat(voucher['Value (RM)'] || 0).toFixed(2)}</span>
-                                <span class="text-xs text-gray-500 ml-2">${voucher['Days Left']} days left</span>
-                            </label>
-                        </div>
-                    `;
-                });
-                
-                resultHTML += `
-                        </div>
-                        <div class="mt-3 flex space-x-3">
-                            <button onclick="selectAllValidVouchers(true)" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                Select All (${validVouchers.length})
-                            </button>
-                            <button onclick="selectAllValidVouchers(false)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                Unselect All
-                            </button>
-                            <button onclick="addSelectedVouchers()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                Add Selected to Redemption
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Invalid vouchers
-            if (invalidVouchers.length > 0) {
-                resultHTML += `
-                    <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200">
-                        <div class="flex items-center mb-2">
-                            <span class="text-red-500 text-2xl mr-3">❌</span>
-                            <h4 class="text-lg font-semibold text-red-800">Vouchers Not Found (${invalidVouchers.length})</h4>
-                        </div>
-                        <p class="text-red-700 mb-2">The following voucher IDs do not exist in our system:</p>
-                        <div class="flex flex-wrap gap-2">
-                            ${invalidVouchers.map(id => `<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">${id}</span>`).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Inactive vouchers
-            if (inactiveVouchers.length > 0) {
-                resultHTML += `
-                    <div class="mb-4 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
-                        <div class="flex items-center mb-2">
-                            <span class="text-yellow-500 text-2xl mr-3">⚠️</span>
-                            <h4 class="text-lg font-semibold text-yellow-800">Inactive Vouchers (${inactiveVouchers.length})</h4>
-                        </div>
-                        <p class="text-yellow-700 mb-2">The following vouchers are not available for redemption:</p>
-                        <div class="space-y-1">
-                `;
-                
-                inactiveVouchers.forEach(item => {
-                    let statusMessage = '';
-                    switch (item.voucher.Status) {
-                        case 'REDEEMED': statusMessage = 'Already redeemed'; break;
-                        case 'EXPIRED': statusMessage = 'Expired'; break;
-                        case 'NOT ISSUE': statusMessage = 'Not issued'; break;
-                        default: statusMessage = 'Not available';
-                    }
-                    
-                    resultHTML += `
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="font-medium">${item.id}</span>
-                            <span class="text-yellow-700">${statusMessage}</span>
-                        </div>
-                    `;
-                });
-                
-                resultHTML += `
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Duplicate vouchers
-            if (duplicateVouchers.length > 0) {
-                resultHTML += `
-                    <div class="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
-                        <div class="flex items-center mb-2">
-                            <span class="text-blue-500 text-2xl mr-3">ℹ️</span>
-                            <h4 class="text-lg font-semibold text-blue-800">Already Selected (${duplicateVouchers.length})</h4>
-                        </div>
-                        <p class="text-blue-700 mb-2">The following vouchers are already in your selection:</p>
-                        <div class="flex flex-wrap gap-2">
-                            ${duplicateVouchers.map(id => `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">${id}</span>`).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            resultDiv.innerHTML = resultHTML;
-            
-            // Store valid vouchers for batch addition
-            window.currentValidVouchers = validVouchers;
-            
-            // Show additional sections if we have valid vouchers or existing selections
-            if (validVouchers.length > 0 || selectedVouchers.length > 0) {
-                showAdditionalSections();
-            } else {
-                hideAdditionalSections();
-            }
-            
-            // Clear the input
-            document.getElementById('voucherIdInput').value = '';
-        }
-        
-        function toggleVoucherSelection(voucherId) {
-            const checkbox = document.getElementById(`select-${voucherId}`);
-            // Just update the checkbox state - actual addition happens when "Add Selected" is clicked
-        }
-        
-        function selectAllValidVouchers(selectAll) {
-            if (window.currentValidVouchers && window.currentValidVouchers.length > 0) {
-                window.currentValidVouchers.forEach(voucher => {
-                    const checkbox = document.getElementById(`select-${voucher['Voucher ID']}`);
-                    if (checkbox) {
-                        checkbox.checked = selectAll;
-                    }
-                });
-            }
-        }
-        
-        function addSelectedVouchers() {
-            if (!window.currentValidVouchers || window.currentValidVouchers.length === 0) {
-                showMessage('No vouchers available to add', 'error');
-                return;
-            }
-            
-            let addedCount = 0;
-            window.currentValidVouchers.forEach(voucher => {
-                const checkbox = document.getElementById(`select-${voucher['Voucher ID']}`);
-                if (checkbox && checkbox.checked) {
-                    // Check if voucher is already in selection
-                    if (!selectedVouchers.find(v => v['Voucher ID'] === voucher['Voucher ID'])) {
-                        selectedVouchers.push(voucher);
-                        addedCount++;
-                    }
-                }
-            });
-            
-            if (addedCount > 0) {
-                updateSelectedVouchers();
-                showAdditionalSections();
-                showMessage(`Added ${addedCount} voucher(s) to redemption!`, 'success');
-            } else {
-                showMessage('Please select at least one voucher to add', 'error');
-            }
-        }
-        
-        function addVoucherToSelection(voucherId) {
-            const voucher = vouchersData.find(v => v['Voucher ID'] === voucherId);
-            
-            // Check if voucher is already selected
-            if (selectedVouchers.find(v => v['Voucher ID'] === voucherId)) {
-                showMessage('This voucher is already selected!', 'error');
-                return;
-            }
-            
-            selectedVouchers.push(voucher);
-            updateSelectedVouchers();
-            showAdditionalSections();
-            showMessage('Voucher added to selection!', 'success');
-        }
-
-        function showAdditionalSections() {
-            document.getElementById('selectedVouchersSection').classList.remove('hidden');
-            document.getElementById('redemptionFormSection').classList.remove('hidden');
-        }
-        
-        function hideAdditionalSections() {
-            document.getElementById('selectedVouchersSection').classList.add('hidden');
-            document.getElementById('redemptionFormSection').classList.add('hidden');
-        }
-        
-        function resetRedemption() {
-            selectedVouchers = [];
-            document.getElementById('voucherIdInput').value = '';
-            document.getElementById('validationResultSection').classList.add('hidden');
-            hideAdditionalSections();
-            document.getElementById('redeemForm').reset();
-            document.getElementById('redeemDate').valueAsDate = new Date();
-            updateSelectedVouchers();
-        }
-
-        function updateSelectedVouchers() {
-            const container = document.getElementById('selectedVouchers');
-            const section = document.getElementById('selectedVouchersSection');
-            
-            if (selectedVouchers.length === 0) {
-                section.classList.add('hidden');
-                return;
-            }
-            
-            section.classList.remove('hidden');
-            
-            container.innerHTML = '';
-            let totalValue = 0;
-            
-            selectedVouchers.forEach(voucher => {
-                const value = parseFloat(voucher['Value (RM)'] || 0);
-                totalValue += value;
-                
-                const item = document.createElement('div');
-                item.className = 'flex justify-between items-center p-3 bg-orange-50 rounded-lg';
-                item.innerHTML = `
-                    <div>
-                        <span class="font-medium">${voucher['Voucher ID']}</span>
-                        <span class="text-sm text-gray-600 ml-2">${voucher.Description}</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-orange-600">RM ${value.toFixed(2)}</span>
-                        <button onclick="removeVoucher('${voucher['Voucher ID']}')" class="text-red-500 hover:text-red-700">
-                            ✕
-                        </button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-            
-            document.getElementById('totalValue').textContent = totalValue.toFixed(2);
-        }
-
-        function removeVoucher(voucherId) {
-            selectedVouchers = selectedVouchers.filter(v => v['Voucher ID'] !== voucherId);
-            const checkbox = document.getElementById(`voucher-${voucherId}`);
-            if (checkbox) checkbox.checked = false;
-            updateSelectedVouchers();
-        }
-
-        document.getElementById('redeemForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (selectedVouchers.length === 0) {
-                showMessage('Please select at least one voucher to redeem.', 'error');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                
-                // Use form data approach for better CORS compatibility
-                const formDataToSend = new FormData();
-                formDataToSend.append('action', 'redeemVouchers');
-                formDataToSend.append('vouchers', JSON.stringify(selectedVouchers.map(v => ({
-                    voucherId: v['Voucher ID'],
-                    value: parseFloat(v['Value (RM)'] || 0),
-                    description: v.Description
-                }))));
-                formDataToSend.append('usageCategory', document.getElementById('usageCategory').value);
-                formDataToSend.append('customerName', document.getElementById('customerName').value);
-                formDataToSend.append('redemptionDate', document.getElementById('redeemDate').value);
-                formDataToSend.append('usageDetails', document.getElementById('usageDetails').value);
-                formDataToSend.append('photos', document.getElementById('photos').value || '');
-                
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: formDataToSend
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Show success message with WhatsApp option
-                    showRedemptionSuccessMessage();
-                    
-                    // Reset form and selections
-                    selectedVouchers = [];
-                    updateSelectedVouchers();
-                    document.getElementById('redeemForm').reset();
-                    document.getElementById('redeemDate').valueAsDate = new Date();
-                    hideAdditionalSections();
-                    document.getElementById('validationResultSection').classList.add('hidden');
-                    
-                    // Reload data to show updated information
-                    setTimeout(async () => {
-                        await loadData();
-                    }, 1000);
-                } else {
-                    showMessage('Error redeeming vouchers: ' + (result.error || 'Unknown error'), 'error');
-                }
-            } catch (error) {
-                console.error('Redemption error:', error);
-                showMessage('Connection error. Please check your internet connection and try again.', 'error');
-            } finally {
-                showLoading(false);
-            }
-        });
-
-        // Update usage details placeholder based on selected category
-        function updateUsageDetailsPlaceholder() {
-            const category = document.getElementById('usageCategory').value;
-            const usageDetails = document.getElementById('usageDetails');
-            
-            switch(category) {
-                case 'Chess Class':
-                    usageDetails.placeholder = "e.g., 'Peribadi / Ogos – Coach Luqman' or 'Centre Pagi / April – Coach Marlia'";
-                    break;
-                case 'Tournament Name':
-                    usageDetails.placeholder = "e.g., 'Battle of Duo (Under 17) – 2nd Series'";
-                    break;
-                case 'Product Purchase':
-                    usageDetails.placeholder = "Describe the product purchased...";
-                    break;
-                default:
-                    usageDetails.placeholder = "Select a category above to see specific examples...";
-            }
-        }
-
-        // Photo upload functions
-        async function uploadPhotos() {
-            const fileInput = document.getElementById('photoUpload');
-            const files = fileInput.files;
-            
-            if (files.length === 0) {
-                showMessage('Please select photos to upload', 'error');
-                return;
-            }
-            
-            const customerName = document.getElementById('customerName').value;
-            const redemptionDate = document.getElementById('redeemDate').value;
-            const usageCategory = document.getElementById('usageCategory').value;
-            
-            if (!customerName || !redemptionDate || !usageCategory) {
-                showMessage('Please fill in customer name, date, and category before uploading photos', 'error');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                const uploadedLinks = [];
-                
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const fileName = generatePhotoFileName(redemptionDate, customerName, usageCategory, i + 1, file.name);
-                    
-                    const formData = new FormData();
-                    formData.append('action', 'uploadPhoto');
-                    formData.append('file', file);
-                    formData.append('fileName', fileName);
-                    formData.append('folderId', DRIVE_FOLDER_ID);
-                    
-                    const response = await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        uploadedLinks.push(result.fileUrl);
-                    } else {
-                        throw new Error(`Failed to upload ${file.name}: ${result.error}`);
-                    }
-                }
-                
-                // Update the photos field with uploaded links
-                document.getElementById('photos').value = uploadedLinks.join(', ');
-                showMessage(`Successfully uploaded ${uploadedLinks.length} photo(s) to Google Drive!`, 'success');
-                
-                // Clear the file input
-                fileInput.value = '';
-                
-            } catch (error) {
-                console.error('Upload error:', error);
-                showMessage('Error uploading photos: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        async function uploadPhotosUpdate() {
-            const fileInput = document.getElementById('updatePhotoUpload');
-            const files = fileInput.files;
-            
-            if (files.length === 0) {
-                showMessage('Please select photos to upload', 'error');
-                return;
-            }
-            
-            const customerName = document.getElementById('updateCustomerName').value;
-            const redemptionDate = document.getElementById('updateRedemptionDate').value;
-            const usageCategory = document.getElementById('updateUsageCategory').value;
-            
-            if (!customerName || !redemptionDate || !usageCategory) {
-                showMessage('Please fill in customer name, date, and category before uploading photos', 'error');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                const uploadedLinks = [];
-                
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const fileName = generatePhotoFileName(redemptionDate, customerName, usageCategory, i + 1, file.name);
-                    
-                    const formData = new FormData();
-                    formData.append('action', 'uploadPhoto');
-                    formData.append('file', file);
-                    formData.append('fileName', fileName);
-                    formData.append('folderId', DRIVE_FOLDER_ID);
-                    
-                    const response = await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        uploadedLinks.push(result.fileUrl);
-                    } else {
-                        throw new Error(`Failed to upload ${file.name}: ${result.error}`);
-                    }
-                }
-                
-                // Update the photos field with uploaded links
-                const existingPhotos = document.getElementById('updatePhotos').value;
-                const allPhotos = existingPhotos ? existingPhotos + ', ' + uploadedLinks.join(', ') : uploadedLinks.join(', ');
-                document.getElementById('updatePhotos').value = allPhotos;
-                
-                showMessage(`Successfully uploaded ${uploadedLinks.length} photo(s) to Google Drive!`, 'success');
-                
-                // Clear the file input
-                fileInput.value = '';
-                
-            } catch (error) {
-                console.error('Upload error:', error);
-                showMessage('Error uploading photos: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        function generatePhotoFileName(date, customerName, category, photoNumber, originalFileName) {
-            // Format date as DD-MM-YYYY
-            const dateObj = new Date(date);
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const year = dateObj.getFullYear();
-            const formattedDate = `${day}-${month}-${year}`;
-            
-            // Clean customer name and category (remove special characters)
-            const cleanCustomerName = customerName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-');
-            const cleanCategory = category.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-');
-            
-            // Get file extension
-            const extension = originalFileName.split('.').pop();
-            
-            // Generate filename: Date-CustomerName-Category-PhotoNumber.extension
-            return `${formattedDate}-${cleanCustomerName}-${cleanCategory}-${photoNumber}.${extension}`;
-        }
-        
-        // WhatsApp function for update form
-        function sendUpdateToWhatsApp() {
-            const voucherId = document.getElementById('updateVoucherId').value;
-            const customerName = document.getElementById('updateCustomerName').value;
-            const usageCategory = document.getElementById('updateUsageCategory').value;
-            const usageDetails = document.getElementById('updateUsageDetails').value;
-            const redemptionDate = document.getElementById('updateRedemptionDate').value;
-            
-            if (!voucherId || !customerName || !usageCategory || !redemptionDate) {
-                showMessage('Please fill in all required fields before sending to WhatsApp', 'error');
-                return;
-            }
-
-            // Get voucher value for total calculation
-            const voucher = vouchersData.find(v => v['Voucher ID'].toUpperCase() === voucherId.toUpperCase());
-            const voucherValue = voucher ? parseFloat(voucher['Value (RM)'] || 0) : 0;
-
-            // Format the redemption date (DD/MM/YYYY)
-            const dateObj = new Date(redemptionDate);
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const year = dateObj.getFullYear();
-            const formattedDate = `${day}/${month}/${year}`;
-
-            // Clean usage details
-            const cleanUsageDetails = usageDetails.replace(/['"]/g, '').trim();
-
-            // Build message text exactly as specified
-            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :
-
-*Usage details* : ${cleanUsageDetails}
-*Date Redeemed* : ${formattedDate}
-*Total Voucher Redeemed* : 1
-*Total Value* : RM ${voucherValue.toFixed(2)}
-
-Thank You !!`;
-
-            // Encode message using encodeURIComponent
-            const encoded = encodeURIComponent(message);
-            
-            // Construct WhatsApp URL using wa.me format
-            const url = `https://wa.me/60182046224?text=${encoded}`;
-
-            // Open WhatsApp in new tab/window
-            window.open(url, '_blank', 'noopener,noreferrer');
-            
-            showMessage('WhatsApp opened! Send the message from there.', 'success');
-        }
-
-        // WhatsApp integration functions
-        function showRedemptionSuccessMessage() {
-            const container = document.getElementById('messageContainer');
-            const messageDiv = document.createElement('div');
-            
-            // Get redemption details for WhatsApp message
-            const customerName = document.getElementById('customerName').value;
-            const totalVouchers = selectedVouchers.length;
-            const redemptionDate = document.getElementById('redeemDate').value;
-            const usageCategory = document.getElementById('usageCategory').value;
-            const usageDetails = document.getElementById('usageDetails').value;
-            
-            messageDiv.className = 'bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg mb-2 fade-in max-w-md';
-            messageDiv.innerHTML = `
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <span class="text-2xl mr-2">✅</span>
-                        <span class="font-semibold">Redemption Successful!</span>
-                    </div>
-                    <p class="text-sm">Successfully redeemed ${totalVouchers} voucher(s) for ${customerName}</p>
-                    <div class="flex space-x-2">
-                        <button onclick="sendRedemptionToWhatsApp(); this.parentElement.parentElement.parentElement.remove();" 
-                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
-                            <span class="mr-2">📱</span>
-                            Send to WhatsApp
-                        </button>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                                class="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(messageDiv);
-            
-            // Auto remove after 15 seconds if not interacted with
-            setTimeout(() => {
-                if (messageDiv.parentElement) {
-                    messageDiv.remove();
-                }
-            }, 15000);
-        }
-
-        function sendRedemptionToWhatsApp() {
-            const customerName = document.getElementById('customerName').value;
-            const totalVouchers = selectedVouchers.length;
-            const redemptionDate = document.getElementById('redeemDate').value;
-            const usageCategory = document.getElementById('usageCategory').value;
-            const usageDetails = document.getElementById('usageDetails').value;
-            
-            sendToWhatsApp(customerName, totalVouchers, redemptionDate, usageCategory, usageDetails);
-        }
-
-        function sendToWhatsApp(customerName, totalVouchers, redemptionDate, usageCategory, usageDetails) {
-            // Format the redemption date (DD/MM/YYYY)
-            const dateObj = new Date(redemptionDate);
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const year = dateObj.getFullYear();
-            const formattedDate = `${day}/${month}/${year}`;
-
-            // Calculate total value from selected vouchers
-            const totalValue = selectedVouchers.reduce((sum, voucher) => {
-                return sum + parseFloat(voucher['Value (RM)'] || 0);
-            }, 0);
-
-            // Clean usage details
-            const cleanUsageDetails = usageDetails.replace(/['"]/g, '').trim();
-
-            // Build message text exactly as specified
-            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :
-
-*Usage details* : ${cleanUsageDetails}
-*Date Redeemed* : ${formattedDate}
-*Total Voucher Redeemed* : ${totalVouchers}
-*Total Value* : RM ${totalValue.toFixed(2)}
-
-Thank You !!`;
-
-            // Encode message using encodeURIComponent
-            const encoded = encodeURIComponent(message);
-            
-            // Construct WhatsApp URL using wa.me format
-            const url = `https://wa.me/60182046224?text=${encoded}`;
-
-            // Open WhatsApp in new tab/window
-            window.open(url, '_blank', 'noopener,noreferrer');
-
-            showMessage('WhatsApp opened! Send the message from there.', 'success');
-        }
-
-        // Utility functions
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            if (show) {
-                overlay.classList.remove('hidden');
-            } else {
-                overlay.classList.add('hidden');
-            }
-        }
-
-        function showMessage(message, type) {
-            const container = document.getElementById('messageContainer');
-            const messageDiv = document.createElement('div');
-            
-            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-            
-            messageDiv.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg mb-2 fade-in`;
-            messageDiv.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                        ✕
-                    </button>
-                </div>
-            `;
-            
-            container.appendChild(messageDiv);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (messageDiv.parentElement) {
-                    messageDiv.remove();
-                }
-            }, 5000);
-        }
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98fcdee0342838f8',t:'MTc2MDY3MzQzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+      }
+    }
+    
+    // Check if Date Issued is blank
+    if (!dateIssued || dateIssued.trim() === '') {
+      return {
+        status: 'NOT ISSUED',
+        daysLeft: 0
+      };
+    }
+    
+    // Calculate days left (90 days validity)
+    const issuedDate = new Date(dateIssued);
+    const currentDate = new Date();
+    const expiryDate = new Date(issuedDate);
+    expiryDate.setDate(expiryDate.getDate() + 90); // Add 90 days
+    
+    const timeDiff = expiryDate.getTime() - currentDate.getTime();
+    const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    // Determine status based on days left
+    let status;
+    if (daysLeft > 0) {
+      status = 'ACTIVE';
+    } else {
+      status = 'EXPIRED';
+    }
+    
+    return {
+      status: status,
+      daysLeft: Math.max(0, daysLeft) // Don't show negative days
+    };
+    
+  } catch (error) {
+    Logger.log('Error in calculateVoucherStatus: ' + error.toString());
+    return {
+      status: 'ERROR',
+      daysLeft: 0
+    };
+  }
+}
+
+function refreshAllCalculations(spreadsheet) {
+  try {
+    const vouchersSheet = spreadsheet.getSheetByName('VOUCHERS');
+    const usageSheet = spreadsheet.getSheetByName('USAGE');
+    
+    if (!vouchersSheet) {
+      return { success: false, error: 'VOUCHERS sheet not found' };
+    }
+    
+    // Get all voucher data
+    const vouchersData = vouchersSheet.getDataRange().getValues();
+    const headers = vouchersData[0];
+    
+    let updatedCount = 0;
+    
+    // Process each voucher (skip header row)
+    for (let i = 1; i < vouchersData.length; i++) {
+      const voucherId = vouchersData[i][0];
+      const dateIssued = vouchersData[i][3];
+      const currentStatus = vouchersData[i][4];
+      const currentDaysLeft = vouchersData[i][5];
+      
+      // Calculate new status and days left
+      const calculatedData = calculateVoucherStatus(spreadsheet, voucherId, dateIssued);
+      
+      // Update only if values have changed
+      if (currentStatus !== calculatedData.status || currentDaysLeft !== calculatedData.daysLeft) {
+        const rowNumber = i + 1; // Convert to 1-based indexing
+        vouchersSheet.getRange(rowNumber, 5).setValue(calculatedData.status); // Status column
+        vouchersSheet.getRange(rowNumber, 6).setValue(calculatedData.daysLeft); // Days Left column
+        updatedCount++;
+      }
+    }
+    
+    return { 
+      success: true, 
+      message: `Refreshed calculations for ${updatedCount} voucher(s)`,
+      updatedCount: updatedCount
+    };
+    
+  } catch (error) {
+    Logger.log('Error in refreshAllCalculations: ' + error.toString());
+    return { success: false, error: error.toString() };
+  }
+}
+
+// Helper function to find voucher by ID
+function findVoucherById(vouchersData, voucherId) {
+  for (let i = 1; i < vouchersData.length; i++) {
+    if (vouchersData[i][0] === voucherId) {
+      return {
+        rowIndex: i,
+        data: vouchersData[i]
+      };
+    }
+  }
+  return null;
+}
+
+// Helper function to validate voucher status
+function isVoucherActive(vouchersData, voucherId) {
+  const voucher = findVoucherById(vouchersData, voucherId);
+  return voucher && voucher.data[4] === 'ACTIVE'; // Status is in column E (index 4)
+}
+
+// Function to set up automatic triggers (run this once to set up automation)
+function setupAutomaticTriggers() {
+  // Delete existing triggers
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
+  
+  // Create time-based trigger to run calculations daily at 6 AM
+  ScriptApp.newTrigger('dailyCalculationUpdate')
+    .timeBased()
+    .everyDays(1)
+    .atHour(6)
+    .create();
+  
+  Logger.log('Automatic triggers set up successfully');
+}
+
+// Function that runs daily to update all calculations
+function dailyCalculationUpdate() {
+  try {
+    const spreadsheet = SpreadsheetApp.openById('1YYz6hTQCGn0XfNNgJ0k_FpzqfSUWIiQOIBR3g_c4RHc');
+    const result = refreshAllCalculations(spreadsheet);
+    Logger.log('Daily calculation update completed: ' + JSON.stringify(result));
+  } catch (error) {
+    Logger.log('Error in daily calculation update: ' + error.toString());
+  }
+}
+
+// Test function to verify the script works
+function testScript() {
+  const spreadsheet = SpreadsheetApp.openById('1YYz6hTQCGn0XfNNgJ0k_FpzqfSUWIiQOIBR3g_c4RHc');
+  
+  // Test automatic calculations
+  const refreshResult = refreshAllCalculations(spreadsheet);
+  Logger.log('Refresh result: ' + JSON.stringify(refreshResult));
+  
+  // Test voucher status calculation
+  const statusResult = calculateVoucherStatus(spreadsheet, 'TEST001', '2024-01-15');
+  Logger.log('Status calculation result: ' + JSON.stringify(statusResult));
+}
+
+// Function to manually trigger calculation refresh (can be called from web app)
+function manualRefresh() {
+  const spreadsheet = SpreadsheetApp.openById('1YYz6hTQCGn0XfNNgJ0k_FpzqfSUWIiQOIBR3g_c4RHc');
+  return refreshAllCalculations(spreadsheet);
+}
