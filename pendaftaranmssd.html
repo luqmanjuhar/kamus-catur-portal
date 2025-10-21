@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pendaftaran Sukan Catur MSSD</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            min-height: 100%;
+        }
+        
+        html {
+            height: 100%;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 1rem 2rem;
+            background: #f8fafc;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #f97316;
+            border-bottom: 3px solid #f97316;
+        }
+        
+        .nav-tab:hover {
+            background: #e2e8f0;
+        }
+        
+        .nav-tab.active:hover {
+            background: white;
+        }
+        
+        .tab-content {
+            background: white;
+            border-radius: 0 0 16px 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: "♔";
+            margin-right: 0.5rem;
+            font-size: 1.6rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+        
+        label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+        
+        .student-entry, .teacher-entry {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .student-entry:hover, .teacher-entry:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .student-number, .teacher-number {
+            position: absolute;
+            top: -10px;
+            left: 1rem;
+            background: #f97316;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .teacher-number {
+            background: #3b82f6;
+        }
+        
+        .remove-student, .remove-teacher {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .remove-student:hover, .remove-teacher:hover {
+            background: #dc2626;
+        }
+        
+        .add-student-btn, .add-teacher-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            transition: background-color 0.3s ease;
+        }
+        
+        .add-student-btn:hover, .add-teacher-btn:hover {
+            background: #059669;
+        }
+        
+        .add-teacher-btn {
+            background: #3b82f6;
+        }
+        
+        .add-teacher-btn:hover {
+            background: #2563eb;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3);
+        }
+        
+        .search-btn {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: #ea580c;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .registration-id-display {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            color: #92400e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: none;
+        }
+        
+        .edit-mode-indicator {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tab-content {
+                padding: 1.5rem;
+            }
+            
+            .nav-tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header class="header">
+            <h1>♛ Dashboard Sukan Catur MSSD</h1>
+            <p>Sistem Pendaftaran dan Pengurusan Majlis Sukan Sekolah Daerah</p>
+        </header>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('register')">Pendaftaran Baru</button>
+            <button class="nav-tab" onclick="switchTab('edit')">Edit Pendaftaran</button>
+            <button class="nav-tab" onclick="switchTab('dashboard')">Dashboard Pendaftaran</button>
+        </div>
+        
+        <div class="tab-content">
+            <!-- Registration Tab -->
+            <div id="registerTab" class="tab-panel active">
+                <div class="edit-mode-indicator" id="editModeIndicator">
+                    📝 Mod Edit: Anda sedang mengedit pendaftaran
+                </div>
+                
+                <form id="registrationForm">
+                    <!-- School Information Section -->
+                    <section>
+                        <h2 class="section-title">Maklumat Sekolah</h2>
+                        
+                        <div class="form-group">
+                            <div class="form-row single">
+                                <div>
+                                    <label for="schoolName">Nama Sekolah *</label>
+                                    <input type="text" id="schoolName" name="schoolName" style="text-transform: uppercase;" oninput="formatSchoolName(this)" placeholder="Contoh: SK TAMAN DESA JAYA 5" required>
+                                    <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
+                                        💡 Tip: "SEKOLAH KEBANGSAAN" → "SK", "SEKOLAH MENENGAH KEBANGSAAN" → "SMK"
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="teachersContainer">
+                            <div class="teacher-entry">
+                                <div class="teacher-number">Guru 1 (Ketua)</div>
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div>
+                                            <label for="teacherName1">Nama Guru *</label>
+                                            <input type="text" id="teacherName1" name="teacherName1" style="text-transform: uppercase;" required>
+                                        </div>
+                                        <div>
+                                            <label for="teacherEmail1">Email Guru *</label>
+                                            <input type="email" id="teacherEmail1" name="teacherEmail1" placeholder="guru@email.com" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-row single">
+                                            <div>
+                                                <label for="phoneNumber1">Nombor Telefon *</label>
+                                                <input type="tel" id="phoneNumber1" name="phoneNumber1" placeholder="012-345 6789" oninput="formatMalaysianPhone(this)" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="teacher-entry">
+                                <div class="teacher-number">Guru 2 (Pengiring)</div>
+                                <button type="button" class="remove-teacher" onclick="removeTeacher(this)" title="Buang Guru">×</button>
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div>
+                                            <label for="teacherName2">Nama Guru *</label>
+                                            <input type="text" id="teacherName2" name="teacherName2" style="text-transform: uppercase;" required>
+                                        </div>
+                                        <div>
+                                            <label for="teacherEmail2">Email Guru *</label>
+                                            <input type="email" id="teacherEmail2" name="teacherEmail2" placeholder="guru@email.com" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-row single">
+                                            <div>
+                                                <label for="phoneNumber2">Nombor Telefon *</label>
+                                                <input type="tel" id="phoneNumber2" name="phoneNumber2" placeholder="012-345 6789" oninput="formatMalaysianPhone(this)" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="add-teacher-btn" onclick="addTeacher()">
+                            <span>➕</span> Tambah Guru Pengiring Lagi
+                        </button>
+                    </section>
+                    
+                    <!-- Students Section -->
+                    <section>
+                        <h2 class="section-title">Pendaftaran Pelajar</h2>
+                        
+                        <div id="studentsContainer">
+                            <div class="student-entry">
+                                <div class="student-number">Pelajar 1</div>
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div>
+                                            <label for="studentName1">Nama Pelajar *</label>
+                                            <input type="text" id="studentName1" name="studentName1" style="text-transform: uppercase;" required>
+                                        </div>
+                                        <div>
+                                            <label for="icNumber1">Nombor IC *</label>
+                                            <input type="text" id="icNumber1" name="icNumber1" placeholder="123456-78-9012" maxlength="14" oninput="formatIC(this)" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div>
+                                            <label for="gender1">Jantina *</label>
+                                            <select id="gender1" name="gender1" onchange="generatePlayerId(1)" required>
+                                                <option value="">Pilih Jantina</option>
+                                                <option value="01">Lelaki</option>
+                                                <option value="02">Perempuan</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="category1">Kategori *</label>
+                                            <select id="category1" name="category1" required>
+                                                <option value="">Pilih Kategori</option>
+                                                <option value="under-12">Bawah 12 Tahun</option>
+                                                <option value="under-15">Bawah 15 Tahun</option>
+                                                <option value="under-18">Bawah 18 Tahun</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-row single">
+                                        <div>
+                                            <label for="playerId1">ID Pemain (Auto-Generated)</label>
+                                            <input type="text" id="playerId1" name="playerId1" readonly style="background-color: #f3f4f6; color: #6b7280;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="add-student-btn" onclick="addStudent()">
+                            <span>➕</span> Tambah Pelajar Lagi
+                        </button>
+                    </section>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        Daftarkan Pasukan untuk Kejohanan
+                    </button>
+                    
+                    <div id="successMessage" class="success-message">
+                        ✅ Pendaftaran berjaya dihantar! Pasukan anda telah didaftarkan untuk kejohanan catur.
+                    </div>
+                    
+                    <div id="registrationIdDisplay" class="registration-id-display">
+                        🎯 ID Pendaftaran Anda: <span id="registrationId"></span>
+                        <br><small>Simpan ID ini untuk mengedit pendaftaran anda kemudian</small>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Edit Tab -->
+            <div id="editTab" class="tab-panel">
+                <section>
+                    <h2 class="section-title">Cari Pendaftaran</h2>
+                    
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div>
+                                <label for="searchRegistrationId">ID Pendaftaran *</label>
+                                <input type="text" id="searchRegistrationId" placeholder="Contoh: REG-001-2026" required>
+                            </div>
+                            <div>
+                                <label for="searchPassword">Kata Laluan (No. Telefon Guru Ketua) *</label>
+                                <input type="password" id="searchPassword" placeholder="Contoh: 012-345 6789" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="button" class="search-btn" onclick="searchRegistration()" style="width: 100%;">
+                            🔍 Cari & Sahkan Pendaftaran
+                        </button>
+                    </div>
+                    
+                    <div style="background: #fef3c7; border: 2px solid #f59e0b; color: #92400e; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.875rem;">
+                        <strong>ℹ️ Nota Keselamatan:</strong><br>
+                        Kata laluan adalah nombor telefon Guru 1 (Ketua) yang didaftarkan semasa pendaftaran awal. Masukkan dalam format: 012-345 6789
+                    </div>
+                    
+                    <div id="searchError" class="error-message">
+                        ❌ ID Pendaftaran tidak dijumpai atau kata laluan salah. Sila semak semula maklumat yang dimasukkan.
+                    </div>
+                    
+                    <div id="searchSuccess" class="success-message">
+                        ✅ Pendaftaran dijumpai dan disahkan! Anda boleh mengedit maklumat di tab "Pendaftaran Baru".
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="tab-panel">
+                <section>
+                    <h2 class="section-title">Dashboard Analisis</h2>
+                    
+                    <!-- Summary Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: bold;" id="totalRegistrations">0</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Jumlah Pendaftaran</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: bold;" id="totalStudents">0</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Jumlah Pelajar</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: bold;" id="totalSchools">0</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Jumlah Sekolah</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: bold;" id="totalTeachers">0</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Jumlah Guru</div>
+                        </div>
+                    </div>
+                    
+                    <div id="registrationsList" style="display: grid; gap: 1rem;">
+                        <div style="text-align: center; color: #6b7280; padding: 2rem;">
+                            📋 Tiada pendaftaran lagi. Sila daftar pasukan terlebih dahulu.
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        let studentCount = 1;
+        let teacherCount = 2;
+        let schoolNumber = 1;
+        let playerCounters = { '01': 0, '02': 0 };
+        let registrationCounter = 1;
+        let isEditMode = false;
+        let currentEditId = null;
+        
+        // Storage for registrations (in real app, this would be a database)
+        let registrations = {};
+        
+        function formatIC(input) {
+            // Remove all non-numeric characters
+            let value = input.value.replace(/\D/g, '');
+            
+            // Apply formatting: ******-**-****
+            if (value.length >= 6) {
+                if (value.length >= 8) {
+                    value = value.substring(0, 6) + '-' + value.substring(6, 8) + '-' + value.substring(8, 12);
+                } else {
+                    value = value.substring(0, 6) + '-' + value.substring(6);
+                }
+            }
+            
+            input.value = value;
+        }
+        
+        function formatMalaysianPhone(input) {
+            // Remove all non-numeric characters
+            let value = input.value.replace(/\D/g, '');
+            
+            // Limit to 10 digits (Malaysian phone number format)
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            // Apply formatting: 012-345 6789
+            if (value.length >= 3) {
+                if (value.length >= 6) {
+                    value = value.substring(0, 3) + '-' + value.substring(3, 6) + ' ' + value.substring(6);
+                } else {
+                    value = value.substring(0, 3) + '-' + value.substring(3);
+                }
+            }
+            
+            input.value = value;
+        }
+        
+        function formatSchoolName(input) {
+            let value = input.value.toUpperCase();
+            
+            // Auto-format school names
+            value = value.replace(/SEKOLAH KEBANGSAAN/g, 'SK');
+            value = value.replace(/SEKOLAH MENENGAH KEBANGSAAN/g, 'SMK');
+            value = value.replace(/SEKOLAH MENENGAH/g, 'SMK');
+            
+            input.value = value;
+        }
+        
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab panels
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+        
+        function generateRegistrationId() {
+            const year = new Date().getFullYear();
+            const id = `REG-${registrationCounter.toString().padStart(3, '0')}-${year}`;
+            registrationCounter++;
+            return id;
+        }
+        
+        function generatePlayerId(studentIndex) {
+            const genderSelect = document.getElementById(`gender${studentIndex}`);
+            const playerIdInput = document.getElementById(`playerId${studentIndex}`);
+            
+            if (genderSelect.value) {
+                playerCounters[genderSelect.value]++;
+                
+                const year = '26';
+                const gender = genderSelect.value;
+                const school = schoolNumber.toString().padStart(2, '0');
+                const player = playerCounters[genderSelect.value].toString().padStart(2, '0');
+                
+                const playerId = year + gender + school + player;
+                playerIdInput.value = playerId;
+            }
+        }
+        
+        function addTeacher() {
+            teacherCount++;
+            const container = document.getElementById('teachersContainer');
+            
+            const teacherEntry = document.createElement('div');
+            teacherEntry.className = 'teacher-entry';
+            teacherEntry.innerHTML = `
+                <div class="teacher-number">Guru ${teacherCount} (Pengiring)</div>
+                <button type="button" class="remove-teacher" onclick="removeTeacher(this)" title="Buang Guru">×</button>
+                <div class="form-group">
+                    <div class="form-row">
+                        <div>
+                            <label for="teacherName${teacherCount}">Nama Guru *</label>
+                            <input type="text" id="teacherName${teacherCount}" name="teacherName${teacherCount}" style="text-transform: uppercase;" required>
+                        </div>
+                        <div>
+                            <label for="teacherEmail${teacherCount}">Email Guru *</label>
+                            <input type="email" id="teacherEmail${teacherCount}" name="teacherEmail${teacherCount}" placeholder="guru@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row single">
+                            <div>
+                                <label for="phoneNumber${teacherCount}">Nombor Telefon *</label>
+                                <input type="tel" id="phoneNumber${teacherCount}" name="phoneNumber${teacherCount}" placeholder="012-345 6789" oninput="formatMalaysianPhone(this)" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(teacherEntry);
+            
+            setTimeout(() => {
+                teacherEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+        
+        function removeTeacher(button) {
+            const teacherEntry = button.parentElement;
+            const teacherEntries = document.querySelectorAll('.teacher-entry');
+            
+            // Prevent removing if only 2 teachers left
+            if (teacherEntries.length <= 2) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #fef3c7;
+                    border: 2px solid #f59e0b;
+                    color: #92400e;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    z-index: 1000;
+                    font-weight: 600;
+                `;
+                notification.textContent = '⚠️ Sekurang-kurangnya 2 orang guru diperlukan';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+                return;
+            }
+            
+            teacherEntry.style.transform = 'scale(0.95)';
+            teacherEntry.style.opacity = '0';
+            
+            setTimeout(() => {
+                teacherEntry.remove();
+                updateTeacherNumbers();
+            }, 300);
+        }
+        
+        function updateTeacherNumbers() {
+            const teacherEntries = document.querySelectorAll('.teacher-entry');
+            teacherEntries.forEach((entry, index) => {
+                const numberElement = entry.querySelector('.teacher-number');
+                if (index === 0) {
+                    numberElement.textContent = 'Guru 1 (Ketua)';
+                } else {
+                    numberElement.textContent = `Guru ${index + 1} (Pengiring)`;
+                }
+            });
+            teacherCount = teacherEntries.length;
+        }
+        
+        function addStudent() {
+            studentCount++;
+            const container = document.getElementById('studentsContainer');
+            
+            const studentEntry = document.createElement('div');
+            studentEntry.className = 'student-entry';
+            studentEntry.innerHTML = `
+                <div class="student-number">Pelajar ${studentCount}</div>
+                <button type="button" class="remove-student" onclick="removeStudent(this)" title="Buang Pelajar">×</button>
+                <div class="form-group">
+                    <div class="form-row">
+                        <div>
+                            <label for="studentName${studentCount}">Nama Pelajar *</label>
+                            <input type="text" id="studentName${studentCount}" name="studentName${studentCount}" style="text-transform: uppercase;" required>
+                        </div>
+                        <div>
+                            <label for="icNumber${studentCount}">Nombor IC *</label>
+                            <input type="text" id="icNumber${studentCount}" name="icNumber${studentCount}" placeholder="123456-78-9012" maxlength="14" oninput="formatIC(this)" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-row">
+                        <div>
+                            <label for="gender${studentCount}">Jantina *</label>
+                            <select id="gender${studentCount}" name="gender${studentCount}" onchange="generatePlayerId(${studentCount})" required>
+                                <option value="">Pilih Jantina</option>
+                                <option value="01">Lelaki</option>
+                                <option value="02">Perempuan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="category${studentCount}">Kategori *</label>
+                            <select id="category${studentCount}" name="category${studentCount}" required>
+                                <option value="">Pilih Kategori</option>
+                                <option value="under-12">Bawah 12 Tahun</option>
+                                <option value="under-15">Bawah 15 Tahun</option>
+                                <option value="under-18">Bawah 18 Tahun</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-row single">
+                        <div>
+                            <label for="playerId${studentCount}">ID Pemain (Auto-Generated)</label>
+                            <input type="text" id="playerId${studentCount}" name="playerId${studentCount}" readonly style="background-color: #f3f4f6; color: #6b7280;">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(studentEntry);
+            
+            setTimeout(() => {
+                studentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+        
+        function removeStudent(button) {
+            const studentEntry = button.parentElement;
+            studentEntry.style.transform = 'scale(0.95)';
+            studentEntry.style.opacity = '0';
+            
+            setTimeout(() => {
+                studentEntry.remove();
+                updateStudentNumbers();
+            }, 300);
+        }
+        
+        function updateStudentNumbers() {
+            const studentEntries = document.querySelectorAll('.student-entry');
+            studentEntries.forEach((entry, index) => {
+                const numberElement = entry.querySelector('.student-number');
+                numberElement.textContent = `Pelajar ${index + 1}`;
+            });
+            studentCount = studentEntries.length;
+        }
+        
+        function searchRegistration() {
+            const searchId = document.getElementById('searchRegistrationId').value.trim();
+            const searchPassword = document.getElementById('searchPassword').value.trim();
+            const searchError = document.getElementById('searchError');
+            const searchSuccess = document.getElementById('searchSuccess');
+            
+            searchError.style.display = 'none';
+            searchSuccess.style.display = 'none';
+            
+            if (!searchId || !searchPassword) {
+                searchError.textContent = '❌ Sila masukkan ID Pendaftaran dan Kata Laluan.';
+                searchError.style.display = 'block';
+                return;
+            }
+            
+            if (registrations[searchId]) {
+                // Get the head teacher's phone number (first teacher)
+                const headTeacherPhone = registrations[searchId].school.teachers[0].phone;
+                
+                // Normalize both phone numbers for comparison (remove spaces and dashes)
+                const normalizePhone = (phone) => phone.replace(/[\s-]/g, '');
+                const normalizedStoredPhone = normalizePhone(headTeacherPhone);
+                const normalizedInputPhone = normalizePhone(searchPassword);
+                
+                if (normalizedStoredPhone === normalizedInputPhone) {
+                    // Password matches - load registration data into form
+                    loadRegistrationData(registrations[searchId]);
+                    
+                    // Switch to registration tab
+                    switchTab('register');
+                    document.querySelectorAll('.nav-tab')[0].classList.add('active');
+                    document.querySelectorAll('.nav-tab')[1].classList.remove('active');
+                    
+                    // Show edit mode indicator
+                    isEditMode = true;
+                    currentEditId = searchId;
+                    document.getElementById('editModeIndicator').style.display = 'block';
+                    document.getElementById('submitBtn').textContent = 'Kemaskini Pendaftaran';
+                    
+                    searchSuccess.style.display = 'block';
+                    
+                    // Clear the search fields for security
+                    document.getElementById('searchRegistrationId').value = '';
+                    document.getElementById('searchPassword').value = '';
+                    
+                    setTimeout(() => {
+                        searchSuccess.style.display = 'none';
+                    }, 3000);
+                } else {
+                    // Password doesn't match
+                    searchError.textContent = '❌ Kata laluan salah. Sila masukkan nombor telefon Guru Ketua yang betul.';
+                    searchError.style.display = 'block';
+                }
+            } else {
+                searchError.style.display = 'block';
+            }
+        }
+        
+        function loadRegistrationData(data) {
+            // Load school information
+            document.getElementById('schoolName').value = data.school.name;
+            
+            // Clear existing teachers
+            const teachersContainer = document.getElementById('teachersContainer');
+            teachersContainer.innerHTML = '';
+            
+            // Load teachers
+            data.school.teachers.forEach((teacher, index) => {
+                if (index === 0) {
+                    // First teacher - use existing structure
+                    teachersContainer.innerHTML = `
+                        <div class="teacher-entry">
+                            <div class="teacher-number">Guru 1 (Ketua)</div>
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div>
+                                        <label for="teacherName1">Nama Guru *</label>
+                                        <input type="text" id="teacherName1" name="teacherName1" style="text-transform: uppercase;" value="${teacher.name}" required>
+                                    </div>
+                                    <div>
+                                        <label for="teacherEmail1">Email Guru *</label>
+                                        <input type="email" id="teacherEmail1" name="teacherEmail1" value="${teacher.email}" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-row single">
+                                        <div>
+                                            <label for="phoneNumber1">Nombor Telefon *</label>
+                                            <input type="tel" id="phoneNumber1" name="phoneNumber1" value="${teacher.phone}" oninput="formatMalaysianPhone(this)" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Additional teachers
+                    const teacherEntry = document.createElement('div');
+                    teacherEntry.className = 'teacher-entry';
+                    teacherEntry.innerHTML = `
+                        <div class="teacher-number">Guru ${index + 1} (Pengiring)</div>
+                        <button type="button" class="remove-teacher" onclick="removeTeacher(this)" title="Buang Guru">×</button>
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div>
+                                    <label for="teacherName${index + 1}">Nama Guru *</label>
+                                    <input type="text" id="teacherName${index + 1}" name="teacherName${index + 1}" style="text-transform: uppercase;" value="${teacher.name}" required>
+                                </div>
+                                <div>
+                                    <label for="teacherEmail${index + 1}">Email Guru *</label>
+                                    <input type="email" id="teacherEmail${index + 1}" name="teacherEmail${index + 1}" value="${teacher.email}" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-row single">
+                                    <div>
+                                        <label for="phoneNumber${index + 1}">Nombor Telefon *</label>
+                                        <input type="tel" id="phoneNumber${index + 1}" name="phoneNumber${index + 1}" value="${teacher.phone}" oninput="formatMalaysianPhone(this)" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    teachersContainer.appendChild(teacherEntry);
+                }
+            });
+            
+            teacherCount = data.school.teachers.length;
+            
+            // Clear existing students
+            const container = document.getElementById('studentsContainer');
+            container.innerHTML = '';
+            
+            // Load students
+            data.students.forEach((student, index) => {
+                if (index === 0) {
+                    // First student - use existing structure
+                    container.innerHTML = `
+                        <div class="student-entry">
+                            <div class="student-number">Pelajar 1</div>
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div>
+                                        <label for="studentName1">Nama Pelajar *</label>
+                                        <input type="text" id="studentName1" name="studentName1" style="text-transform: uppercase;" value="${student.name}" required>
+                                    </div>
+                                    <div>
+                                        <label for="icNumber1">Nombor IC *</label>
+                                        <input type="text" id="icNumber1" name="icNumber1" placeholder="123456-78-9012" maxlength="14" oninput="formatIC(this)" value="${student.ic}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div>
+                                        <label for="gender1">Jantina *</label>
+                                        <select id="gender1" name="gender1" onchange="generatePlayerId(1)" required>
+                                            <option value="">Pilih Jantina</option>
+                                            <option value="01" ${student.gender === 'Lelaki' ? 'selected' : ''}>Lelaki</option>
+                                            <option value="02" ${student.gender === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="category1">Kategori *</label>
+                                        <select id="category1" name="category1" required>
+                                            <option value="">Pilih Kategori</option>
+                                            <option value="under-12" ${student.category === 'under-12' ? 'selected' : ''}>Bawah 12 Tahun</option>
+                                            <option value="under-15" ${student.category === 'under-15' ? 'selected' : ''}>Bawah 15 Tahun</option>
+                                            <option value="under-18" ${student.category === 'under-18' ? 'selected' : ''}>Bawah 18 Tahun</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-row single">
+                                    <div>
+                                        <label for="playerId1">ID Pemain (Auto-Generated)</label>
+                                        <input type="text" id="playerId1" name="playerId1" value="${student.playerId}" readonly style="background-color: #f3f4f6; color: #6b7280;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Additional students
+                    addStudent();
+                    const currentIndex = index + 1;
+                    document.getElementById(`studentName${currentIndex}`).value = student.name;
+                    document.getElementById(`icNumber${currentIndex}`).value = student.ic;
+                    document.getElementById(`gender${currentIndex}`).value = student.gender === 'Lelaki' ? '01' : '02';
+                    document.getElementById(`category${currentIndex}`).value = student.category;
+                    document.getElementById(`playerId${currentIndex}`).value = student.playerId;
+                }
+            });
+            
+            studentCount = data.students.length;
+        }
+        
+        function resetForm() {
+            document.getElementById('registrationForm').reset();
+            isEditMode = false;
+            currentEditId = null;
+            document.getElementById('editModeIndicator').style.display = 'none';
+            document.getElementById('submitBtn').textContent = 'Daftarkan Pasukan untuk Kejohanan';
+            
+            // Reset to minimum teachers (2)
+            const teachersContainer = document.getElementById('teachersContainer');
+            teachersContainer.innerHTML = `
+                <div class="teacher-entry">
+                    <div class="teacher-number">Guru 1 (Ketua)</div>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div>
+                                <label for="teacherName1">Nama Guru *</label>
+                                <input type="text" id="teacherName1" name="teacherName1" style="text-transform: uppercase;" required>
+                            </div>
+                            <div>
+                                <label for="teacherEmail1">Email Guru *</label>
+                                <input type="email" id="teacherEmail1" name="teacherEmail1" placeholder="guru@email.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-row single">
+                                <div>
+                                    <label for="phoneNumber1">Nombor Telefon *</label>
+                                    <input type="tel" id="phoneNumber1" name="phoneNumber1" placeholder="012-345 6789" oninput="formatMalaysianPhone(this)" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="teacher-entry">
+                    <div class="teacher-number">Guru 2 (Pengiring)</div>
+                    <button type="button" class="remove-teacher" onclick="removeTeacher(this)" title="Buang Guru">×</button>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div>
+                                <label for="teacherName2">Nama Guru *</label>
+                                <input type="text" id="teacherName2" name="teacherName2" style="text-transform: uppercase;" required>
+                            </div>
+                            <div>
+                                <label for="teacherEmail2">Email Guru *</label>
+                                <input type="email" id="teacherEmail2" name="teacherEmail2" placeholder="guru@email.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-row single">
+                                <div>
+                                    <label for="phoneNumber2">Nombor Telefon *</label>
+                                    <input type="tel" id="phoneNumber2" name="phoneNumber2" placeholder="012-345 6789" oninput="formatMalaysianPhone(this)" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            teacherCount = 2;
+            
+            // Reset to single student
+            const container = document.getElementById('studentsContainer');
+            const studentEntries = container.querySelectorAll('.student-entry');
+            for (let i = 1; i < studentEntries.length; i++) {
+                studentEntries[i].remove();
+            }
+            studentCount = 1;
+            updateStudentNumbers();
+        }
+        
+        function updateDashboard() {
+            const totalRegs = Object.keys(registrations).length;
+            let totalStudents = 0;
+            let totalTeachers = 0;
+            const allSchools = new Set();
+            
+            Object.values(registrations).forEach(reg => {
+                totalStudents += reg.students.length;
+                totalTeachers += reg.school.teachers.length;
+                allSchools.add(reg.school.name);
+            });
+            
+            // Update main totals
+            document.getElementById('totalRegistrations').textContent = totalRegs;
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('totalSchools').textContent = allSchools.size;
+            document.getElementById('totalTeachers').textContent = totalTeachers;
+            
+            const listContainer = document.getElementById('registrationsList');
+            
+            if (totalRegs === 0) {
+                listContainer.innerHTML = `
+                    <div style="text-align: center; color: #6b7280; padding: 2rem;">
+                        📋 Tiada pendaftaran lagi. Sila daftar pasukan terlebih dahulu.
+                    </div>
+                `;
+                return;
+            }
+            
+            listContainer.innerHTML = '';
+            
+            Object.entries(registrations).forEach(([id, data]) => {
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    background: white;
+                    border: 2px solid #e5e7eb;
+                    border-radius: 12px;
+                    padding: 1.5rem;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                    transition: all 0.3s ease;
+                `;
+                
+                // Count students by gender
+                const maleCount = data.students.filter(s => s.gender === 'Lelaki').length;
+                const femaleCount = data.students.filter(s => s.gender === 'Perempuan').length;
+                
+                // Count by categories
+                const u12Count = data.students.filter(s => s.category === 'under-12').length;
+                const u15Count = data.students.filter(s => s.category === 'under-15').length;
+                const u18Count = data.students.filter(s => s.category === 'under-18').length;
+                
+                card.innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; color: #f97316; font-size: 1.2rem; font-weight: 600;">${data.school.name}</h3>
+                        <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">ID: ${id}</p>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #9ca3af;">
+                            <div>📅 Didaftar: ${data.createdAt}</div>
+                            ${data.updatedAt !== data.createdAt ? `<div>🔄 Dikemaskini: ${data.updatedAt}</div>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">${data.school.teachers.length}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">Jumlah Guru</div>
+                        </div>
+                        <div style="background: #f0fdf4; padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">${data.students.length}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">Jumlah Pelajar</div>
+                        </div>
+                        <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">${maleCount}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">Pelajar Lelaki</div>
+                        </div>
+                        <div style="background: #fce7f3; padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #ec4899;">${femaleCount}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">Pelajar Perempuan</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                        <div style="background: #ecfdf5; padding: 0.75rem; border-radius: 6px; text-align: center; border: 1px solid #d1fae5;">
+                            <div style="font-weight: bold; color: #10b981;">${u12Count}</div>
+                            <div style="font-size: 0.8rem; color: #6b7280;">Bawah 12</div>
+                        </div>
+                        <div style="background: #fef3c7; padding: 0.75rem; border-radius: 6px; text-align: center; border: 1px solid #fde68a;">
+                            <div style="font-weight: bold; color: #f59e0b;">${u15Count}</div>
+                            <div style="font-size: 0.8rem; color: #6b7280;">Bawah 15</div>
+                        </div>
+                        <div style="background: #fee2e2; padding: 0.75rem; border-radius: 6px; text-align: center; border: 1px solid #fecaca;">
+                            <div style="font-weight: bold; color: #ef4444;">${u18Count}</div>
+                            <div style="font-size: 0.8rem; color: #6b7280;">Bawah 18</div>
+                        </div>
+                    </div>
+                `;
+                
+                listContainer.appendChild(card);
+            });
+        }
+        
+        // Google Sheets Configuration
+        const GOOGLE_SHEETS_CONFIG = {
+            // Your Google Apps Script Web App URL
+            webAppUrl: 'https://script.google.com/macros/s/AKfycbzy_DI5U7PRW2CwczvHjG1d84o6pl9RdszjmIjhhrs0MAKOIMcotAWlfXX7S-fOUnLM/exec'
+        };
+        
+        async function sendToGoogleSheets(registrationData, registrationId) {
+            try {
+                console.log('🔄 Sending data to Google Sheets...', { registrationId, data: registrationData });
+                
+                // Determine school type
+                const hasU12 = registrationData.students.some(s => s.category === 'under-12');
+                const hasU15U18 = registrationData.students.some(s => s.category === 'under-15' || s.category === 'under-18');
+                let schoolType = 'SK'; // Default to primary
+                if (hasU12 && hasU15U18) {
+                    schoolType = 'CAMPURAN';
+                } else if (hasU15U18) {
+                    schoolType = 'SMK';
+                }
+                
+                // Prepare complete data payload
+                const payload = {
+                    action: 'addRegistration',
+                    registrationId: registrationId,
+                    schoolData: {
+                        ID_PENDAFTARAN: registrationId,
+                        NAMA_SEKOLAH: registrationData.school.name,
+                        JENIS_SEKOLAH: schoolType,
+                        JUMLAH_GURU: registrationData.school.teachers.length,
+                        JUMLAH_PELAJAR: registrationData.students.length,
+                        JUMLAH_LELAKI: registrationData.students.filter(s => s.gender === 'Lelaki').length,
+                        JUMLAH_PEREMPUAN: registrationData.students.filter(s => s.gender === 'Perempuan').length,
+                        JUMLAH_U12: registrationData.students.filter(s => s.category === 'under-12').length,
+                        JUMLAH_U15: registrationData.students.filter(s => s.category === 'under-15').length,
+                        JUMLAH_U18: registrationData.students.filter(s => s.category === 'under-18').length,
+                        TARIKH_DAFTAR: registrationData.createdAt,
+                        TARIKH_KEMASKINI: registrationData.updatedAt,
+                        STATUS: 'AKTIF'
+                    },
+                    teachersData: registrationData.school.teachers.map((teacher, index) => ({
+                        ID_PENDAFTARAN: registrationId,
+                        NAMA_SEKOLAH: registrationData.school.name,
+                        NAMA_GURU: teacher.name,
+                        EMAIL_GURU: teacher.email,
+                        TELEFON_GURU: teacher.phone,
+                        JAWATAN_GURU: index === 0 ? 'KETUA' : 'PENGIRING',
+                        URUTAN_GURU: index + 1,
+                        TARIKH_DAFTAR: registrationData.createdAt,
+                        TARIKH_KEMASKINI: registrationData.updatedAt,
+                        STATUS: 'AKTIF'
+                    })),
+                    studentsData: registrationData.students.map(student => ({
+                        ID_PENDAFTARAN: registrationId,
+                        NAMA_SEKOLAH: registrationData.school.name,
+                        NAMA_PELAJAR: student.name,
+                        NO_IC: student.ic,
+                        JANTINA: student.gender,
+                        KATEGORI_UMUR: student.category,
+                        KATEGORI_DISPLAY: student.category === 'under-12' ? 'Bawah 12 Tahun' : 
+                                          student.category === 'under-15' ? 'Bawah 15 Tahun' : 'Bawah 18 Tahun',
+                        ID_PEMAIN: student.playerId,
+                        GURU_KETUA: registrationData.school.teachers[0].name,
+                        TELEFON_GURU: registrationData.school.teachers[0].phone,
+                        TARIKH_DAFTAR: registrationData.createdAt,
+                        TARIKH_KEMASKINI: registrationData.updatedAt,
+                        STATUS: 'AKTIF'
+                    }))
+                };
+                
+                console.log('📤 Payload being sent:', payload);
+                
+                // Send data to Google Sheets
+                const response = await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // Important for Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('📥 Response received:', response);
+                
+                // Since we're using no-cors mode, we can't read the response
+                // But if no error was thrown, assume success
+                showNotification('✅ Data berjaya dihantar ke Google Sheets!', 'success');
+                console.log('✅ Data successfully sent to Google Sheets');
+                
+            } catch (error) {
+                console.error('❌ Error sending to Google Sheets:', error);
+                showNotification('⚠️ Ralat menyimpan ke Google Sheets. Data masih tersimpan secara tempatan.', 'warning');
+                
+                // Show detailed error for debugging
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    registrationId: registrationId
+                });
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                max-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                ${type === 'success' ? 'background: #10b981;' : 
+                  type === 'warning' ? 'background: #f59e0b;' : 
+                  type === 'error' ? 'background: #ef4444;' : 'background: #3b82f6;'}
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+        
+        function sendWhatsAppNotification(registrationData, registrationId) {
+            // Count students by category and gender
+            const maleU12 = registrationData.students.filter(s => s.gender === 'Lelaki' && s.category === 'under-12').length;
+            const femaleU12 = registrationData.students.filter(s => s.gender === 'Perempuan' && s.category === 'under-12').length;
+            const maleU15 = registrationData.students.filter(s => s.gender === 'Lelaki' && s.category === 'under-15').length;
+            const femaleU15 = registrationData.students.filter(s => s.gender === 'Perempuan' && s.category === 'under-15').length;
+            const maleU18 = registrationData.students.filter(s => s.gender === 'Lelaki' && s.category === 'under-18').length;
+            const femaleU18 = registrationData.students.filter(s => s.gender === 'Perempuan' && s.category === 'under-18').length;
+            
+            // Build category breakdown text
+            let categoryBreakdown = [];
+            if (maleU12 > 0) categoryBreakdown.push(`L12 - ${maleU12} orang`);
+            if (femaleU12 > 0) categoryBreakdown.push(`P12 - ${femaleU12} orang`);
+            if (maleU15 > 0) categoryBreakdown.push(`L15 - ${maleU15} orang`);
+            if (femaleU15 > 0) categoryBreakdown.push(`P15 - ${femaleU15} orang`);
+            if (maleU18 > 0) categoryBreakdown.push(`L18 - ${maleU18} orang`);
+            if (femaleU18 > 0) categoryBreakdown.push(`P18 - ${femaleU18} orang`);
+            
+            const categoryText = categoryBreakdown.join(', ');
+            
+            // Create WhatsApp message
+            const message = `📢 *NOTIFIKASI PENDAFTARAN BERJAYA*
+
+Assalamualaikum & Salam Sejahtera 👋
+
+Saya telah berjaya mendaftar pasukan sekolah untuk *PERTANDINGAN CATUR MSSD MUAR* ✅
+
+🏫 *Nama Sekolah:* ${registrationData.school.name}
+🆔 *ID Pendaftaran:* ${registrationId}
+👩‍🏫 *Nama Guru (Ketua):* ${registrationData.school.teachers[0].name}
+📞 *No. Telefon Guru:* ${registrationData.school.teachers[0].phone}
+👥 *Jumlah Pelajar:* ${registrationData.students.length} orang (${categoryText})
+
+Terima kasih atas sokongan dan penyertaan anda.
+Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
+
+♟️ *"Satukan Pemain, Gilap Bakat, Ukir Kejayaan"*`;
+            
+            // WhatsApp Web URL with phone number and message
+            const phoneNumber = '60182046224'; // Remove + and spaces
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            
+            // Open WhatsApp in new tab
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        }
+        
+        // Form submission handler
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const schoolName = formData.get('schoolName');
+            
+            // Collect teachers data
+            const teachers = [];
+            const teacherEntries = document.querySelectorAll('.teacher-entry');
+            teacherEntries.forEach((entry, index) => {
+                const teacherName = formData.get(`teacherName${index + 1}`);
+                const teacherEmail = formData.get(`teacherEmail${index + 1}`);
+                const phoneNumber = formData.get(`phoneNumber${index + 1}`);
+                
+                if (teacherName && teacherEmail && phoneNumber) {
+                    teachers.push({
+                        name: teacherName,
+                        email: teacherEmail,
+                        phone: phoneNumber
+                    });
+                }
+            });
+            
+            // Collect students data
+            const students = [];
+            const studentEntries = document.querySelectorAll('.student-entry');
+            studentEntries.forEach((entry, index) => {
+                const studentName = formData.get(`studentName${index + 1}`);
+                const icNumber = formData.get(`icNumber${index + 1}`);
+                const gender = formData.get(`gender${index + 1}`);
+                const category = formData.get(`category${index + 1}`);
+                const playerId = formData.get(`playerId${index + 1}`);
+                
+                if (studentName && icNumber && gender && category) {
+                    students.push({
+                        name: studentName,
+                        ic: icNumber,
+                        gender: gender === '01' ? 'Lelaki' : 'Perempuan',
+                        category: category,
+                        playerId: playerId
+                    });
+                }
+            });
+            
+            // Validation
+            if (!schoolName || teachers.length < 2 || students.length === 0) {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = '❌ Sila lengkapkan semua maklumat yang diperlukan.';
+                return;
+            }
+            
+            const now = new Date().toLocaleString('ms-MY', {
+                timeZone: 'Asia/Kuala_Lumpur',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            let registrationId;
+            if (isEditMode && currentEditId) {
+                registrationId = currentEditId;
+            } else {
+                registrationId = generateRegistrationId();
+            }
+            
+            const registrationData = {
+                school: {
+                    name: schoolName,
+                    teachers: teachers
+                },
+                students: students,
+                createdAt: isEditMode ? registrations[currentEditId].createdAt : now,
+                updatedAt: now
+            };
+            
+            // Store registration
+            registrations[registrationId] = registrationData;
+            
+            // Send to Google Sheets
+            await sendToGoogleSheets(registrationData, registrationId);
+            
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('registrationIdDisplay').style.display = 'block';
+            document.getElementById('registrationId').textContent = registrationId;
+            
+            // Send WhatsApp notification for new registrations only
+            if (!isEditMode) {
+                setTimeout(() => {
+                    sendWhatsAppNotification(registrationData, registrationId);
+                }, 2000);
+            }
+            
+            // Update dashboard
+            updateDashboard();
+            
+            // Reset form after successful submission
+            setTimeout(() => {
+                resetForm();
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('registrationIdDisplay').style.display = 'none';
+            }, 5000);
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Initialize dashboard on page load
+        updateDashboard();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99224acf1389a853',t:'MTc2MTA2NTgyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
