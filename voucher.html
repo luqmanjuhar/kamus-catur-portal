@@ -729,7 +729,6 @@
             e.preventDefault();
             
             const formData = {
-                action: 'updateVoucher',
                 voucherId: document.getElementById('updateVoucherId').value,
                 value: parseFloat(document.getElementById('updateValue').value),
                 description: document.getElementById('updateDescription').value,
@@ -750,15 +749,14 @@
             try {
                 showLoading(true);
                 
-                // Use form data approach for better CORS compatibility
                 const formDataToSend = new FormData();
                 Object.keys(formData).forEach(key => {
                     formDataToSend.append(key, formData[key]);
                 });
                 
-                const response = await fetch(APPS_SCRIPT_URL, {
+                const updateUrl = `${APPS_SCRIPT_URL}?action=updateVoucher`;
+                const response = await fetch(updateUrl, {
                     method: 'POST',
-                    mode: 'cors',
                     body: formDataToSend
                 });
                 
@@ -1104,9 +1102,7 @@
             try {
                 showLoading(true);
                 
-                // Use form data approach for better CORS compatibility
                 const formDataToSend = new FormData();
-                formDataToSend.append('action', 'redeemVouchers');
                 formDataToSend.append('vouchers', JSON.stringify(selectedVouchers.map(v => ({
                     voucherId: v['Voucher ID'],
                     value: parseFloat(v['Value (RM)'] || 0),
@@ -1118,9 +1114,9 @@
                 formDataToSend.append('usageDetails', document.getElementById('usageDetails').value);
                 formDataToSend.append('photos', document.getElementById('photos').value || '');
                 
-                const response = await fetch(APPS_SCRIPT_URL, {
+                const redeemUrl = `${APPS_SCRIPT_URL}?action=redeemVouchers`;
+                const response = await fetch(redeemUrl, {
                     method: 'POST',
-                    mode: 'cors',
                     body: formDataToSend
                 });
                 
@@ -1205,12 +1201,12 @@
                     const fileName = generatePhotoFileName(redemptionDate, customerName, usageCategory, i + 1, file.name);
                     
                     const formData = new FormData();
-                    formData.append('action', 'uploadPhoto');
                     formData.append('file', file);
                     formData.append('fileName', fileName);
                     formData.append('folderId', DRIVE_FOLDER_ID);
                     
-                    const response = await fetch(APPS_SCRIPT_URL, {
+                    const uploadUrl = `${APPS_SCRIPT_URL}?action=uploadPhoto`;
+                    const response = await fetch(uploadUrl, {
                         method: 'POST',
                         body: formData
                     });
@@ -1266,12 +1262,12 @@
                     const fileName = generatePhotoFileName(redemptionDate, customerName, usageCategory, i + 1, file.name);
                     
                     const formData = new FormData();
-                    formData.append('action', 'uploadPhoto');
                     formData.append('file', file);
                     formData.append('fileName', fileName);
                     formData.append('folderId', DRIVE_FOLDER_ID);
                     
-                    const response = await fetch(APPS_SCRIPT_URL, {
+                    const uploadUrl = `${APPS_SCRIPT_URL}?action=uploadPhoto`;
+                    const response = await fetch(uploadUrl, {
                         method: 'POST',
                         body: formData
                     });
@@ -1350,14 +1346,7 @@
             const cleanUsageDetails = usageDetails.replace(/['"]/g, '').trim();
 
             // Build message text exactly as specified
-            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :
-
-*Usage details* : ${cleanUsageDetails}
-*Date Redeemed* : ${formattedDate}
-*Total Voucher Redeemed* : 1
-*Total Value* : RM ${voucherValue.toFixed(2)}
-
-Thank You !!`;
+            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :\n\n*Usage details* : ${cleanUsageDetails}\n*Date Redeemed* : ${formattedDate}\n*Total Voucher Redeemed* : 1\n*Total Value* : RM ${voucherValue.toFixed(2)}\n\nThank You !!`;
 
             // Encode message using encodeURIComponent
             const encoded = encodeURIComponent(message);
@@ -1442,14 +1431,7 @@ Thank You !!`;
             const cleanUsageDetails = usageDetails.replace(/['"]/g, '').trim();
 
             // Build message text exactly as specified
-            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :
-
-*Usage details* : ${cleanUsageDetails}
-*Date Redeemed* : ${formattedDate}
-*Total Voucher Redeemed* : ${totalVouchers}
-*Total Value* : RM ${totalValue.toFixed(2)}
-
-Thank You !!`;
+            const message = `Hi Kamus Catur, I'm ${customerName} have redeemed my voucher for ${usageCategory} and the details as follow :\n\n*Usage details* : ${cleanUsageDetails}\n*Date Redeemed* : ${formattedDate}\n*Total Voucher Redeemed* : ${totalVouchers}\n*Total Value* : RM ${totalValue.toFixed(2)}\n\nThank You !!`;
 
             // Encode message using encodeURIComponent
             const encoded = encodeURIComponent(message);
@@ -1501,3 +1483,4 @@ Thank You !!`;
     </script>
 </body>
 </html>
+
