@@ -316,6 +316,20 @@
             font-size: 0.9rem;
         }
         
+        .debug-info {
+            background: #f3f4f6;
+            border: 2px solid #d1d5db;
+            color: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -356,9 +370,51 @@
         <div class="tab-content">
             <!-- Registration Tab -->
             <div id="registerTab" class="tab-panel active">
-                <div class="config-warning" id="configWarning" style="display: none;">
-                    ⚠️ <strong>Setup Required:</strong> Sila update Google Apps Script Web App URL dalam kod untuk enable Google Sheets integration.
+                <div class="config-warning" id="configWarning">
+                    ⚠️ <strong>Setup Required:</strong> Sila setup Google Apps Script untuk simpan data ke Google Sheets.
                     <br><small>Semasa ini data hanya disimpan secara tempatan dalam browser.</small>
+                    <details style="margin-top: 0.5rem;">
+                        <summary style="cursor: pointer; font-weight: 600;">📋 Panduan Setup Google Apps Script (KLIK SINI)</summary>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; line-height: 1.4;">
+                            <strong>LANGKAH 1: Buka Google Apps Script</strong><br>
+                            • Pergi ke <a href="https://script.google.com" target="_blank" style="color: #f97316; text-decoration: underline;">script.google.com</a><br>
+                            • Klik "New Project"<br>
+                            • Namakan project: "MSSD Catur Registration"<br><br>
+                            
+                            <strong>LANGKAH 2: Salin Kod Apps Script</strong><br>
+                            • Padam semua kod default dalam editor<br>
+                            • Salin dan tampal kod Google Apps Script yang telah disediakan<br>
+                            • Klik "Save" (Ctrl+S)<br><br>
+                            
+                            <strong>LANGKAH 3: Update Spreadsheet ID</strong><br>
+                            • Dalam kod, cari baris: <code>const SPREADSHEET_ID = '...'</code><br>
+                            • Gantikan dengan ID Google Sheets anda<br>
+                            • ID boleh didapati dari URL Google Sheets<br><br>
+                            
+                            <strong>LANGKAH 4: Deploy sebagai Web App</strong><br>
+                            • Klik "Deploy" > "New deployment"<br>
+                            • Klik ikon gear ⚙️ dan pilih "Web app"<br>
+                            • Execute as: "Me"<br>
+                            • Who has access: "Anyone"<br>
+                            • Klik "Deploy"<br><br>
+                            
+                            <strong>LANGKAH 5: Salin Web App URL</strong><br>
+                            • Salin URL yang diberikan (bermula dengan https://script.google.com/macros/s/...)<br>
+                            • Gantikan dalam kod HTML ini pada baris <code>GOOGLE_APPS_SCRIPT_URL</code><br><br>
+                            
+                            <strong>LANGKAH 6: Test</strong><br>
+                            • Refresh halaman ini<br>
+                            • Cuba daftar satu pendaftaran test<br>
+                            • Semak Google Sheets untuk pastikan data masuk<br><br>
+                            
+                            <div style="background: #fee2e2; border: 1px solid #fecaca; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
+                                <strong>⚠️ PENTING:</strong> Pastikan Google Sheets anda mempunyai 3 sheets dengan nama:<br>
+                                • <strong>SEKOLAH</strong> - untuk data sekolah<br>
+                                • <strong>GURU</strong> - untuk data guru<br>
+                                • <strong>PELAJAR</strong> - untuk data pelajar
+                            </div>
+                        </div>
+                    </details>
                 </div>
                 
                 <div class="edit-mode-indicator" id="editModeIndicator">
@@ -506,6 +562,11 @@
                         🎯 ID Pendaftaran Anda: <span id="registrationId"></span>
                         <br><small>Simpan ID ini untuk mengedit pendaftaran anda kemudian</small>
                     </div>
+                    
+                    <div id="debugInfo" class="debug-info">
+                        <strong>Debug Information:</strong><br>
+                        <div id="debugContent"></div>
+                    </div>
                 </form>
             </div>
             
@@ -551,7 +612,12 @@
             <!-- Dashboard Tab -->
             <div id="dashboardTab" class="tab-panel">
                 <section>
-                    <h2 class="section-title">Dashboard Analisis</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 class="section-title" style="margin-bottom: 0;">Dashboard Analisis</h2>
+                        <button type="button" onclick="refreshDashboard()" style="background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            🔄 Refresh Data
+                        </button>
+                    </div>
                     
                     <!-- Summary Stats -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
@@ -595,22 +661,41 @@
         // Storage for registrations (in real app, this would be a database)
         let registrations = {};
         
-        // Google Sheets Configuration - FULLY CONNECTED AND WORKING!
-        const GOOGLE_SHEETS_CONFIG = {
-            webAppUrl: 'https://script.google.com/macros/s/AKfycbx8SOXfMYLURiABjY0mdQVqMitTtw3YthlOR_fZ6WNvyG1WbB24wPAX-NIdVQjyiXPI/exec',
-            enabled: true
-        };
+        // Google Apps Script Web App URL for data submission
+        // IMPORTANT: Replace this with your actual Google Apps Script Web App URL
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqyfUtkViAUL56KM_CWwBvyshUEovcn8n9fgSOJoKg1gXjO6bIPnnl6IiOwBM0zZ6FZA/exec';
         
-        // Check if Google Sheets is properly configured
-        function checkGoogleSheetsConfig() {
-            const isConfigured = GOOGLE_SHEETS_CONFIG.webAppUrl.includes('YOUR_DEPLOYMENT_ID_HERE') === false && 
-                               GOOGLE_SHEETS_CONFIG.enabled === true;
+        // Debug function to show detailed information
+        function showDebugInfo(message, data = null) {
+            const debugElement = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const debugMessage = `[${timestamp}] ${message}`;
+            
+            if (data) {
+                debugContent.innerHTML += `${debugMessage}<br>Data: ${JSON.stringify(data, null, 2)}<br><br>`;
+            } else {
+                debugContent.innerHTML += `${debugMessage}<br>`;
+            }
+            
+            debugElement.style.display = 'block';
+            debugElement.scrollTop = debugElement.scrollHeight;
+        }
+        
+        // Check if Google Apps Script URL is configured
+        function checkGoogleAppsScriptConfig() {
+            const isConfigured = GOOGLE_APPS_SCRIPT_URL && 
+                                GOOGLE_APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbyqyfUtkViAUL56KM_CWwBvyshUEovcn8n9fgSOJoKg1gXjO6bIPnnl6IiOwBM0zZ6FZA/exec' && 
+                                GOOGLE_APPS_SCRIPT_URL.includes('script.google.com');
             
             const warningElement = document.getElementById('configWarning');
             if (isConfigured) {
                 warningElement.style.display = 'none';
+                showDebugInfo('✅ Google Apps Script Web App URL configured');
             } else {
                 warningElement.style.display = 'block';
+                showDebugInfo('⚠️ Google Apps Script Web App URL not configured');
             }
             
             return isConfigured;
@@ -1069,6 +1154,8 @@
             currentEditId = null;
             document.getElementById('editModeIndicator').style.display = 'none';
             document.getElementById('submitBtn').textContent = 'Daftarkan Pasukan untuk Kejohanan';
+            document.getElementById('debugInfo').style.display = 'none';
+            document.getElementById('debugContent').innerHTML = '';
             
             // Reset to minimum teachers (2)
             const teachersContainer = document.getElementById('teachersContainer');
@@ -1235,179 +1322,78 @@
         }
         
         async function sendToGoogleSheets(registrationData, registrationId) {
-            // Check if Google Sheets is configured
-            if (!checkGoogleSheetsConfig()) {
-                console.log('⚠️ Google Sheets not configured, skipping...');
-                showNotification('ℹ️ Data disimpan secara tempatan. Google Sheets belum dikonfigurasi.', 'info');
-                return;
+            // Skip Google Sheets if URL not properly configured
+            if (GOOGLE_APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyqyfUtkViAUL56KM_CWwBvyshUEovcn8n9fgSOJoKg1gXjO6bIPnnl6IiOwBM0zZ6FZA/exec' || !GOOGLE_APPS_SCRIPT_URL.includes('script.google.com')) {
+                showDebugInfo('⚠️ Google Apps Script URL belum dikonfigurasi - data disimpan tempatan sahaja');
+                showNotification('⚠️ Setup Google Apps Script untuk simpan ke cloud', 'warning');
+                return false;
             }
             
             try {
-                console.log('🔄 Sending data to Google Sheets...', { registrationId, data: registrationData });
+                showDebugInfo('📤 Menghantar data ke Google Apps Script...');
                 
-                // Determine school type
-                const hasU12 = registrationData.students.some(s => s.category === 'under-12');
-                const hasU15U18 = registrationData.students.some(s => s.category === 'under-15' || s.category === 'under-18');
-                let schoolType = 'SK'; // Default to primary
-                if (hasU12 && hasU15U18) {
-                    schoolType = 'CAMPURAN';
-                } else if (hasU15U18) {
-                    schoolType = 'SMK';
-                }
-                
-                // Prepare JSON payload exactly as expected by Google Apps Script
+                // Prepare data for Google Sheets
                 const payload = {
-                    action: 'addRegistration',
+                    action: isEditMode ? 'update' : 'create',
                     registrationId: registrationId,
-                    createHeaders: true,
-                    data: {
-                        school: {
-                            ID_PENDAFTARAN: registrationId,
-                            NAMA_SEKOLAH: registrationData.school.name,
-                            JENIS_SEKOLAH: schoolType,
-                            JUMLAH_GURU: registrationData.school.teachers.length,
-                            JUMLAH_PELAJAR: registrationData.students.length,
-                            JUMLAH_LELAKI: registrationData.students.filter(s => s.gender === 'Lelaki').length,
-                            JUMLAH_PEREMPUAN: registrationData.students.filter(s => s.gender === 'Perempuan').length,
-                            JUMLAH_U12: registrationData.students.filter(s => s.category === 'under-12').length,
-                            JUMLAH_U15: registrationData.students.filter(s => s.category === 'under-15').length,
-                            JUMLAH_U18: registrationData.students.filter(s => s.category === 'under-18').length,
-                            TARIKH_DAFTAR: registrationData.createdAt,
-                            TARIKH_KEMASKINI: registrationData.updatedAt,
-                            STATUS: 'AKTIF'
-                        },
-                        teachers: registrationData.school.teachers.map((teacher, index) => ({
-                            ID_PENDAFTARAN: registrationId,
-                            NAMA_SEKOLAH: registrationData.school.name,
-                            NAMA_GURU: teacher.name,
-                            EMAIL_GURU: teacher.email,
-                            TELEFON_GURU: teacher.phone,
-                            JAWATAN_GURU: index === 0 ? 'KETUA' : 'PENGIRING',
-                            URUTAN_GURU: index + 1,
-                            TARIKH_DAFTAR: registrationData.createdAt,
-                            TARIKH_KEMASKINI: registrationData.updatedAt,
-                            STATUS: 'AKTIF'
-                        })),
-                        students: registrationData.students.map(student => ({
-                            ID_PENDAFTARAN: registrationId,
-                            NAMA_SEKOLAH: registrationData.school.name,
-                            NAMA_PELAJAR: student.name,
-                            NO_IC: student.ic,
-                            JANTINA: student.gender,
-                            KATEGORI_UMUR: student.category,
-                            KATEGORI_DISPLAY: student.category === 'under-12' ? 'Bawah 12 Tahun' : 
-                                              student.category === 'under-15' ? 'Bawah 15 Tahun' : 'Bawah 18 Tahun',
-                            ID_PEMAIN: student.playerId,
-                            GURU_KETUA: registrationData.school.teachers[0].name,
-                            TELEFON_GURU: registrationData.school.teachers[0].phone,
-                            TARIKH_DAFTAR: registrationData.createdAt,
-                            TARIKH_KEMASKINI: registrationData.updatedAt,
-                            STATUS: 'AKTIF'
-                        }))
-                    },
-                    headers: {
-                        schools: ['ID_PENDAFTARAN', 'NAMA_SEKOLAH', 'JENIS_SEKOLAH', 'JUMLAH_GURU', 'JUMLAH_PELAJAR', 'JUMLAH_LELAKI', 'JUMLAH_PEREMPUAN', 'JUMLAH_U12', 'JUMLAH_U15', 'JUMLAH_U18', 'TARIKH_DAFTAR', 'TARIKH_KEMASKINI', 'STATUS'],
-                        teachers: ['ID_PENDAFTARAN', 'NAMA_SEKOLAH', 'NAMA_GURU', 'EMAIL_GURU', 'TELEFON_GURU', 'JAWATAN_GURU', 'URUTAN_GURU', 'TARIKH_DAFTAR', 'TARIKH_KEMASKINI', 'STATUS'],
-                        students: ['ID_PENDAFTARAN', 'NAMA_SEKOLAH', 'NAMA_PELAJAR', 'NO_IC', 'JANTINA', 'KATEGORI_UMUR', 'KATEGORI_DISPLAY', 'ID_PEMAIN', 'GURU_KETUA', 'TELEFON_GURU', 'TARIKH_DAFTAR', 'TARIKH_KEMASKINI', 'STATUS']
-                    }
+                    schoolName: registrationData.school.name,
+                    teachers: registrationData.school.teachers,
+                    students: registrationData.students,
+                    createdAt: registrationData.createdAt,
+                    updatedAt: registrationData.updatedAt
                 };
                 
-                console.log('📤 JSON Payload being sent:', JSON.stringify(payload, null, 2));
+                showDebugInfo('📋 Data yang dihantar:', payload);
                 
-                // Send to Google Sheets with proper JSON content type
-                let response;
-                let attempts = 0;
-                const maxAttempts = 3;
+                // Use fetch with proper error handling
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify(payload),
+                    redirect: 'follow'
+                });
                 
-                while (attempts < maxAttempts) {
-                    try {
-                        response = await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify(payload),
-                            mode: 'cors',
-                            redirect: 'follow'
-                        });
-                        
-                        if (response.ok) {
-                            break; // Success, exit retry loop
-                        } else {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                    } catch (fetchError) {
-                        attempts++;
-                        console.warn(`⚠️ Attempt ${attempts} failed:`, fetchError.message);
-                        
-                        if (attempts >= maxAttempts) {
-                            throw fetchError;
-                        }
-                        
-                        // Wait before retry (exponential backoff)
-                        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
-                    }
+                showDebugInfo(`📡 Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
                 }
                 
-                // Parse response
+                const responseText = await response.text();
+                showDebugInfo('📥 Response dari server:', responseText);
+                
                 let result;
                 try {
-                    const responseText = await response.text();
-                    console.log('📥 Raw response:', responseText);
-                    
-                    // Try to parse as JSON
-                    if (responseText.trim().startsWith('{') || responseText.trim().startsWith('[')) {
-                        result = JSON.parse(responseText);
-                    } else {
-                        // Handle non-JSON response (might be HTML error page)
-                        result = { 
-                            success: response.ok, 
-                            message: responseText.substring(0, 200) + (responseText.length > 200 ? '...' : ''),
-                            status: response.status 
-                        };
-                    }
+                    result = JSON.parse(responseText);
                 } catch (parseError) {
-                    console.warn('⚠️ Could not parse response as JSON:', parseError);
-                    result = { 
-                        success: response.ok, 
-                        message: 'Response received but could not parse',
-                        status: response.status 
-                    };
+                    showDebugInfo('⚠️ Response bukan JSON format:', responseText);
+                    throw new Error('Invalid JSON response from server');
                 }
                 
-                console.log('✅ Processed response:', result);
-                
-                if (result.success !== false && response.ok) {
-                    showNotification('✅ Data berjaya dihantar ke Google Sheets!', 'success');
+                if (result.success) {
+                    showDebugInfo('✅ Data berjaya disimpan ke Google Sheets!');
+                    showNotification('✅ Data berjaya disimpan ke Google Sheets!', 'success');
+                    return true;
                 } else {
-                    throw new Error(result.message || 'Unknown error from Google Sheets');
+                    throw new Error(result.error || 'Unknown error from Google Apps Script');
                 }
                 
             } catch (error) {
-                console.error('❌ Error sending to Google Sheets:', error);
+                showDebugInfo('❌ Ralat menghantar ke Google Sheets:', error.message);
+                console.error('Google Sheets Error:', error);
                 
-                // More user-friendly error messages
-                let errorMessage = 'Ralat menyimpan ke Google Sheets';
+                // Show user-friendly error message
                 if (error.message.includes('Failed to fetch')) {
-                    errorMessage += ': Masalah rangkaian atau CORS';
-                } else if (error.message.includes('HTTP 4')) {
-                    errorMessage += ': Ralat permintaan (4xx)';
-                } else if (error.message.includes('HTTP 5')) {
-                    errorMessage += ': Ralat pelayan Google (5xx)';
+                    showNotification('❌ Tiada sambungan internet atau server tidak dapat dihubungi', 'error');
+                } else if (error.message.includes('CORS')) {
+                    showNotification('❌ Masalah CORS - sila semak konfigurasi Google Apps Script', 'error');
                 } else {
-                    errorMessage += ': ' + error.message;
+                    showNotification('❌ Gagal simpan ke Google Sheets: ' + error.message, 'error');
                 }
                 
-                showNotification('⚠️ ' + errorMessage, 'warning');
-                
-                // Show detailed error for debugging
-                console.error('Error details:', {
-                    message: error.message,
-                    stack: error.stack,
-                    registrationId: registrationId,
-                    url: GOOGLE_SHEETS_CONFIG.webAppUrl
-                });
+                return false;
             }
         }
         
@@ -1435,7 +1421,7 @@
                 notification.style.opacity = '0';
                 notification.style.transform = 'translateX(100%)';
                 setTimeout(() => notification.remove(), 300);
-            }, 4000);
+            }, 5000);
         }
         
         function sendWhatsAppNotification(registrationData, registrationId) {
@@ -1489,6 +1475,8 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
         document.getElementById('registrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            showDebugInfo('🚀 Form submission started...');
+            
             const formData = new FormData(this);
             const schoolName = formData.get('schoolName');
             
@@ -1530,8 +1518,20 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
                 }
             });
             
+            showDebugInfo('📊 Collected form data', {
+                school: schoolName,
+                teachersCount: teachers.length,
+                studentsCount: students.length
+            });
+            
             // Validation
             if (!schoolName || teachers.length < 2 || students.length === 0) {
+                showDebugInfo('❌ Validation failed', {
+                    schoolName: !!schoolName,
+                    teachersCount: teachers.length,
+                    studentsCount: students.length
+                });
+                
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('errorMessage').textContent = '❌ Sila lengkapkan semua maklumat yang diperlukan.';
                 return;
@@ -1550,8 +1550,10 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
             let registrationId;
             if (isEditMode && currentEditId) {
                 registrationId = currentEditId;
+                showDebugInfo('📝 Edit mode - using existing ID', registrationId);
             } else {
                 registrationId = generateRegistrationId();
+                showDebugInfo('🆕 New registration - generated ID', registrationId);
             }
             
             const registrationData = {
@@ -1564,6 +1566,8 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
                 updatedAt: now
             };
             
+            showDebugInfo('💾 Storing registration locally...', registrationId);
+            
             // Store registration locally
             registrations[registrationId] = registrationData;
             
@@ -1574,6 +1578,8 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
             document.getElementById('successMessage').style.display = 'block';
             document.getElementById('registrationIdDisplay').style.display = 'block';
             document.getElementById('registrationId').textContent = registrationId;
+            
+            showDebugInfo('✅ Registration completed successfully!');
             
             // Send WhatsApp notification for new registrations only
             if (!isEditMode) {
@@ -1590,17 +1596,24 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
                 resetForm();
                 document.getElementById('successMessage').style.display = 'none';
                 document.getElementById('registrationIdDisplay').style.display = 'none';
-            }, 5000);
+            }, 8000);
             
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
         
+        // Refresh dashboard data
+        function refreshDashboard() {
+            showNotification('🔄 Dashboard dikemaskini!', 'info');
+            updateDashboard();
+        }
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            checkGoogleSheetsConfig();
+            showDebugInfo('🚀 System initialized');
+            checkGoogleAppsScriptConfig();
             updateDashboard();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9928f17db61ca858',t:'MTc2MTEzNTU2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992a9144e1e1a858',t:'MTc2MTE1MjYwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
