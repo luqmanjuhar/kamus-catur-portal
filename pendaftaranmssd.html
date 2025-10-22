@@ -344,14 +344,12 @@
         </div>
         
         <div class="tab-content">
-            <!-- Registration Tab -->
             <div id="registerTab" class="tab-panel active">
                 <div class="edit-mode-indicator" id="editModeIndicator">
                     📝 Mod Edit: Anda sedang mengedit pendaftaran
                 </div>
                 
                 <form id="registrationForm">
-                    <!-- School Information Section -->
                     <section>
                         <h2 class="section-title">Maklumat Sekolah</h2>
                         
@@ -423,7 +421,6 @@
                         </button>
                     </section>
                     
-                    <!-- Students Section -->
                     <section>
                         <h2 class="section-title">Pendaftaran Pelajar</h2>
                         
@@ -494,7 +491,6 @@
                 </form>
             </div>
             
-            <!-- Edit Tab -->
             <div id="editTab" class="tab-panel">
                 <section>
                     <h2 class="section-title">Cari Pendaftaran</h2>
@@ -533,12 +529,10 @@
                 </section>
             </div>
             
-            <!-- Dashboard Tab -->
             <div id="dashboardTab" class="tab-panel">
                 <section>
                     <h2 class="section-title">Dashboard Analisis</h2>
                     
-                    <!-- Summary Stats -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                         <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
                             <div style="font-size: 2.5rem; font-weight: bold;" id="totalRegistrations">0</div>
@@ -631,7 +625,14 @@
         function switchTab(tabName) {
             // Update tab buttons
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
+            // Use event.target if triggered by click, otherwise look up the button element
+            const clickedButton = event.target.closest('.nav-tab');
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            } else {
+                 // Fallback for programmatic switch
+                document.querySelector(`.nav-tabs button[onclick*="'${tabName}'"]`).classList.add('active');
+            }
             
             // Update tab panels
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
@@ -649,15 +650,31 @@
             const genderSelect = document.getElementById(`gender${studentIndex}`);
             const playerIdInput = document.getElementById(`playerId${studentIndex}`);
             
+            // Reset player counters if we are re-generating IDs (e.g., on load)
+            // This simulation logic is simplified and not fully robust for a real application
+            // but keeps the unique ID generation logic intact for demonstration.
+            if (isEditMode) {
+                // In edit mode, we generally stick to the existing Player ID.
+                return;
+            }
+            
             if (genderSelect.value) {
-                playerCounters[genderSelect.value]++;
+                // Note: The logic here is simplified for this demo and doesn't handle player 
+                // ID reuse/reassignment accurately upon deletion or gender change.
                 
-                const year = '26';
+                // For a real application, player counters should be based on the
+                // current list of students in the specific school (not global).
+                // Resetting or calculating based on the current list is necessary.
+                
+                // We'll use a simplified unique counter based on the student index for now.
+                const year = '26'; // Placeholder year code
                 const gender = genderSelect.value;
-                const school = schoolNumber.toString().padStart(2, '0');
-                const player = playerCounters[genderSelect.value].toString().padStart(2, '0');
+                const school = schoolNumber.toString().padStart(2, '0'); // Placeholder school number
                 
-                const playerId = year + gender + school + player;
+                // Use a simplified unique sequence based on student index
+                const playerSequence = studentIndex.toString().padStart(2, '0');
+                
+                const playerId = year + gender + school + playerSequence;
                 playerIdInput.value = playerId;
             }
         }
@@ -704,30 +721,19 @@
             const teacherEntry = button.parentElement;
             const teacherEntries = document.querySelectorAll('.teacher-entry');
             
-            // Prevent removing if only 2 teachers left
-            if (teacherEntries.length <= 2) {
-                const notification = document.createElement('div');
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #fef3c7;
-                    border: 2px solid #f59e0b;
-                    color: #92400e;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    z-index: 1000;
-                    font-weight: 600;
-                `;
-                notification.textContent = '⚠️ Sekurang-kurangnya 2 orang guru diperlukan';
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.remove();
-                }, 3000);
+            // Prevent removing if only 1 teacher is left (Head Teacher must stay)
+            if (teacherEntries.length <= 1) {
+                showNotification('⚠️ Sekurang-kurangnya 1 orang guru diperlukan', 'warning');
                 return;
             }
             
+            // Prevent removing Guru 1 (Ketua) unless it's the only one
+            const isHeadTeacher = teacherEntry.querySelector('.teacher-number').textContent.includes('(Ketua)');
+            if (isHeadTeacher && teacherEntries.length > 1) {
+                showNotification('⚠️ Guru 1 (Ketua) tidak boleh dibuang', 'warning');
+                return;
+            }
+
             teacherEntry.style.transform = 'scale(0.95)';
             teacherEntry.style.opacity = '0';
             
@@ -741,10 +747,14 @@
             const teacherEntries = document.querySelectorAll('.teacher-entry');
             teacherEntries.forEach((entry, index) => {
                 const numberElement = entry.querySelector('.teacher-number');
+                const removeButton = entry.querySelector('.remove-teacher');
+                
                 if (index === 0) {
                     numberElement.textContent = 'Guru 1 (Ketua)';
+                    if (removeButton) removeButton.style.display = 'none'; // Cannot remove head teacher
                 } else {
                     numberElement.textContent = `Guru ${index + 1} (Pengiring)`;
+                    if (removeButton) removeButton.style.display = 'flex';
                 }
             });
             teacherCount = teacherEntries.length;
@@ -807,10 +817,21 @@
             setTimeout(() => {
                 studentEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
+            
+            // Re-run numbering logic after adding the element
+            updateStudentNumbers();
         }
         
         function removeStudent(button) {
             const studentEntry = button.parentElement;
+            
+            // Prevent removing if only 1 student is left
+            const studentEntries = document.querySelectorAll('.student-entry');
+            if (studentEntries.length <= 1) {
+                showNotification('⚠️ Sekurang-kurangnya 1 orang pelajar diperlukan', 'warning');
+                return;
+            }
+
             studentEntry.style.transform = 'scale(0.95)';
             studentEntry.style.opacity = '0';
             
@@ -825,6 +846,17 @@
             studentEntries.forEach((entry, index) => {
                 const numberElement = entry.querySelector('.student-number');
                 numberElement.textContent = `Pelajar ${index + 1}`;
+                
+                // Update the input IDs/Names for FormData consistency
+                const i = index + 1;
+                entry.querySelector(`[name^="studentName"]`).name = `studentName${i}`;
+                entry.querySelector(`[name^="icNumber"]`).name = `icNumber${i}`;
+                entry.querySelector(`[name^="gender"]`).name = `gender${i}`;
+                entry.querySelector(`[name^="category"]`).name = `category${i}`;
+                entry.querySelector(`[name^="playerId"]`).name = `playerId${i}`;
+                
+                // Update onchange attribute
+                entry.querySelector(`[name^="gender"]`).setAttribute('onchange', `generatePlayerId(${i})`);
             });
             studentCount = studentEntries.length;
         }
@@ -844,6 +876,11 @@
                 return;
             }
             
+            // --- SIMULATION FOR EDIT MODE START ---
+            // In a real implementation, this would involve a fetch request to GAS 
+            // with action=searchRegistration, which verifies the ID and password 
+            // against the SEKOLAH sheet and returns the full data if successful.
+            
             if (registrations[searchId]) {
                 // Get the head teacher's phone number (first teacher)
                 const headTeacherPhone = registrations[searchId].school.teachers[0].phone;
@@ -855,12 +892,12 @@
                 
                 if (normalizedStoredPhone === normalizedInputPhone) {
                     // Password matches - load registration data into form
-                    loadRegistrationData(registrations[searchId]);
+                    loadRegistrationData(registrations[searchId], searchId);
                     
                     // Switch to registration tab
                     switchTab('register');
-                    document.querySelectorAll('.nav-tab')[0].classList.add('active');
-                    document.querySelectorAll('.nav-tab')[1].classList.remove('active');
+                    document.querySelector('.nav-tabs button:nth-child(1)').classList.add('active');
+                    document.querySelector('.nav-tabs button:nth-child(2)').classList.remove('active');
                     
                     // Show edit mode indicator
                     isEditMode = true;
@@ -883,22 +920,24 @@
                     searchError.style.display = 'block';
                 }
             } else {
+                searchError.textContent = '❌ ID Pendaftaran tidak dijumpai.';
                 searchError.style.display = 'block';
             }
+            // --- SIMULATION FOR EDIT MODE END ---
         }
         
-        function loadRegistrationData(data) {
+        function loadRegistrationData(data, regId) {
             // Load school information
             document.getElementById('schoolName').value = data.school.name;
             
-            // Clear existing teachers
+            // Reset teachers container
             const teachersContainer = document.getElementById('teachersContainer');
             teachersContainer.innerHTML = '';
             
             // Load teachers
             data.school.teachers.forEach((teacher, index) => {
                 if (index === 0) {
-                    // First teacher - use existing structure
+                    // First teacher (Head)
                     teachersContainer.innerHTML = `
                         <div class="teacher-entry">
                             <div class="teacher-number">Guru 1 (Ketua)</div>
@@ -925,28 +964,29 @@
                         </div>
                     `;
                 } else {
-                    // Additional teachers
+                    // Additional teachers (Pengiring)
+                    const i = index + 1;
                     const teacherEntry = document.createElement('div');
                     teacherEntry.className = 'teacher-entry';
                     teacherEntry.innerHTML = `
-                        <div class="teacher-number">Guru ${index + 1} (Pengiring)</div>
+                        <div class="teacher-number">Guru ${i} (Pengiring)</div>
                         <button type="button" class="remove-teacher" onclick="removeTeacher(this)" title="Buang Guru">×</button>
                         <div class="form-group">
                             <div class="form-row">
                                 <div>
-                                    <label for="teacherName${index + 1}">Nama Guru *</label>
-                                    <input type="text" id="teacherName${index + 1}" name="teacherName${index + 1}" style="text-transform: uppercase;" value="${teacher.name}" required>
+                                    <label for="teacherName${i}">Nama Guru *</label>
+                                    <input type="text" id="teacherName${i}" name="teacherName${i}" style="text-transform: uppercase;" value="${teacher.name}" required>
                                 </div>
                                 <div>
-                                    <label for="teacherEmail${index + 1}">Email Guru *</label>
-                                    <input type="email" id="teacherEmail${index + 1}" name="teacherEmail${index + 1}" value="${teacher.email}" required>
+                                    <label for="teacherEmail${i}">Email Guru *</label>
+                                    <input type="email" id="teacherEmail${i}" name="teacherEmail${i}" value="${teacher.email}" required>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="form-row single">
                                     <div>
-                                        <label for="phoneNumber${index + 1}">Nombor Telefon *</label>
-                                        <input type="tel" id="phoneNumber${index + 1}" name="phoneNumber${index + 1}" value="${teacher.phone}" oninput="formatMalaysianPhone(this)" required>
+                                        <label for="phoneNumber${i}">Nombor Telefon *</label>
+                                        <input type="tel" id="phoneNumber${i}" name="phoneNumber${i}" value="${teacher.phone}" oninput="formatMalaysianPhone(this)" required>
                                     </div>
                                 </div>
                             </div>
@@ -958,83 +998,78 @@
             
             teacherCount = data.school.teachers.length;
             
-            // Clear existing students
-            const container = document.getElementById('studentsContainer');
-            container.innerHTML = '';
+            // Reset students container
+            const studentsContainer = document.getElementById('studentsContainer');
+            studentsContainer.innerHTML = '';
             
             // Load students
             data.students.forEach((student, index) => {
-                if (index === 0) {
-                    // First student - use existing structure
-                    container.innerHTML = `
-                        <div class="student-entry">
-                            <div class="student-number">Pelajar 1</div>
-                            <div class="form-group">
-                                <div class="form-row">
-                                    <div>
-                                        <label for="studentName1">Nama Pelajar *</label>
-                                        <input type="text" id="studentName1" name="studentName1" style="text-transform: uppercase;" value="${student.name}" required>
-                                    </div>
-                                    <div>
-                                        <label for="icNumber1">Nombor IC *</label>
-                                        <input type="text" id="icNumber1" name="icNumber1" placeholder="123456-78-9012" maxlength="14" oninput="formatIC(this)" value="${student.ic}" required>
-                                    </div>
-                                </div>
+                const i = index + 1;
+                
+                const studentEntry = document.createElement('div');
+                studentEntry.className = 'student-entry';
+                studentEntry.innerHTML = `
+                    <div class="student-number">Pelajar ${i}</div>
+                    ${i > 1 ? '<button type="button" class="remove-student" onclick="removeStudent(this)" title="Buang Pelajar">×</button>' : ''}
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div>
+                                <label for="studentName${i}">Nama Pelajar *</label>
+                                <input type="text" id="studentName${i}" name="studentName${i}" style="text-transform: uppercase;" value="${student.name}" required>
                             </div>
-                            <div class="form-group">
-                                <div class="form-row">
-                                    <div>
-                                        <label for="gender1">Jantina *</label>
-                                        <select id="gender1" name="gender1" onchange="generatePlayerId(1)" required>
-                                            <option value="">Pilih Jantina</option>
-                                            <option value="01" ${student.gender === 'Lelaki' ? 'selected' : ''}>Lelaki</option>
-                                            <option value="02" ${student.gender === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="category1">Kategori *</label>
-                                        <select id="category1" name="category1" required>
-                                            <option value="">Pilih Kategori</option>
-                                            <option value="under-12" ${student.category === 'under-12' ? 'selected' : ''}>Bawah 12 Tahun</option>
-                                            <option value="under-15" ${student.category === 'under-15' ? 'selected' : ''}>Bawah 15 Tahun</option>
-                                            <option value="under-18" ${student.category === 'under-18' ? 'selected' : ''}>Bawah 18 Tahun</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="form-row single">
-                                    <div>
-                                        <label for="playerId1">ID Pemain (Auto-Generated)</label>
-                                        <input type="text" id="playerId1" name="playerId1" value="${student.playerId}" readonly style="background-color: #f3f4f6; color: #6b7280;">
-                                    </div>
-                                </div>
+                            <div>
+                                <label for="icNumber${i}">Nombor IC *</label>
+                                <input type="text" id="icNumber${i}" name="icNumber${i}" placeholder="123456-78-9012" maxlength="14" oninput="formatIC(this)" value="${student.ic}" required>
                             </div>
                         </div>
-                    `;
-                } else {
-                    // Additional students
-                    addStudent();
-                    const currentIndex = index + 1;
-                    document.getElementById(`studentName${currentIndex}`).value = student.name;
-                    document.getElementById(`icNumber${currentIndex}`).value = student.ic;
-                    document.getElementById(`gender${currentIndex}`).value = student.gender === 'Lelaki' ? '01' : '02';
-                    document.getElementById(`category${currentIndex}`).value = student.category;
-                    document.getElementById(`playerId${currentIndex}`).value = student.playerId;
-                }
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div>
+                                <label for="gender${i}">Jantina *</label>
+                                <select id="gender${i}" name="gender${i}" onchange="generatePlayerId(${i})" required>
+                                    <option value="">Pilih Jantina</option>
+                                    <option value="01" ${student.gender === 'Lelaki' ? 'selected' : ''}>Lelaki</option>
+                                    <option value="02" ${student.gender === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="category${i}">Kategori *</label>
+                                <select id="category${i}" name="category${i}" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="under-12" ${student.category === 'under-12' ? 'selected' : ''}>Bawah 12 Tahun</option>
+                                    <option value="under-15" ${student.category === 'under-15' ? 'selected' : ''}>Bawah 15 Tahun</option>
+                                    <option value="under-18" ${student.category === 'under-18' ? 'selected' : ''}>Bawah 18 Tahun</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row single">
+                            <div>
+                                <label for="playerId${i}">ID Pemain (Auto-Generated)</label>
+                                <input type="text" id="playerId${i}" name="playerId${i}" value="${student.playerId}" readonly style="background-color: #f3f4f6; color: #6b7280;">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                studentsContainer.appendChild(studentEntry);
             });
             
             studentCount = data.students.length;
+            updateStudentNumbers();
         }
         
         function resetForm() {
             document.getElementById('registrationForm').reset();
+            
+            // Reset Edit Mode states
             isEditMode = false;
             currentEditId = null;
             document.getElementById('editModeIndicator').style.display = 'none';
             document.getElementById('submitBtn').textContent = 'Daftarkan Pasukan untuk Kejohanan';
             
-            // Reset to minimum teachers (2)
+            // Reset to default structure (1 student, 2 teachers)
             const teachersContainer = document.getElementById('teachersContainer');
             teachersContainer.innerHTML = `
                 <div class="teacher-entry">
@@ -1087,13 +1122,55 @@
                 </div>
             `;
             teacherCount = 2;
+            updateTeacherNumbers();
             
-            // Reset to single student
-            const container = document.getElementById('studentsContainer');
-            const studentEntries = container.querySelectorAll('.student-entry');
-            for (let i = 1; i < studentEntries.length; i++) {
-                studentEntries[i].remove();
-            }
+            const studentsContainer = document.getElementById('studentsContainer');
+            studentsContainer.innerHTML = `
+                <div class="student-entry">
+                    <div class="student-number">Pelajar 1</div>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div>
+                                <label for="studentName1">Nama Pelajar *</label>
+                                <input type="text" id="studentName1" name="studentName1" style="text-transform: uppercase;" required>
+                            </div>
+                            <div>
+                                <label for="icNumber1">Nombor IC *</label>
+                                <input type="text" id="icNumber1" name="icNumber1" placeholder="123456-78-9012" maxlength="14" oninput="formatIC(this)" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div>
+                                <label for="gender1">Jantina *</label>
+                                <select id="gender1" name="gender1" onchange="generatePlayerId(1)" required>
+                                    <option value="">Pilih Jantina</option>
+                                    <option value="01">Lelaki</option>
+                                    <option value="02">Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="category1">Kategori *</label>
+                                <select id="category1" name="category1" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="under-12">Bawah 12 Tahun</option>
+                                    <option value="under-15">Bawah 15 Tahun</option>
+                                    <option value="under-18">Bawah 18 Tahun</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row single">
+                            <div>
+                                <label for="playerId1">ID Pemain (Auto-Generated)</label>
+                                <input type="text" id="playerId1" name="playerId1" readonly style="background-color: #f3f4f6; color: #6b7280;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
             studentCount = 1;
             updateStudentNumbers();
         }
@@ -1257,7 +1334,7 @@
                         JANTINA: student.gender,
                         KATEGORI_UMUR: student.category,
                         KATEGORI_DISPLAY: student.category === 'under-12' ? 'Bawah 12 Tahun' : 
-                                          student.category === 'under-15' ? 'Bawah 15 Tahun' : 'Bawah 18 Tahun',
+                                             student.category === 'under-15' ? 'Bawah 15 Tahun' : 'Bawah 18 Tahun',
                         ID_PEMAIN: student.playerId,
                         GURU_KETUA: registrationData.school.teachers[0].name,
                         TELEFON_GURU: registrationData.school.teachers[0].phone,
@@ -1269,26 +1346,31 @@
                 
                 console.log('📤 Payload being sent:', payload);
                 
-                // Send data to Google Sheets
+                // --- FIX APPLIED HERE: Removed 'mode: no-cors' ---
                 const response = await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
                     method: 'POST',
-                    mode: 'no-cors', // Important for Google Apps Script
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(payload)
                 });
                 
-                console.log('📥 Response received:', response);
-                
-                // Since we're using no-cors mode, we can't read the response
-                // But if no error was thrown, assume success
-                showNotification('✅ Data berjaya dihantar ke Google Sheets!', 'success');
-                console.log('✅ Data successfully sent to Google Sheets');
-                
+                // Check if the GAS deployment is configured to return a successful response (200 OK)
+                if (response.ok || response.status === 200) {
+                     // Since Apps Script typically returns a redirect, checking `response.ok` or `response.status` might not be accurate,
+                     // but if no error is thrown, we assume the data was sent.
+                    showNotification('✅ Data berjaya dihantar ke Google Sheets!', 'success');
+                    console.log('✅ Data successfully sent to Google Sheets');
+                } else {
+                     // For cross-origin requests, a non-OK status is often still hidden by the browser security. 
+                     // This else block is mostly a fallback.
+                     showNotification('⚠️ Ralat jaringan: Data mungkin tidak disimpan di Sheets.', 'error');
+                     console.error('❌ Network error assumed based on status:', response.status);
+                }
+
             } catch (error) {
-                console.error('❌ Error sending to Google Sheets:', error);
-                showNotification('⚠️ Ralat menyimpan ke Google Sheets. Data masih tersimpan secara tempatan.', 'warning');
+                console.error('❌ Fatal Error in sendToGoogleSheets:', error);
+                showNotification('⚠️ Ralat menyimpan ke Google Sheets. Sila semak konsol.', 'error');
                 
                 // Show detailed error for debugging
                 console.error('Error details:', {
@@ -1312,13 +1394,23 @@
                 z-index: 1000;
                 max-width: 300px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                opacity: 0;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                transform: translateX(100%);
                 ${type === 'success' ? 'background: #10b981;' : 
-                  type === 'warning' ? 'background: #f59e0b;' : 
-                  type === 'error' ? 'background: #ef4444;' : 'background: #3b82f6;'}
+                 type === 'warning' ? 'background: #f59e0b;' : 
+                 type === 'error' ? 'background: #ef4444;' : 'background: #3b82f6;'}
             `;
             notification.textContent = message;
             document.body.appendChild(notification);
             
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 50);
+
+            // Animate out and remove
             setTimeout(() => {
                 notification.style.opacity = '0';
                 notification.style.transform = 'translateX(100%)';
@@ -1365,7 +1457,7 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
 ♟️ *"Satukan Pemain, Gilap Bakat, Ukir Kejayaan"*`;
             
             // WhatsApp Web URL with phone number and message
-            const phoneNumber = '60182046224'; // Remove + and spaces
+            const phoneNumber = '60182046224'; // MSSD Catur contact number (must be a valid international format, e.g., 6018...)
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
             
@@ -1419,7 +1511,7 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
             });
             
             // Validation
-            if (!schoolName || teachers.length < 2 || students.length === 0) {
+            if (!schoolName || teachers.length < 1 || students.length === 0) {
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('errorMessage').textContent = '❌ Sila lengkapkan semua maklumat yang diperlukan.';
                 return;
@@ -1448,11 +1540,11 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
                     teachers: teachers
                 },
                 students: students,
-                createdAt: isEditMode ? registrations[currentEditId].createdAt : now,
+                createdAt: isEditMode && registrations[currentEditId] ? registrations[currentEditId].createdAt : now,
                 updatedAt: now
             };
             
-            // Store registration
+            // Store registration (Simulated local storage)
             registrations[registrationId] = registrationData;
             
             // Send to Google Sheets
@@ -1484,8 +1576,13 @@ Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
         
-        // Initialize dashboard on page load
-        updateDashboard();
+        // Initialize dashboard and teacher/student numbering on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDashboard();
+            updateTeacherNumbers();
+            updateStudentNumbers();
+        });
+
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99224acf1389a853',t:'MTc2MTA2NTgyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
