@@ -246,7 +246,12 @@
 
         <div id="dashboard" class="tab-content">
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-orange-600 mb-6">Dashboard Pendaftaran</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-orange-600">Dashboard Pendaftaran</h2>
+                    <button onclick="loadFromGoogleSheets()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                        🔄 Segerak dengan Google Sheets
+                    </button>
+                </div>
                 
                 <!-- Summary Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -368,6 +373,7 @@
         let teacherCount = 2;
         let studentCount = 1;
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymF7bPqtjqUxjhOEiXTSazWvLo-w6vReobw6vJyl6MPXw57DSMxQ0MCvA8jUdtj9ADKA/exec';
+        let isLoadingFromSheets = false;
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -385,6 +391,8 @@
             
             if (tabName === 'dashboard') {
                 updateDashboard();
+                // Auto-sync with Google Sheets when dashboard is opened
+                loadFromGoogleSheets();
             }
         }
 
@@ -674,6 +682,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        action: 'submit',
                         registrationId: regId,
                         schoolName: data.schoolName,
                         teachers: data.teachers,
@@ -683,6 +692,50 @@
                 });
             } catch (error) {
                 console.error('Error sending to Google Sheets:', error);
+            }
+        }
+
+        async function loadFromGoogleSheets() {
+            if (!GOOGLE_SCRIPT_URL || isLoadingFromSheets) {
+                return;
+            }
+            
+            isLoadingFromSheets = true;
+            
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=load`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.registrations) {
+                        // Merge with local data, prioritizing Google Sheets data
+                        const sheetsData = data.registrations;
+                        const localData = JSON.parse(localStorage.getItem('mssdRegistrations') || '{}');
+                        
+                        // Combine both datasets
+                        const mergedData = { ...localData, ...sheetsData };
+                        
+                        // Update local storage
+                        localStorage.setItem('mssdRegistrations', JSON.stringify(mergedData));
+                        registrations = mergedData;
+                        
+                        // Update dashboard if currently viewing it
+                        const currentTab = document.querySelector('.tab-content.active');
+                        if (currentTab && currentTab.id === 'dashboard') {
+                            updateDashboard();
+                        }
+                        
+                        showSyncStatus('✅ Data disegerakkan dengan Google Sheets', 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading from Google Sheets:', error);
+                showSyncStatus('⚠️ Gagal segerak dengan Google Sheets', 'warning');
+            } finally {
+                isLoadingFromSheets = false;
             }
         }
 
@@ -1146,7 +1199,39 @@
             }, 5000);
         }
 
+        function showSyncStatus(message, type) {
+            // Remove existing sync status
+            const existingStatus = document.getElementById('syncStatus');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+            
+            const syncStatus = document.createElement('div');
+            syncStatus.id = 'syncStatus';
+            syncStatus.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-lg z-50 text-sm ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'warning' ? 'bg-yellow-500 text-black' : 'bg-blue-500 text-white'
+            }`;
+            syncStatus.textContent = message;
+            
+            document.body.appendChild(syncStatus);
+            
+            setTimeout(() => {
+                if (syncStatus) {
+                    syncStatus.remove();
+                }
+            }, 3000);
+        }
+
         updateDashboard();
+        
+        // Auto-sync every 30 seconds when dashboard is active
+        setInterval(() => {
+            const currentTab = document.querySelector('.tab-content.active');
+            if (currentTab && currentTab.id === 'dashboard') {
+                loadFromGoogleSheets();
+            }
+        }, 30000);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e5f8c87f6a858',t:'MTc2MTE5MjUwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e758e41b7a858',t:'MTc2MTE5MzQwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
