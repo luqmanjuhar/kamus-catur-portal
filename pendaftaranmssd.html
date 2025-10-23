@@ -112,7 +112,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 font-medium mb-2">Nombor Telefon *</label>
-                                        <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="12">
+                                        <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13">
                                     </div>
                                 </div>
                             </div>
@@ -133,7 +133,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 font-medium mb-2">Nombor Telefon *</label>
-                                        <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="12">
+                                        <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13">
                                     </div>
                                 </div>
                             </div>
@@ -401,7 +401,9 @@
 
         function formatPhoneNumber(phone) {
             phone = phone.replace(/\D/g, '');
-            if (phone.length >= 10) {
+            if (phone.length >= 11) {
+                return phone.substring(0, 3) + '-' + phone.substring(3, 6) + ' ' + phone.substring(6, 11);
+            } else if (phone.length >= 10) {
                 return phone.substring(0, 3) + '-' + phone.substring(3, 6) + ' ' + phone.substring(6, 10);
             }
             return phone;
@@ -521,7 +523,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">Nombor Telefon *</label>
-                        <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="12">
+                        <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13">
                     </div>
                 </div>
             `;
@@ -887,7 +889,7 @@
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Nombor Telefon *</label>
-                            <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="12">
+                            <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13">
                         </div>
                     </div>
                 </div>
@@ -908,7 +910,7 @@
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2">Nombor Telefon *</label>
-                            <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="12">
+                            <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13">
                         </div>
                     </div>
                 </div>
@@ -1146,5 +1148,5 @@
 
         updateDashboard();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e33bcc6f2a858',t:'MTc2MTE5MDcxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e5f8c87f6a858',t:'MTc2MTE5MjUwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
