@@ -76,7 +76,19 @@
                         
                         <div class="mb-4">
                             <label for="schoolName" class="block text-gray-700 font-medium mb-2">Nama Sekolah *</label>
-                            <input type="text" id="schoolName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Contoh: Sekolah Kebangsaan Taman Desa">
+                            <input type="text" id="schoolName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Contoh: SK Taman Desa">
+                            <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-sm text-blue-800">
+                                    <span class="font-semibold">💡 Tips:</span> Anda boleh gunakan singkatan sahaja:
+                                </p>
+                                <div class="text-xs text-blue-700 mt-1 grid grid-cols-2 gap-2">
+                                    <div>• <strong>SK</strong> - Sekolah Kebangsaan</div>
+                                    <div>• <strong>SMK</strong> - Sekolah Menengah Kebangsaan</div>
+                                    <div>• <strong>SJKC</strong> - Sekolah Jenis Kebangsaan (Cina)</div>
+                                    <div>• <strong>SJKT</strong> - Sekolah Jenis Kebangsaan (Tamil)</div>
+                                    <div>• <strong>SMKA</strong> - Sekolah Menengah Kebangsaan Agama</div>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
@@ -209,8 +221,8 @@
                     </div>
                     
                     <div class="mb-6">
-                        <label for="searchPassword" class="block text-gray-700 font-medium mb-2">Kata Laluan (Nombor Telefon Guru Ketua) *</label>
-                        <input type="text" id="searchPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789">
+                        <label for="searchPassword" class="block text-gray-700 font-medium mb-2">Kata Laluan (4 Digit Terakhir No Telefon Guru Ketua) *</label>
+                        <input type="text" id="searchPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="6789" maxlength="4">
                     </div>
                     
                     <button type="submit" class="w-full px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium">
@@ -236,6 +248,7 @@
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-2xl font-bold text-orange-600 mb-6">Dashboard Pendaftaran</h2>
                 
+                <!-- Summary Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="bg-gradient-to-br from-orange-600 to-orange-700 rounded-lg p-6 text-white">
                         <div class="text-3xl font-bold" id="totalRegistrations">0</div>
@@ -258,7 +271,92 @@
                     </div>
                 </div>
 
-                <div id="registrationsList" class="space-y-4">
+                <!-- Tree Diagram -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-8">
+                    <h3 class="text-xl font-bold text-indigo-800 mb-6 text-center">📊 Analisis Pendaftaran Mengikut Kategori</h3>
+                    
+                    <div id="treeDiagram" class="space-y-6">
+                        <!-- Root Level -->
+                        <div class="text-center">
+                            <div class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold text-lg">
+                                <span id="treeTotal">0</span> Sekolah Berdaftar
+                            </div>
+                        </div>
+                        
+                        <!-- Level 1: School Types -->
+                        <div class="flex justify-center">
+                            <div class="w-px h-8 bg-gray-400"></div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Primary Schools -->
+                            <div class="text-center">
+                                <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold mb-4">
+                                    <div class="text-2xl font-bold" id="primarySchools">0</div>
+                                    <div class="text-sm">Sekolah Rendah</div>
+                                    <div class="text-xs opacity-90">(SK, SJKC, SJKT)</div>
+                                </div>
+                                
+                                <!-- Primary Categories -->
+                                <div class="space-y-3">
+                                    <div class="bg-green-100 border border-green-300 rounded-lg p-3">
+                                        <div class="font-semibold text-green-800 mb-2">Bawah 12 Tahun</div>
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div class="bg-blue-200 text-blue-800 px-2 py-1 rounded">
+                                                <span class="font-bold" id="primary12Male">0</span> Lelaki
+                                            </div>
+                                            <div class="bg-pink-200 text-pink-800 px-2 py-1 rounded">
+                                                <span class="font-bold" id="primary12Female">0</span> Perempuan
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Secondary Schools -->
+                            <div class="text-center">
+                                <div class="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold mb-4">
+                                    <div class="text-2xl font-bold" id="secondarySchools">0</div>
+                                    <div class="text-sm">Sekolah Menengah</div>
+                                    <div class="text-xs opacity-90">(SMK, SMKA)</div>
+                                </div>
+                                
+                                <!-- Secondary Categories -->
+                                <div class="space-y-3">
+                                    <div class="bg-purple-100 border border-purple-300 rounded-lg p-3">
+                                        <div class="font-semibold text-purple-800 mb-2">Bawah 15 Tahun</div>
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div class="bg-blue-200 text-blue-800 px-2 py-1 rounded">
+                                                <span class="font-bold" id="secondary15Male">0</span> Lelaki
+                                            </div>
+                                            <div class="bg-pink-200 text-pink-800 px-2 py-1 rounded">
+                                                <span class="font-bold" id="secondary15Female">0</span> Perempuan
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-purple-100 border border-purple-300 rounded-lg p-3">
+                                        <div class="font-semibold text-purple-800 mb-2">Bawah 18 Tahun</div>
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div class="bg-blue-200 text-blue-800 px-2 py-1 rounded">
+                                                <span class="font-bold" id="secondary18Male">0</span> Lelaki
+                                            </div>
+                                            <div class="bg-pink-200 text-pink-800 px-2 py-1 rounded">
+                                                <span class="font-bold" id="secondary18Female">0</span> Perempuan
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed School List -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">📋 Senarai Sekolah Berdaftar</h3>
+                    <div id="registrationsList" class="space-y-4">
+                    </div>
                 </div>
             </div>
         </div>
@@ -293,7 +391,10 @@
         function formatSchoolName(name) {
             name = name.toUpperCase();
             name = name.replace(/SEKOLAH KEBANGSAAN/gi, 'SK');
+            name = name.replace(/SEKOLAH MENENGAH KEBANGSAAN AGAMA/gi, 'SMKA');
             name = name.replace(/SEKOLAH MENENGAH KEBANGSAAN/gi, 'SMK');
+            name = name.replace(/SEKOLAH JENIS KEBANGSAAN \(CINA\)/gi, 'SJKC');
+            name = name.replace(/SEKOLAH JENIS KEBANGSAAN \(TAMIL\)/gi, 'SJKT');
             name = name.replace(/SEKOLAH JENIS KEBANGSAAN/gi, 'SJK');
             return name;
         }
@@ -599,16 +700,28 @@
                 categoryCounts[genderCode + ageCode]++;
             });
             
-            const message = `*PENDAFTARAN BARU MSSD CATUR*%0A%0A` +
-                `🏫 Sekolah: ${data.schoolName}%0A` +
-                `🆔 ID: ${regId}%0A` +
-                `👨‍🏫 Guru Ketua: ${data.teachers[0].name}%0A` +
-                `📱 Telefon: ${data.teachers[0].phone}%0A` +
-                `👥 Jumlah Pelajar: ${data.students.length}%0A%0A` +
-                `*Pecahan Kategori:*%0A` +
-                `L12: ${categoryCounts.L12} | P12: ${categoryCounts.P12}%0A` +
-                `L15: ${categoryCounts.L15} | P15: ${categoryCounts.P15}%0A` +
-                `L18: ${categoryCounts.L18} | P18: ${categoryCounts.P18}`;
+            // Generate category breakdown text
+            const categoryBreakdown = [];
+            if (categoryCounts.L12 > 0) categoryBreakdown.push(`L12 - ${categoryCounts.L12} orang`);
+            if (categoryCounts.P12 > 0) categoryBreakdown.push(`P12 - ${categoryCounts.P12} orang`);
+            if (categoryCounts.L15 > 0) categoryBreakdown.push(`L15 - ${categoryCounts.L15} orang`);
+            if (categoryCounts.P15 > 0) categoryBreakdown.push(`P15 - ${categoryCounts.P15} orang`);
+            if (categoryCounts.L18 > 0) categoryBreakdown.push(`L18 - ${categoryCounts.L18} orang`);
+            if (categoryCounts.P18 > 0) categoryBreakdown.push(`P18 - ${categoryCounts.P18} orang`);
+            
+            const categoryText = categoryBreakdown.join(', ');
+            
+            const message = `📢 *NOTIFIKASI PENDAFTARAN BERJAYA*%0A%0A` +
+                `Assalamualaikum & Salam Sejahtera 👋%0A%0A` +
+                `Saya telah berjaya mendaftar pasukan sekolah untuk *PERTANDINGAN CATUR MSSD MUAR* ✅%0A%0A` +
+                `🏫 Nama Sekolah: ${data.schoolName}%0A` +
+                `🆔 ID Pendaftaran: ${regId}%0A` +
+                `👩‍🏫 Nama Guru (Ketua): ${data.teachers[0].name}%0A` +
+                `📞 No. Telefon Guru: ${data.teachers[0].phone}%0A` +
+                `👥 Jumlah Pelajar: ${data.students.length} orang (${categoryText})%0A%0A` +
+                `Terima kasih atas sokongan dan penyertaan anda.%0A` +
+                `Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.%0A%0A` +
+                `♟ "Satukan Pemain, Gilap Bakat, Ukir Kejayaan"`;
             
             const whatsappUrl = `https://wa.me/60182046224?text=${message}`;
             window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
@@ -669,7 +782,10 @@
             
             const registration = registrations[regId];
             
-            if (registration && registration.teachers[0].phone === password) {
+            const teacherPhone = registration?.teachers[0]?.phone || '';
+            const last4Digits = teacherPhone.replace(/\D/g, '').slice(-4);
+            
+            if (registration && last4Digits === password) {
                 loadRegistrationForEdit(regId, registration);
                 document.getElementById('searchResult').classList.remove('hidden');
                 document.getElementById('searchError').classList.add('hidden');
@@ -687,44 +803,62 @@
             currentEditId = regId;
             document.getElementById('editModeIndicator').classList.add('active');
             
+            // Reset form first
+            resetForm();
+            
+            // Load school name
             document.getElementById('schoolName').value = data.schoolName;
             
+            // Load teachers
             const teachersContainer = document.getElementById('teachersContainer');
-            teachersContainer.innerHTML = '';
-            teacherCount = 0;
+            const existingTeachers = teachersContainer.querySelectorAll('.teacher-entry');
             
+            // Add additional teachers if needed
+            while (existingTeachers.length < data.teachers.length) {
+                addTeacher();
+            }
+            
+            // Fill teacher data
             data.teachers.forEach((teacher, index) => {
-                if (index > 0) {
-                    addTeacher();
-                }
                 const entries = teachersContainer.querySelectorAll('.teacher-entry');
                 const entry = entries[index];
-                entry.querySelector('.teacher-name').value = teacher.name;
-                entry.querySelector('.teacher-email').value = teacher.email;
-                entry.querySelector('.teacher-phone').value = teacher.phone;
+                if (entry) {
+                    entry.querySelector('.teacher-name').value = teacher.name;
+                    entry.querySelector('.teacher-email').value = teacher.email;
+                    entry.querySelector('.teacher-phone').value = teacher.phone;
+                }
             });
             
+            // Load students
             const studentsContainer = document.getElementById('studentsContainer');
-            studentsContainer.innerHTML = '';
-            studentCount = 0;
+            const existingStudents = studentsContainer.querySelectorAll('.student-entry');
             
-            data.students.forEach((student, index) => {
-                if (index === 0) {
-                    addStudent();
-                    studentCount = 0;
-                } else {
-                    addStudent();
+            // Remove existing students except first one
+            existingStudents.forEach((student, index) => {
+                if (index > 0) {
+                    student.remove();
                 }
+            });
+            
+            // Add students as needed
+            while (studentsContainer.querySelectorAll('.student-entry').length < data.students.length) {
+                addStudent();
+            }
+            
+            // Fill student data
+            data.students.forEach((student, index) => {
                 const entries = studentsContainer.querySelectorAll('.student-entry');
                 const entry = entries[index];
-                entry.querySelector('.student-name').value = student.name;
-                entry.querySelector('.student-ic').value = student.ic;
-                entry.querySelector('.student-gender').value = student.gender;
-                entry.querySelector('.student-category').value = student.category;
-                
-                // Generate updated player ID based on current registration ID
-                const updatedPlayerId = generatePlayerId(student.gender, data.schoolName, index, student.category, regId);
-                entry.querySelector('.student-id').value = updatedPlayerId;
+                if (entry) {
+                    entry.querySelector('.student-name').value = student.name;
+                    entry.querySelector('.student-ic').value = student.ic;
+                    entry.querySelector('.student-gender').value = student.gender;
+                    entry.querySelector('.student-category').value = student.category;
+                    
+                    // Generate updated player ID based on current registration ID
+                    const updatedPlayerId = generatePlayerId(student.gender, data.schoolName, index, student.category, regId);
+                    entry.querySelector('.student-id').value = updatedPlayerId;
+                }
             });
         }
 
@@ -836,16 +970,62 @@
             let totalTeachers = 0;
             const schools = new Set();
             
+            // Tree diagram counters
+            let primarySchoolCount = 0;
+            let secondarySchoolCount = 0;
+            let primary12Male = 0, primary12Female = 0;
+            let secondary15Male = 0, secondary15Female = 0;
+            let secondary18Male = 0, secondary18Female = 0;
+            
             Object.values(registrations).forEach(reg => {
                 totalStudents += reg.students.length;
                 totalTeachers += reg.teachers.length;
                 schools.add(reg.schoolName);
+                
+                // Determine school type
+                const schoolName = reg.schoolName.toUpperCase();
+                const isPrimary = schoolName.includes('SK') || schoolName.includes('SJKC') || schoolName.includes('SJKT');
+                const isSecondary = schoolName.includes('SMK') || schoolName.includes('SMKA');
+                
+                if (isPrimary) {
+                    primarySchoolCount++;
+                } else if (isSecondary) {
+                    secondarySchoolCount++;
+                }
+                
+                // Count students by category and gender
+                reg.students.forEach(student => {
+                    const isMale = student.gender === 'Lelaki';
+                    
+                    if (student.category.includes('12')) {
+                        if (isMale) primary12Male++;
+                        else primary12Female++;
+                    } else if (student.category.includes('15')) {
+                        if (isMale) secondary15Male++;
+                        else secondary15Female++;
+                    } else if (student.category.includes('18')) {
+                        if (isMale) secondary18Male++;
+                        else secondary18Female++;
+                    }
+                });
             });
             
+            // Update summary cards
             document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalStudents').textContent = totalStudents;
             document.getElementById('totalSchools').textContent = schools.size;
             document.getElementById('totalTeachers').textContent = totalTeachers;
+            
+            // Update tree diagram
+            document.getElementById('treeTotal').textContent = schools.size;
+            document.getElementById('primarySchools').textContent = primarySchoolCount;
+            document.getElementById('secondarySchools').textContent = secondarySchoolCount;
+            document.getElementById('primary12Male').textContent = primary12Male;
+            document.getElementById('primary12Female').textContent = primary12Female;
+            document.getElementById('secondary15Male').textContent = secondary15Male;
+            document.getElementById('secondary15Female').textContent = secondary15Female;
+            document.getElementById('secondary18Male').textContent = secondary18Male;
+            document.getElementById('secondary18Female').textContent = secondary18Female;
             
             const listContainer = document.getElementById('registrationsList');
             listContainer.innerHTML = '';
@@ -856,70 +1036,98 @@
             }
             
             Object.entries(registrations).forEach(([regId, data]) => {
-                const categoryCounts = {
-                    'Bawah 12 Tahun': 0,
-                    'Bawah 15 Tahun': 0,
-                    'Bawah 18 Tahun': 0
-                };
-                
-                const genderCounts = {
-                    'Lelaki': 0,
-                    'Perempuan': 0
+                // Generate category summary
+                const categorySummary = {
+                    'L12': 0, 'P12': 0,
+                    'L15': 0, 'P15': 0,
+                    'L18': 0, 'P18': 0
                 };
                 
                 data.students.forEach(student => {
-                    categoryCounts[student.category]++;
-                    genderCounts[student.gender]++;
+                    const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
+                    const ageCode = student.category.includes('12') ? '12' : 
+                                   student.category.includes('15') ? '15' : '18';
+                    categorySummary[genderCode + ageCode]++;
                 });
                 
+                const summaryText = Object.entries(categorySummary)
+                    .filter(([key, count]) => count > 0)
+                    .map(([key, count]) => `${key}: ${count}`)
+                    .join(' | ');
+                
+                // Generate teachers list
+                const teachersList = data.teachers.map((teacher, index) => 
+                    `<div class="text-sm ${index === 0 ? 'font-semibold' : ''}">
+                        ${teacher.name} ${index === 0 ? '(Ketua)' : '(Pengiring)'} - ${teacher.phone}
+                    </div>`
+                ).join('');
+                
+                // Generate students list
+                const studentsList = data.students.map(student => {
+                    const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
+                    const ageCode = student.category.includes('12') ? '12' : 
+                                   student.category.includes('15') ? '15' : '18';
+                    return `<div class="text-sm flex justify-between">
+                        <span>${student.name}</span>
+                        <span class="font-medium text-orange-600">${genderCode}${ageCode}</span>
+                    </div>`;
+                }).join('');
+
                 const card = document.createElement('div');
-                card.className = 'bg-gray-50 rounded-lg p-6 border border-gray-200';
+                card.className = 'bg-gray-50 rounded-lg border border-gray-200';
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="text-xl font-bold text-indigo-900">${data.schoolName}</h3>
-                            <p class="text-gray-600 text-sm mt-1">ID: ${regId}</p>
-                            <p class="text-gray-500 text-xs mt-1">Didaftar: ${new Date(data.createdAt).toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' })}</p>
+                    <button onclick="toggleSchoolDetails('${regId}')" class="w-full text-left p-4 hover:bg-gray-100 transition-colors rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-bold text-indigo-900">${data.schoolName}</h3>
+                                <p class="text-gray-600 text-sm mt-1">ID: ${regId} | Pelajar: ${data.students.length}</p>
+                                <p class="text-gray-500 text-xs mt-1">Didaftar: ${new Date(data.createdAt).toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' })}</p>
+                            </div>
+                            <div class="text-gray-400">
+                                <span id="arrow-${regId}">▼</span>
+                            </div>
                         </div>
-                    </div>
+                    </button>
                     
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div class="bg-white rounded p-3">
-                            <div class="text-sm text-gray-600">Guru</div>
-                            <div class="text-2xl font-bold text-indigo-600">${data.teachers.length}</div>
-                        </div>
-                        <div class="bg-white rounded p-3">
-                            <div class="text-sm text-gray-600">Pelajar</div>
-                            <div class="text-2xl font-bold text-green-600">${data.students.length}</div>
-                        </div>
-                        <div class="bg-white rounded p-3">
-                            <div class="text-sm text-gray-600">Lelaki</div>
-                            <div class="text-2xl font-bold text-blue-600">${genderCounts['Lelaki']}</div>
-                        </div>
-                        <div class="bg-white rounded p-3">
-                            <div class="text-sm text-gray-600">Perempuan</div>
-                            <div class="text-2xl font-bold text-pink-600">${genderCounts['Perempuan']}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-white rounded p-3 text-center">
-                            <div class="text-xs text-gray-600">Bawah 12</div>
-                            <div class="text-lg font-bold text-purple-600">${categoryCounts['Bawah 12 Tahun']}</div>
-                        </div>
-                        <div class="bg-white rounded p-3 text-center">
-                            <div class="text-xs text-gray-600">Bawah 15</div>
-                            <div class="text-lg font-bold text-orange-600">${categoryCounts['Bawah 15 Tahun']}</div>
-                        </div>
-                        <div class="bg-white rounded p-3 text-center">
-                            <div class="text-xs text-gray-600">Bawah 18</div>
-                            <div class="text-lg font-bold text-red-600">${categoryCounts['Bawah 18 Tahun']}</div>
+                    <div id="details-${regId}" class="hidden p-4 pt-0">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-700 mb-3 border-b pb-2">👨‍🏫 Senarai Guru</h4>
+                                <div class="space-y-2 mb-4">
+                                    ${teachersList}
+                                </div>
+                                <div class="bg-orange-50 rounded-lg p-3 mt-3">
+                                    <h5 class="font-semibold text-orange-700 text-sm mb-2">Ringkasan Pendaftaran</h5>
+                                    <p class="text-xs text-gray-700">Jumlah Pelajar: <span class="font-bold">${data.students.length}</span></p>
+                                    <p class="text-xs text-gray-700 mt-1">${summaryText}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-700 mb-3 border-b pb-2">👥 Senarai Pelajar</h4>
+                                <div class="space-y-2 max-h-48 overflow-y-auto">
+                                    ${studentsList}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
                 
                 listContainer.appendChild(card);
             });
+        }
+
+        function toggleSchoolDetails(regId) {
+            const detailsDiv = document.getElementById(`details-${regId}`);
+            const arrow = document.getElementById(`arrow-${regId}`);
+            
+            if (detailsDiv.classList.contains('hidden')) {
+                detailsDiv.classList.remove('hidden');
+                arrow.textContent = '▲';
+            } else {
+                detailsDiv.classList.add('hidden');
+                arrow.textContent = '▼';
+            }
         }
 
         function showNotification(message, type) {
@@ -938,5 +1146,5 @@
 
         updateDashboard();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992dfd12737aa858',t:'MTc2MTE4ODQ3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e33bcc6f2a858',t:'MTc2MTE5MDcxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
