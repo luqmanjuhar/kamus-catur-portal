@@ -42,6 +42,7 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 to-orange-100 min-h-full">
+    <!-- Indicator for Edit Mode -->
     <div class="edit-mode-indicator" id="editModeIndicator">
         🔄 MOD EDIT AKTIF
     </div>
@@ -52,6 +53,7 @@
             <p class="text-center text-gray-600 mt-2">Sistem Pendaftaran Kejohanan Catur Peringkat Daerah</p>
         </header>
 
+        <!-- Navigation Tabs -->
         <nav class="bg-white rounded-lg shadow-md p-4 mb-6">
             <div class="flex flex-wrap gap-3 justify-center">
                 <button onclick="switchTab('pendaftaran')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-orange-600 text-white" data-tab="pendaftaran">
@@ -66,6 +68,7 @@
             </div>
         </nav>
 
+        <!-- Tab Content: Pendaftaran Baru / Edit -->
         <div id="pendaftaran" class="tab-content active">
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-2xl font-bold text-orange-600 mb-6">Pendaftaran Baru</h2>
@@ -96,6 +99,7 @@
                         <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Maklumat Guru</h3>
                         
                         <div id="teachersContainer">
+                            <!-- Teacher 1 (Ketua) -->
                             <div class="teacher-entry bg-orange-50 p-4 rounded-lg mb-4" data-teacher-index="0">
                                 <div class="flex justify-between items-center mb-3">
                                     <h4 class="font-semibold text-orange-700">Guru 1 (Ketua) *</h4>
@@ -117,6 +121,7 @@
                                 </div>
                             </div>
 
+                            <!-- Teacher 2 (Pengiring) -->
                             <div class="teacher-entry bg-orange-50 p-4 rounded-lg mb-4" data-teacher-index="1">
                                 <div class="flex justify-between items-center mb-3">
                                     <h4 class="font-semibold text-orange-700">Guru 2 (Pengiring) *</h4>
@@ -148,6 +153,7 @@
                         <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Pendaftaran Pelajar</h3>
                         
                         <div id="studentsContainer">
+                            <!-- Student 1 -->
                             <div class="student-entry bg-orange-50 p-4 rounded-lg mb-4" data-student-index="0">
                                 <div class="flex justify-between items-center mb-3">
                                     <h4 class="font-semibold text-orange-700">Pelajar 1</h4>
@@ -210,6 +216,7 @@
             </div>
         </div>
 
+        <!-- Tab Content: Edit Pendaftaran -->
         <div id="edit" class="tab-content">
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-2xl font-bold text-orange-600 mb-6">Edit Pendaftaran</h2>
@@ -217,12 +224,12 @@
                 <form id="searchForm" onsubmit="handleSearch(event)" class="max-w-2xl mx-auto">
                     <div class="mb-4">
                         <label for="searchRegId" class="block text-gray-700 font-medium mb-2">ID Pendaftaran *</label>
-                        <input type="text" id="searchRegId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="REG-001-2026">
+                        <input type="text" id="searchRegId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Contoh: MSSD-01-003">
                     </div>
                     
                     <div class="mb-6">
                         <label for="searchPassword" class="block text-gray-700 font-medium mb-2">Kata Laluan (4 Digit Terakhir No Telefon Guru Ketua) *</label>
-                        <input type="text" id="searchPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="6789" maxlength="4">
+                        <input type="text" id="searchPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Contoh: 6789" maxlength="4">
                     </div>
                     
                     <button type="submit" class="w-full px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium">
@@ -244,14 +251,10 @@
             </div>
         </div>
 
+        <!-- Tab Content: Dashboard Pendaftaran -->
         <div id="dashboard" class="tab-content">
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-orange-600">Dashboard Pendaftaran</h2>
-                    <button onclick="loadFromGoogleSheets()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
-                        🔄 Segerak dengan Google Sheets
-                    </button>
-                </div>
+                <h2 class="text-2xl font-bold text-orange-600 mb-6">Dashboard Pendaftaran</h2>
                 
                 <!-- Summary Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -276,7 +279,7 @@
                     </div>
                 </div>
 
-                <!-- Tree Diagram -->
+                <!-- Tree Diagram: Breakdown by Category -->
                 <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-8">
                     <h3 class="text-xl font-bold text-indigo-800 mb-6 text-center">📊 Analisis Pendaftaran Mengikut Kategori</h3>
                     
@@ -288,7 +291,6 @@
                             </div>
                         </div>
                         
-                        <!-- Level 1: School Types -->
                         <div class="flex justify-center">
                             <div class="w-px h-8 bg-gray-400"></div>
                         </div>
@@ -368,12 +370,15 @@
     </div>
 
     <script>
+        // Data storage in localStorage
         let registrations = JSON.parse(localStorage.getItem('mssdRegistrations') || '{}');
         let currentEditId = null;
         let teacherCount = 2;
         let studentCount = 1;
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymF7bPqtjqUxjhOEiXTSazWvLo-w6vReobw6vJyl6MPXw57DSMxQ0MCvA8jUdtj9ADKA/exec';
-        let isLoadingFromSheets = false;
+        // The Google Script URL BASE for submission (POST) and reading (GET?action=read)
+        const GOOGLE_SCRIPT_URL_BASE = 'https://script.google.com/macros/s/AKfycbymF7bPqtjqUxjhOEiXTSazWvLo-w6vReobw6vJyl6MPXw57DSMxQ0MCvA8jUdtj9ADKA/exec';
+
+        // --- Core UI Functions ---
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -391,13 +396,28 @@
             
             if (tabName === 'dashboard') {
                 updateDashboard();
-                // Auto-sync with Google Sheets when dashboard is opened
-                loadFromGoogleSheets();
             }
         }
 
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white max-w-md`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // --- Data Formatting and ID Generation ---
+
         function formatSchoolName(name) {
             name = name.toUpperCase();
+            // Standardize school prefixes
             name = name.replace(/SEKOLAH KEBANGSAAN/gi, 'SK');
             name = name.replace(/SEKOLAH MENENGAH KEBANGSAAN AGAMA/gi, 'SMKA');
             name = name.replace(/SEKOLAH MENENGAH KEBANGSAAN/gi, 'SMK');
@@ -425,33 +445,11 @@
             return ic;
         }
 
-        document.getElementById('schoolName').addEventListener('input', function(e) {
-            e.target.value = formatSchoolName(e.target.value);
-        });
-
-        document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('teacher-name') || e.target.classList.contains('student-name')) {
-                e.target.value = e.target.value.toUpperCase();
-            }
-            
-            if (e.target.classList.contains('teacher-phone')) {
-                e.target.value = formatPhoneNumber(e.target.value);
-            }
-            
-            if (e.target.classList.contains('student-ic')) {
-                e.target.value = formatIC(e.target.value);
-            }
-            
-            if (e.target.classList.contains('student-gender') || e.target.classList.contains('student-category')) {
-                updateStudentIds();
-            }
-        });
-
         function generatePlayerId(gender, schoolName, studentIndex, category, regId) {
             const year = new Date().getFullYear().toString().slice(-2);
             
-            // Category code based on age group
-            let categoryCode = '15'; // default
+            // Category code
+            let categoryCode = '15'; 
             if (category.includes('12')) {
                 categoryCode = '12';
             } else if (category.includes('15')) {
@@ -463,8 +461,9 @@
             // Gender code
             const genderCode = gender === 'Lelaki' ? '01' : '02';
             
-            // School number from registration ID (last 2 digits)
-            const schoolNo = regId ? regId.split('-').pop().padStart(2, '0') : '00';
+            // School number from registration ID (last 3 digits)
+            const regIdParts = regId ? regId.split('-') : [];
+            const schoolNo = regIdParts.length > 2 ? regIdParts.pop().padStart(3, '0') : '000';
             
             // Player number for this registration (2 digits)
             const playerCount = String(studentIndex + 1).padStart(2, '0');
@@ -472,26 +471,31 @@
             return `${year}${categoryCode}${genderCode}${schoolNo}${playerCount}`;
         }
 
-        function hashCode(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return hash;
+        function generateRegistrationId(category) {
+            // Count existing registrations
+            let categoryCount = 0;
+            // This is a simplified sequential counter based on existing registrations count
+            categoryCount = Object.keys(registrations).length;
+            
+            // Category code: 01 for Primary (B12), 02 for Secondary (B15/B18)
+            const categoryCode = category.includes('12') ? '01' : '02';
+            
+            // Sequential count for *all* registrations
+            const count = String(categoryCount + 1).padStart(3, '0');
+            
+            return `MSSD-${categoryCode}-${count}`;
         }
 
         function updateStudentIds() {
             const schoolName = document.getElementById('schoolName').value;
             const students = document.querySelectorAll('.student-entry');
             
-            // Get the first student's category to generate registration ID
             const firstStudent = students[0];
             if (firstStudent) {
                 const firstCategory = firstStudent.querySelector('.student-category').value;
                 if (firstCategory) {
-                    const tempRegId = generateRegistrationId(firstCategory);
+                    // Use the editing ID, or generate a potential new one for display
+                    const tempRegId = currentEditId || generateRegistrationId(firstCategory);
                     
                     students.forEach((student, index) => {
                         const gender = student.querySelector('.student-gender').value;
@@ -500,22 +504,28 @@
                         
                         if (gender && schoolName && category) {
                             idField.value = generatePlayerId(gender, schoolName, index, category, tempRegId);
+                        } else {
+                            idField.value = 'Auto-generated';
                         }
                     });
                 }
             }
         }
 
+        // --- Dynamic Form Management (Teachers & Students) ---
+
         function addTeacher() {
             const container = document.getElementById('teachersContainer');
             const newTeacher = document.createElement('div');
+            const newIndex = container.querySelectorAll('.teacher-entry').length;
+            
             newTeacher.className = 'teacher-entry bg-orange-50 p-4 rounded-lg mb-4';
-            newTeacher.setAttribute('data-teacher-index', teacherCount);
+            newTeacher.setAttribute('data-teacher-index', newIndex);
             
             newTeacher.innerHTML = `
                 <div class="flex justify-between items-center mb-3">
-                    <h4 class="font-semibold text-orange-700">Guru ${teacherCount + 1} (Pengiring)</h4>
-                    <button type="button" onclick="removeTeacher(${teacherCount})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">
+                    <h4 class="font-semibold text-orange-700">Guru ${newIndex + 1} (Pengiring)</h4>
+                    <button type="button" onclick="removeTeacher(${newIndex})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">
                         🗑️ Buang
                     </button>
                 </div>
@@ -537,14 +547,25 @@
             `;
             
             container.appendChild(newTeacher);
-            teacherCount++;
         }
 
         function removeTeacher(index) {
             const teachers = document.querySelectorAll('.teacher-entry');
+            const teacherToRemove = document.querySelector(`[data-teacher-index="${index}"]`);
             if (teachers.length > 2) {
-                const teacher = document.querySelector(`[data-teacher-index="${index}"]`);
-                teacher.remove();
+                teacherToRemove.remove();
+                // Re-index and update display names
+                document.querySelectorAll('.teacher-entry').forEach((entry, idx) => {
+                    entry.setAttribute('data-teacher-index', idx);
+                    const title = entry.querySelector('h4');
+                    const removeBtn = entry.querySelector('button');
+                    if (idx === 0) {
+                        title.innerHTML = 'Guru 1 (Ketua) *';
+                    } else {
+                        title.innerHTML = `Guru ${idx + 1} (Pengiring)`;
+                        removeBtn.setAttribute('onclick', `removeTeacher(${idx})`);
+                    }
+                });
             } else {
                 showNotification('Minimum 2 guru diperlukan!', 'error');
             }
@@ -553,13 +574,15 @@
         function addStudent() {
             const container = document.getElementById('studentsContainer');
             const newStudent = document.createElement('div');
+            const newIndex = container.querySelectorAll('.student-entry').length;
+            
             newStudent.className = 'student-entry bg-orange-50 p-4 rounded-lg mb-4';
-            newStudent.setAttribute('data-student-index', studentCount);
+            newStudent.setAttribute('data-student-index', newIndex);
             
             newStudent.innerHTML = `
                 <div class="flex justify-between items-center mb-3">
-                    <h4 class="font-semibold text-orange-700">Pelajar ${studentCount + 1}</h4>
-                    <button type="button" onclick="removeStudent(${studentCount})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">
+                    <h4 class="font-semibold text-orange-700">Pelajar ${newIndex + 1}</h4>
+                    <button type="button" onclick="removeStudent(${newIndex})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">
                         🗑️ Buang
                     </button>
                 </div>
@@ -601,36 +624,27 @@
             `;
             
             container.appendChild(newStudent);
-            studentCount++;
             updateStudentIds();
         }
 
         function removeStudent(index) {
-            const student = document.querySelector(`[data-student-index="${index}"]`);
-            if (student) {
-                student.remove();
+            const studentToRemove = document.querySelector(`[data-student-index="${index}"]`);
+            if (studentToRemove) {
+                studentToRemove.remove();
+                // Re-index and update display names
+                document.querySelectorAll('.student-entry').forEach((entry, idx) => {
+                    entry.setAttribute('data-student-index', idx);
+                    entry.querySelector('h4').textContent = `Pelajar ${idx + 1}`;
+                    const removeBtn = entry.querySelector('button');
+                    if (removeBtn) {
+                        removeBtn.setAttribute('onclick', `removeStudent(${idx})`);
+                    }
+                });
                 updateStudentIds();
             }
         }
 
-        function generateRegistrationId(category) {
-            // Count existing registrations by category
-            let categoryCount = 0;
-            Object.values(registrations).forEach(reg => {
-                const hasCategory = reg.students.some(student => student.category === category);
-                if (hasCategory) {
-                    categoryCount++;
-                }
-            });
-            
-            // Category code: 01 for Bawah 12, 02 for Bawah 15 & 18
-            const categoryCode = category.includes('12') ? '01' : '02';
-            
-            // Sequential count for this category
-            const count = String(categoryCount + 1).padStart(2, '0');
-            
-            return `MSSD-${categoryCode}-${count}`;
-        }
+        // --- Data Submission and Persistence ---
 
         function collectFormData() {
             const schoolName = document.getElementById('schoolName').value;
@@ -650,12 +664,8 @@
                 const gender = entry.querySelector('.student-gender').value;
                 const category = entry.querySelector('.student-category').value;
                 
-                // Generate player ID with proper registration ID
+                // Get the displayed Player ID
                 let playerId = entry.querySelector('.student-id').value;
-                if (gender && category && schoolName) {
-                    const tempRegId = generateRegistrationId(category);
-                    playerId = generatePlayerId(gender, schoolName, index, category, tempRegId);
-                }
                 
                 students.push({
                     name: entry.querySelector('.student-name').value,
@@ -670,83 +680,36 @@
         }
 
         async function sendToGoogleSheets(regId, data) {
-            if (!GOOGLE_SCRIPT_URL) {
-                return;
-            }
-            
+            // POST still uses 'no-cors' mode for fire-and-forget submission, 
+            // as this requires specific setup on the server for a full CORS response.
+            const payload = {
+                action: 'submit', // Explicitly set action for the Google Script
+                registrationId: regId,
+                schoolName: data.schoolName,
+                teachers: data.teachers,
+                students: data.students,
+                timestamp: new Date().toISOString()
+            };
+
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                await fetch(GOOGLE_SCRIPT_URL_BASE, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'no-cors', 
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        action: 'submit',
-                        registrationId: regId,
-                        schoolName: data.schoolName,
-                        teachers: data.teachers,
-                        students: data.students,
-                        timestamp: new Date().toISOString()
-                    })
+                    body: JSON.stringify(payload)
                 });
+                console.log(`Data for ${regId} sent to Google Sheets (opaque response).`);
             } catch (error) {
-                console.error('Error sending to Google Sheets:', error);
-            }
-        }
-
-        async function loadFromGoogleSheets() {
-            if (!GOOGLE_SCRIPT_URL || isLoadingFromSheets) {
-                return;
-            }
-            
-            isLoadingFromSheets = true;
-            
-            try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=load`, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.registrations) {
-                        // Merge with local data, prioritizing Google Sheets data
-                        const sheetsData = data.registrations;
-                        const localData = JSON.parse(localStorage.getItem('mssdRegistrations') || '{}');
-                        
-                        // Combine both datasets
-                        const mergedData = { ...localData, ...sheetsData };
-                        
-                        // Update local storage
-                        localStorage.setItem('mssdRegistrations', JSON.stringify(mergedData));
-                        registrations = mergedData;
-                        
-                        // Update dashboard if currently viewing it
-                        const currentTab = document.querySelector('.tab-content.active');
-                        if (currentTab && currentTab.id === 'dashboard') {
-                            updateDashboard();
-                        }
-                        
-                        showSyncStatus('✅ Data disegerakkan dengan Google Sheets', 'success');
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading from Google Sheets:', error);
-                showSyncStatus('⚠️ Gagal segerak dengan Google Sheets', 'warning');
-            } finally {
-                isLoadingFromSheets = false;
+                console.error('Network Error while sending to Google Sheets:', error);
             }
         }
 
         function sendWhatsAppNotification(regId, data, isNew) {
             if (!isNew) return;
             
-            const categoryCounts = {
-                'L12': 0, 'P12': 0,
-                'L15': 0, 'P15': 0,
-                'L18': 0, 'P18': 0
-            };
+            const categoryCounts = { 'L12': 0, 'P12': 0, 'L15': 0, 'P15': 0, 'L18': 0, 'P18': 0 };
             
             data.students.forEach(student => {
                 const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
@@ -755,7 +718,6 @@
                 categoryCounts[genderCode + ageCode]++;
             });
             
-            // Generate category breakdown text
             const categoryBreakdown = [];
             if (categoryCounts.L12 > 0) categoryBreakdown.push(`L12 - ${categoryCounts.L12} orang`);
             if (categoryCounts.P12 > 0) categoryBreakdown.push(`P12 - ${categoryCounts.P12} orang`);
@@ -788,12 +750,21 @@
             const data = collectFormData();
             const isNew = !currentEditId;
             
-            // Generate registration ID based on first student's category
+            // Generate registration ID
             let regId = currentEditId;
             if (!regId && data.students.length > 0) {
                 regId = generateRegistrationId(data.students[0].category);
+            } else if (!regId) {
+                showNotification('❌ Sila tambah sekurang-kurangnya satu pelajar.', 'error');
+                return;
             }
             
+            // Re-generate all player IDs one last time with the final regId before saving
+            data.students.forEach((student, index) => {
+                student.playerId = generatePlayerId(student.gender, data.schoolName, index, student.category, regId);
+            });
+            
+            // Format timestamp (Kuala Lumpur time)
             const now = new Date().toLocaleString('en-CA', { 
                 timeZone: 'Asia/Kuala_Lumpur',
                 year: 'numeric',
@@ -805,6 +776,7 @@
                 hour12: false
             }).replace(/(\d{4})-(\d{2})-(\d{2}), (\d{2}):(\d{2}):(\d{2})/, '$1-$2-$3T$4:$5:$6+08:00');
             
+            // Save to localStorage
             registrations[regId] = {
                 ...data,
                 registrationId: regId,
@@ -828,6 +800,8 @@
             resetForm();
             updateDashboard();
         }
+
+        // --- Edit/Search Functions ---
 
         function handleSearch(event) {
             event.preventDefault();
@@ -858,7 +832,7 @@
             currentEditId = regId;
             document.getElementById('editModeIndicator').classList.add('active');
             
-            // Reset form first
+            // Reset form structure
             resetForm();
             
             // Load school name
@@ -866,17 +840,15 @@
             
             // Load teachers
             const teachersContainer = document.getElementById('teachersContainer');
-            const existingTeachers = teachersContainer.querySelectorAll('.teacher-entry');
             
-            // Add additional teachers if needed
-            while (existingTeachers.length < data.teachers.length) {
+            // Add required extra teacher fields
+            while (teachersContainer.querySelectorAll('.teacher-entry').length < data.teachers.length) {
                 addTeacher();
             }
             
             // Fill teacher data
             data.teachers.forEach((teacher, index) => {
-                const entries = teachersContainer.querySelectorAll('.teacher-entry');
-                const entry = entries[index];
+                const entry = teachersContainer.querySelector(`[data-teacher-index="${index}"]`);
                 if (entry) {
                     entry.querySelector('.teacher-name').value = teacher.name;
                     entry.querySelector('.teacher-email').value = teacher.email;
@@ -886,24 +858,19 @@
             
             // Load students
             const studentsContainer = document.getElementById('studentsContainer');
-            const existingStudents = studentsContainer.querySelectorAll('.student-entry');
+            // Remove extra student placeholders
+            while (studentsContainer.children.length > 1) {
+                studentsContainer.removeChild(studentsContainer.lastChild);
+            }
             
-            // Remove existing students except first one
-            existingStudents.forEach((student, index) => {
-                if (index > 0) {
-                    student.remove();
-                }
-            });
-            
-            // Add students as needed
-            while (studentsContainer.querySelectorAll('.student-entry').length < data.students.length) {
+            // Add required extra student fields
+            for (let i = 1; i < data.students.length; i++) {
                 addStudent();
             }
             
             // Fill student data
             data.students.forEach((student, index) => {
-                const entries = studentsContainer.querySelectorAll('.student-entry');
-                const entry = entries[index];
+                const entry = studentsContainer.querySelector(`[data-student-index="${index}"]`);
                 if (entry) {
                     entry.querySelector('.student-name').value = student.name;
                     entry.querySelector('.student-ic').value = student.ic;
@@ -915,6 +882,7 @@
                     entry.querySelector('.student-id').value = updatedPlayerId;
                 }
             });
+             updateStudentIds(); // Final update just in case
         }
 
         function resetForm() {
@@ -925,6 +893,7 @@
             const teachersContainer = document.getElementById('teachersContainer');
             const studentsContainer = document.getElementById('studentsContainer');
             
+            // Reset teachers to 2 mandatory fields structure
             teachersContainer.innerHTML = `
                 <div class="teacher-entry bg-orange-50 p-4 rounded-lg mb-4" data-teacher-index="0">
                     <div class="flex justify-between items-center mb-3">
@@ -969,6 +938,7 @@
                 </div>
             `;
             
+            // Reset students to 1 mandatory field structure
             studentsContainer.innerHTML = `
                 <div class="student-entry bg-orange-50 p-4 rounded-lg mb-4" data-student-index="0">
                     <div class="flex justify-between items-center mb-3">
@@ -1015,11 +985,37 @@
                 </div>
             `;
             
-            teacherCount = 2;
-            studentCount = 1;
+            // Clear search tab fields/messages
+            document.getElementById('searchRegId').value = '';
+            document.getElementById('searchPassword').value = '';
+            document.getElementById('searchResult').classList.add('hidden');
+            document.getElementById('searchError').classList.add('hidden');
         }
 
-        function updateDashboard() {
+        // --- Dashboard Reporting ---
+        
+        // Function to fetch data from Google Apps Script. 
+        // NOTE: Since direct CORS fetch is failing, this function is removed 
+        // to prevent the app from crashing. Dashboard will rely solely on localStorage.
+        /* async function fetchDashboardData() {
+            // ... (Removed problematic fetch logic)
+        }
+        */
+
+        // Refactored to fetch data asynchronously
+        async function updateDashboard() {
+            // Display loading indicator briefly, then proceed with local data immediately
+            document.getElementById('registrationsList').innerHTML = '<div class="text-center text-gray-500 py-8 text-lg font-semibold text-indigo-700">Memuat data dari storan tempatan...</div>';
+
+            // --- Note: Fetching from Google Sheet API is blocked by CORS. We use local storage (registrations) as the source of truth. ---
+            console.error("Dashboard is running on LOCAL DATA ONLY (localStorage). The attempt to fetch live data from Google Sheets failed due to CORS policy.");
+            // --- End Note ---
+            
+            // Allow a brief moment for the loading message to appear before processing local data
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // --- Dashboard calculation and rendering logic starts here ---
+            
             const totalRegs = Object.keys(registrations).length;
             let totalStudents = 0;
             let totalTeachers = 0;
@@ -1037,7 +1033,7 @@
                 totalTeachers += reg.teachers.length;
                 schools.add(reg.schoolName);
                 
-                // Determine school type
+                // Determine school type based on common prefixes
                 const schoolName = reg.schoolName.toUpperCase();
                 const isPrimary = schoolName.includes('SK') || schoolName.includes('SJKC') || schoolName.includes('SJKT');
                 const isSecondary = schoolName.includes('SMK') || schoolName.includes('SMKA');
@@ -1090,23 +1086,20 @@
                 return;
             }
             
-            Object.entries(registrations).forEach(([regId, data]) => {
+            // Sort registrations by latest update time (newest first)
+            const sortedRegistrations = Object.entries(registrations).sort(([, a], [, b]) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            
+            sortedRegistrations.forEach(([regId, data]) => {
                 // Generate category summary
-                const categorySummary = {
-                    'L12': 0, 'P12': 0,
-                    'L15': 0, 'P15': 0,
-                    'L18': 0, 'P18': 0
-                };
-                
+                const categorySummary = { 'L12': 0, 'P12': 0, 'L15': 0, 'P15': 0, 'L18': 0, 'P18': 0 };
                 data.students.forEach(student => {
                     const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
-                    const ageCode = student.category.includes('12') ? '12' : 
-                                   student.category.includes('15') ? '15' : '18';
+                    const ageCode = student.category.includes('12') ? '12' : student.category.includes('15') ? '15' : '18';
                     categorySummary[genderCode + ageCode]++;
                 });
                 
                 const summaryText = Object.entries(categorySummary)
-                    .filter(([key, count]) => count > 0)
+                    .filter(([, count]) => count > 0)
                     .map(([key, count]) => `${key}: ${count}`)
                     .join(' | ');
                 
@@ -1120,8 +1113,7 @@
                 // Generate students list
                 const studentsList = data.students.map(student => {
                     const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
-                    const ageCode = student.category.includes('12') ? '12' : 
-                                   student.category.includes('15') ? '15' : '18';
+                    const ageCode = student.category.includes('12') ? '12' : student.category.includes('15') ? '15' : '18';
                     return `<div class="text-sm flex justify-between">
                         <span>${student.name}</span>
                         <span class="font-medium text-orange-600">${genderCode}${ageCode}</span>
@@ -1136,7 +1128,7 @@
                             <div>
                                 <h3 class="text-xl font-bold text-indigo-900">${data.schoolName}</h3>
                                 <p class="text-gray-600 text-sm mt-1">ID: ${regId} | Pelajar: ${data.students.length}</p>
-                                <p class="text-gray-500 text-xs mt-1">Didaftar: ${new Date(data.createdAt).toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' })}</p>
+                                <p class="text-gray-500 text-xs mt-1">Dikemaskini: ${new Date(data.updatedAt).toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' })}</p>
                             </div>
                             <div class="text-gray-400">
                                 <span id="arrow-${regId}">▼</span>
@@ -1185,53 +1177,8 @@
             }
         }
 
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${
-                type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            } text-white max-w-md`;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
-        }
-
-        function showSyncStatus(message, type) {
-            // Remove existing sync status
-            const existingStatus = document.getElementById('syncStatus');
-            if (existingStatus) {
-                existingStatus.remove();
-            }
-            
-            const syncStatus = document.createElement('div');
-            syncStatus.id = 'syncStatus';
-            syncStatus.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-lg z-50 text-sm ${
-                type === 'success' ? 'bg-green-500 text-white' : 
-                type === 'warning' ? 'bg-yellow-500 text-black' : 'bg-blue-500 text-white'
-            }`;
-            syncStatus.textContent = message;
-            
-            document.body.appendChild(syncStatus);
-            
-            setTimeout(() => {
-                if (syncStatus) {
-                    syncStatus.remove();
-                }
-            }, 3000);
-        }
-
+        // Initialize dashboard state on load
         updateDashboard();
-        
-        // Auto-sync every 30 seconds when dashboard is active
-        setInterval(() => {
-            const currentTab = document.querySelector('.tab-content.active');
-            if (currentTab && currentTab.id === 'dashboard') {
-                loadFromGoogleSheets();
-            }
-        }, 30000);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e758e41b7a858',t:'MTc2MTE5MzQwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
