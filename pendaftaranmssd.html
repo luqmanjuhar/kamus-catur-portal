@@ -246,7 +246,17 @@
 
         <div id="dashboard" class="tab-content">
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-orange-600 mb-6">Dashboard Pendaftaran</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-orange-600">Dashboard Pendaftaran</h2>
+                    <div class="flex gap-2">
+                        <button onclick="showGoogleSheetsChecklist()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm">
+                            🔧 Setup Checklist
+                        </button>
+                        <button onclick="loadFromGoogleSheets()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                            🔄 Segerak dengan Google Sheets
+                        </button>
+                    </div>
+                </div>
                 
                 <!-- Summary Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -262,7 +272,7 @@
                     
                     <div class="bg-gradient-to-br from-yellow-600 to-yellow-700 rounded-lg p-6 text-white">
                         <div class="text-3xl font-bold" id="totalSchools">0</div>
-                        <div class="text-yellow-100 mt-2">Jumlah Sekolah</div>
+                        <div class="text-yellow-100 mt-2">Jumlah Sekolah Layak</div>
                     </div>
                     
                     <div class="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6 text-white">
@@ -279,7 +289,10 @@
                         <!-- Root Level -->
                         <div class="text-center">
                             <div class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold text-lg">
-                                <span id="treeTotal">0</span> Sekolah Berdaftar
+                                <span id="treeTotal">0</span> Sekolah Layak Berdaftar
+                            </div>
+                            <div class="text-xs text-gray-600 mt-2">
+                                *Sekolah Rendah (U12) & Sekolah Menengah (U15/U18)
                             </div>
                         </div>
                         
@@ -294,7 +307,7 @@
                                 <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold mb-4">
                                     <div class="text-2xl font-bold" id="primarySchools">0</div>
                                     <div class="text-sm">Sekolah Rendah</div>
-                                    <div class="text-xs opacity-90">(SK, SJKC, SJKT)</div>
+                                    <div class="text-xs opacity-90">(SK, SJKC, SJKT dengan U12)</div>
                                 </div>
                                 
                                 <!-- Primary Categories -->
@@ -318,7 +331,7 @@
                                 <div class="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold mb-4">
                                     <div class="text-2xl font-bold" id="secondarySchools">0</div>
                                     <div class="text-sm">Sekolah Menengah</div>
-                                    <div class="text-xs opacity-90">(SMK, SMKA)</div>
+                                    <div class="text-xs opacity-90">(SMK, SMKA dengan U15/U18)</div>
                                 </div>
                                 
                                 <!-- Secondary Categories -->
@@ -362,12 +375,120 @@
         </div>
     </div>
 
+    <!-- Google Sheets Setup Modal -->
+    <div id="setupModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-purple-600">🔧 Google Sheets Setup Checklist</h2>
+                    <button onclick="closeSetupModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Current Configuration -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">📋 Current Configuration</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Google Apps Script URL:</span>
+                                <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded" id="currentScriptUrl">Loading...</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Connection Status:</span>
+                                <span id="connectionStatus" class="px-2 py-1 rounded text-xs">Testing...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step-by-Step Setup -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-green-800 mb-4">✅ Setup Steps</h3>
+                        
+                        <div class="space-y-4">
+                            <!-- Step 1 -->
+                            <div class="border-l-4 border-green-500 pl-4">
+                                <h4 class="font-semibold text-green-700">Step 1: Create Google Spreadsheet</h4>
+                                <p class="text-sm text-gray-700 mt-1">Create a new Google Spreadsheet with these exact sheet names:</p>
+                                <ul class="text-xs text-gray-600 mt-2 ml-4 list-disc">
+                                    <li><code>GURU</code> - Teacher information</li>
+                                    <li><code>SEKOLAH</code> - School registration data</li>
+                                    <li><code>PELAJAR</code> - Student information</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <input type="text" id="spreadsheetId" placeholder="Paste your Spreadsheet ID here" class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                                    <p class="text-xs text-gray-500 mt-1">Get this from your spreadsheet URL: docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="border-l-4 border-yellow-500 pl-4">
+                                <h4 class="font-semibold text-yellow-700">Step 2: Create Google Apps Script</h4>
+                                <p class="text-sm text-gray-700 mt-1">Go to <a href="https://script.google.com" target="_blank" class="text-blue-600 underline">script.google.com</a> and create a new project</p>
+                                <div class="bg-gray-100 p-3 rounded mt-2 text-xs font-mono overflow-x-auto">
+                                    <div class="mb-2 font-bold">Copy this code to your Apps Script:</div>
+                                    <pre id="appsScriptCode">Loading script template...</pre>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="border-l-4 border-blue-500 pl-4">
+                                <h4 class="font-semibold text-blue-700">Step 3: Deploy as Web App</h4>
+                                <ol class="text-sm text-gray-700 mt-1 ml-4 list-decimal space-y-1">
+                                    <li>Click "Deploy" → "New deployment"</li>
+                                    <li>Choose type: "Web app"</li>
+                                    <li>Execute as: "Me"</li>
+                                    <li>Who has access: "Anyone"</li>
+                                    <li>Click "Deploy" and copy the Web App URL</li>
+                                </ol>
+                                <div class="mt-2">
+                                    <input type="text" id="webAppUrl" placeholder="Paste your Web App URL here" class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="border-l-4 border-purple-500 pl-4">
+                                <h4 class="font-semibold text-purple-700">Step 4: Test Connection</h4>
+                                <p class="text-sm text-gray-700 mt-1">Click the button below to test your setup:</p>
+                                <button onclick="testGoogleSheetsConnection()" class="mt-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                                    🧪 Test Connection
+                                </button>
+                                <div id="testResult" class="mt-2 text-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Troubleshooting -->
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-red-800 mb-3">🚨 Common Issues</h3>
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <div><strong>CORS Error:</strong> Make sure your Apps Script is deployed as "Anyone" can access</div>
+                            <div><strong>404 Error:</strong> Check your Web App URL is correct and deployment is active</div>
+                            <div><strong>Permission Error:</strong> Ensure the script has permission to access your spreadsheet</div>
+                            <div><strong>Timeout:</strong> Your script might be taking too long - check for infinite loops</div>
+                        </div>
+                    </div>
+
+                    <!-- Save Configuration -->
+                    <div class="flex justify-end gap-3">
+                        <button onclick="closeSetupModal()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                            Cancel
+                        </button>
+                        <button onclick="saveGoogleSheetsConfig()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            💾 Save Configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let registrations = JSON.parse(localStorage.getItem('mssdRegistrations') || '{}');
+        let registrations = {};
         let currentEditId = null;
         let teacherCount = 2;
         let studentCount = 1;
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymF7bPqtjqUxjhOEiXTSazWvLo-w6vReobw6vJyl6MPXw57DSMxQ0MCvA8jUdtj9ADKA/exec';
+        let isLoadingFromSheets = false;
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -385,6 +506,8 @@
             
             if (tabName === 'dashboard') {
                 updateDashboard();
+                // Auto-sync with Google Sheets when dashboard is opened
+                loadFromGoogleSheets();
             }
         }
 
@@ -674,6 +797,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        action: currentEditId ? 'update' : 'submit',
                         registrationId: regId,
                         schoolName: data.schoolName,
                         teachers: data.teachers,
@@ -683,6 +807,156 @@
                 });
             } catch (error) {
                 console.error('Error sending to Google Sheets:', error);
+            }
+        }
+
+        async function loadFromGoogleSheets() {
+            if (!GOOGLE_SCRIPT_URL || isLoadingFromSheets) {
+                console.log('Sync skipped - already loading or no URL');
+                return;
+            }
+            
+            console.log('🔄 Starting Google Sheets sync...');
+            isLoadingFromSheets = true;
+            showSyncStatus('🔄 Menyegerak dengan Google Sheets...', 'info');
+            
+            try {
+                // Use JSONP approach for no-cors requests
+                const callbackName = 'googleSheetsCallback_' + Date.now();
+                console.log('📡 Creating JSONP request with callback:', callbackName);
+                
+                // Create a promise that resolves when callback is called
+                const dataPromise = new Promise((resolve, reject) => {
+                    // Set up callback function
+                    window[callbackName] = function(data) {
+                        console.log('📥 Received data from Google Sheets:', data);
+                        resolve(data);
+                        // Clean up
+                        delete window[callbackName];
+                        if (script.parentNode) {
+                            document.head.removeChild(script);
+                        }
+                    };
+                    
+                    // Create script element for JSONP
+                    const script = document.createElement('script');
+                    const requestUrl = `${GOOGLE_SCRIPT_URL}?action=load&callback=${callbackName}`;
+                    console.log('🌐 Request URL:', requestUrl);
+                    script.src = requestUrl;
+                    
+                    script.onerror = (error) => {
+                        console.error('❌ Script loading failed:', error);
+                        reject(new Error('Failed to load script'));
+                        delete window[callbackName];
+                        if (script.parentNode) {
+                            document.head.removeChild(script);
+                        }
+                    };
+                    
+                    script.onload = () => {
+                        console.log('✅ Script loaded successfully');
+                    };
+                    
+                    document.head.appendChild(script);
+                    
+                    // Timeout after 15 seconds (increased from 10)
+                    setTimeout(() => {
+                        if (window[callbackName]) {
+                            console.log('⏰ Request timeout after 15 seconds');
+                            reject(new Error('Request timeout'));
+                            delete window[callbackName];
+                            if (script.parentNode) {
+                                document.head.removeChild(script);
+                            }
+                        }
+                    }, 15000);
+                });
+                
+                const data = await dataPromise;
+                console.log('📊 Processing received data...');
+                
+                if (data && typeof data === 'object') {
+                    if (data.error) {
+                        console.error('❌ Server returned error:', data.error);
+                        showSyncStatus('❌ Ralat dari server: ' + data.error, 'error');
+                        return;
+                    }
+                    
+                    if (data.registrations && typeof data.registrations === 'object') {
+                        console.log('✅ Valid registrations data received:', Object.keys(data.registrations).length, 'entries');
+                        
+                        // Replace local data with Google Sheets data (no local storage)
+                        registrations = data.registrations;
+                        
+                        // Force update dashboard
+                        updateDashboard();
+                        
+                        const sheetsCount = Object.keys(data.registrations).length;
+                        showSyncStatus(`✅ Segerak berjaya! ${sheetsCount} pendaftaran dimuat`, 'success');
+                    } else {
+                        console.log('ℹ️ No registrations data in response');
+                        showSyncStatus('ℹ️ Tiada data pendaftaran dari server', 'info');
+                    }
+                } else {
+                    console.log('⚠️ Invalid or empty response from server');
+                    showSyncStatus('⚠️ Respons tidak sah dari server', 'warning');
+                }
+            } catch (error) {
+                console.error('❌ Sync error:', error);
+                showSyncStatus('❌ Gagal segerak: ' + error.message, 'error');
+            } finally {
+                isLoadingFromSheets = false;
+                console.log('🏁 Sync process completed');
+            }
+        }
+
+        async function searchRegistrationOnline(regId, password) {
+            if (!GOOGLE_SCRIPT_URL) {
+                return { found: false, error: 'No Google Sheets URL configured' };
+            }
+            
+            try {
+                const callbackName = 'searchCallback_' + Date.now();
+                
+                const dataPromise = new Promise((resolve, reject) => {
+                    window[callbackName] = function(data) {
+                        resolve(data);
+                        delete window[callbackName];
+                        if (script.parentNode) {
+                            document.head.removeChild(script);
+                        }
+                    };
+                    
+                    const script = document.createElement('script');
+                    const requestUrl = `${GOOGLE_SCRIPT_URL}?action=search&regId=${encodeURIComponent(regId)}&password=${encodeURIComponent(password)}&callback=${callbackName}`;
+                    script.src = requestUrl;
+                    
+                    script.onerror = (error) => {
+                        reject(new Error('Failed to load script'));
+                        delete window[callbackName];
+                        if (script.parentNode) {
+                            document.head.removeChild(script);
+                        }
+                    };
+                    
+                    document.head.appendChild(script);
+                    
+                    setTimeout(() => {
+                        if (window[callbackName]) {
+                            reject(new Error('Request timeout'));
+                            delete window[callbackName];
+                            if (script.parentNode) {
+                                document.head.removeChild(script);
+                            }
+                        }
+                    }, 10000);
+                });
+                
+                return await dataPromise;
+                
+            } catch (error) {
+                console.error('Error searching registration:', error);
+                return { found: false, error: error.message };
             }
         }
 
@@ -741,26 +1015,6 @@
                 regId = generateRegistrationId(data.students[0].category);
             }
             
-            const now = new Date().toLocaleString('en-CA', { 
-                timeZone: 'Asia/Kuala_Lumpur',
-                year: 'numeric',
-                month: '2-digit', 
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            }).replace(/(\d{4})-(\d{2})-(\d{2}), (\d{2}):(\d{2}):(\d{2})/, '$1-$2-$3T$4:$5:$6+08:00');
-            
-            registrations[regId] = {
-                ...data,
-                registrationId: regId,
-                createdAt: registrations[regId]?.createdAt || now,
-                updatedAt: now
-            };
-            
-            localStorage.setItem('mssdRegistrations', JSON.stringify(registrations));
-            
             sendToGoogleSheets(regId, data);
             
             showNotification(
@@ -773,24 +1027,28 @@
             sendWhatsAppNotification(regId, data, isNew);
             
             resetForm();
-            updateDashboard();
+            
+            // Refresh data from Google Sheets
+            setTimeout(() => {
+                loadFromGoogleSheets();
+            }, 2000);
         }
 
-        function handleSearch(event) {
+        async function handleSearch(event) {
             event.preventDefault();
             
             const regId = document.getElementById('searchRegId').value;
             const password = document.getElementById('searchPassword').value;
             
-            const registration = registrations[regId];
+            showSyncStatus('🔍 Mencari pendaftaran...', 'info');
             
-            const teacherPhone = registration?.teachers[0]?.phone || '';
-            const last4Digits = teacherPhone.replace(/\D/g, '').slice(-4);
+            const result = await searchRegistrationOnline(regId, password);
             
-            if (registration && last4Digits === password) {
-                loadRegistrationForEdit(regId, registration);
+            if (result.found && result.registration) {
+                loadRegistrationForEdit(regId, result.registration);
                 document.getElementById('searchResult').classList.remove('hidden');
                 document.getElementById('searchError').classList.add('hidden');
+                showSyncStatus('✅ Pendaftaran dijumpai!', 'success');
                 
                 setTimeout(() => {
                     switchTab('pendaftaran');
@@ -798,6 +1056,7 @@
             } else {
                 document.getElementById('searchResult').classList.add('hidden');
                 document.getElementById('searchError').classList.remove('hidden');
+                showSyncStatus('❌ Pendaftaran tidak dijumpai', 'error');
             }
         }
 
@@ -857,9 +1116,9 @@
                     entry.querySelector('.student-gender').value = student.gender;
                     entry.querySelector('.student-category').value = student.category;
                     
-                    // Generate updated player ID based on current registration ID
-                    const updatedPlayerId = generatePlayerId(student.gender, data.schoolName, index, student.category, regId);
-                    entry.querySelector('.student-id').value = updatedPlayerId;
+                    // Use existing player ID or generate new one
+                    const playerId = student.playerId || generatePlayerId(student.gender, data.schoolName, index, student.category, regId);
+                    entry.querySelector('.student-id').value = playerId;
                 }
             });
         }
@@ -970,7 +1229,11 @@
             const totalRegs = Object.keys(registrations).length;
             let totalStudents = 0;
             let totalTeachers = 0;
-            const schools = new Set();
+            
+            // Track schools by their valid categories
+            const primarySchools = new Set(); // Schools with U12 students
+            const secondarySchools = new Set(); // Schools with U15/U18 students
+            const allSchools = new Set(); // All registered schools
             
             // Tree diagram counters
             let primarySchoolCount = 0;
@@ -982,44 +1245,63 @@
             Object.values(registrations).forEach(reg => {
                 totalStudents += reg.students.length;
                 totalTeachers += reg.teachers.length;
-                schools.add(reg.schoolName);
+                allSchools.add(reg.schoolName);
                 
-                // Determine school type
+                // Determine school type based on name
                 const schoolName = reg.schoolName.toUpperCase();
-                const isPrimary = schoolName.includes('SK') || schoolName.includes('SJKC') || schoolName.includes('SJKT');
-                const isSecondary = schoolName.includes('SMK') || schoolName.includes('SMKA');
+                const isPrimarySchool = schoolName.includes('SK') || schoolName.includes('SJKC') || schoolName.includes('SJKT');
+                const isSecondarySchool = schoolName.includes('SMK') || schoolName.includes('SMKA');
                 
-                if (isPrimary) {
-                    primarySchoolCount++;
-                } else if (isSecondary) {
-                    secondarySchoolCount++;
-                }
+                // Check what categories this school has registered
+                let hasU12 = false;
+                let hasU15 = false;
+                let hasU18 = false;
                 
                 // Count students by category and gender
                 reg.students.forEach(student => {
                     const isMale = student.gender === 'Lelaki';
                     
                     if (student.category.includes('12')) {
+                        hasU12 = true;
                         if (isMale) primary12Male++;
                         else primary12Female++;
                     } else if (student.category.includes('15')) {
+                        hasU15 = true;
                         if (isMale) secondary15Male++;
                         else secondary15Female++;
                     } else if (student.category.includes('18')) {
+                        hasU18 = true;
                         if (isMale) secondary18Male++;
                         else secondary18Female++;
                     }
                 });
+                
+                // Count schools based on categories they register for
+                // Primary schools (RENDAH) - any school that registers U12 students
+                if (hasU12) {
+                    primarySchools.add(reg.schoolName);
+                }
+                
+                // Secondary schools (MENENGAH) - any school that registers U15 or U18 students
+                if (hasU15 || hasU18) {
+                    secondarySchools.add(reg.schoolName);
+                }
             });
+            
+            primarySchoolCount = primarySchools.size;
+            secondarySchoolCount = secondarySchools.size;
+            
+            // Calculate total valid schools (primary with U12 + secondary with U15/U18)
+            const totalValidSchools = primarySchoolCount + secondarySchoolCount;
             
             // Update summary cards
             document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalStudents').textContent = totalStudents;
-            document.getElementById('totalSchools').textContent = schools.size;
+            document.getElementById('totalSchools').textContent = totalValidSchools;
             document.getElementById('totalTeachers').textContent = totalTeachers;
             
             // Update tree diagram
-            document.getElementById('treeTotal').textContent = schools.size;
+            document.getElementById('treeTotal').textContent = totalValidSchools;
             document.getElementById('primarySchools').textContent = primarySchoolCount;
             document.getElementById('secondarySchools').textContent = secondarySchoolCount;
             document.getElementById('primary12Male').textContent = primary12Male;
@@ -1146,7 +1428,490 @@
             }, 5000);
         }
 
-        updateDashboard();
+        function showSyncStatus(message, type) {
+            // Remove existing sync status
+            const existingStatus = document.getElementById('syncStatus');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+            
+            const syncStatus = document.createElement('div');
+            syncStatus.id = 'syncStatus';
+            syncStatus.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-lg z-50 text-sm max-w-xs ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'warning' ? 'bg-yellow-500 text-black' : 
+                type === 'error' ? 'bg-red-500 text-white' :
+                type === 'info' ? 'bg-blue-500 text-white' : 'bg-gray-500 text-white'
+            }`;
+            syncStatus.textContent = message;
+            
+            document.body.appendChild(syncStatus);
+            
+            // Keep loading messages longer, others shorter
+            const timeout = type === 'info' ? 5000 : 3000;
+            setTimeout(() => {
+                if (syncStatus && syncStatus.parentNode) {
+                    syncStatus.remove();
+                }
+            }, timeout);
+        }
+
+        // Load data on page load
+        loadFromGoogleSheets();
+        
+        // Auto-sync every 30 seconds when dashboard is active
+        setInterval(() => {
+            const currentTab = document.querySelector('.tab-content.active');
+            if (currentTab && currentTab.id === 'dashboard') {
+                loadFromGoogleSheets();
+            }
+        }, 30000);
+
+        // Google Sheets Setup Functions
+        function showGoogleSheetsChecklist() {
+            document.getElementById('setupModal').classList.remove('hidden');
+            
+            // Show current configuration
+            document.getElementById('currentScriptUrl').textContent = GOOGLE_SCRIPT_URL || 'Not configured';
+            
+            // Load saved configuration
+            const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
+            const savedWebAppUrl = localStorage.getItem('webAppUrl');
+            
+            if (savedSpreadsheetId) {
+                document.getElementById('spreadsheetId').value = savedSpreadsheetId;
+            }
+            if (savedWebAppUrl) {
+                document.getElementById('webAppUrl').value = savedWebAppUrl;
+            }
+            
+            // Generate Apps Script code template
+            generateAppsScriptTemplate();
+            
+            // Test current connection
+            testCurrentConnection();
+        }
+
+        function closeSetupModal() {
+            document.getElementById('setupModal').classList.add('hidden');
+        }
+
+        function generateAppsScriptTemplate() {
+            const spreadsheetId = document.getElementById('spreadsheetId').value || '1FJnBiWM5cuH0a1Yw0CxAR9zy_LiD1lVtQg9ijXRrPS4';
+            
+            const scriptTemplate = `// MSSD Catur Registration System - Google Apps Script
+// Your spreadsheet ID is already configured below
+
+const SPREADSHEET_ID = '${spreadsheetId}';
+
+function doGet(e) {
+  try {
+    const action = e.parameter.action;
+    const callback = e.parameter.callback;
+    
+    let result = {};
+    
+    if (action === 'load') {
+      result = loadRegistrations();
+    } else if (action === 'search') {
+      const regId = e.parameter.regId;
+      const password = e.parameter.password;
+      result = searchRegistration(regId, password);
+    }
+    
+    // JSONP response
+    if (callback) {
+      return ContentService
+        .createTextOutput(callback + '(' + JSON.stringify(result) + ')')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    const errorResult = { error: error.toString() };
+    const callback = e.parameter.callback;
+    
+    if (callback) {
+      return ContentService
+        .createTextOutput(callback + '(' + JSON.stringify(errorResult) + ')')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    
+    return ContentService
+      .createTextOutput(JSON.stringify(errorResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const action = data.action;
+    
+    if (action === 'submit' || action === 'update') {
+      return saveRegistration(data);
+    }
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: 'Unknown action' }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function loadRegistrations() {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    
+    // Create sheets if they don't exist
+    let teacherSheet = ss.getSheetByName('GURU');
+    if (!teacherSheet) {
+      teacherSheet = ss.insertSheet('GURU');
+      teacherSheet.getRange(1, 1, 1, 10).setValues([['ID PENDAFTARAN', 'NAMA SEKOLAH', 'NAMA GURU', 'EMAIL GURU', 'TELEFON GURU', 'JAWATAN GURU', 'URUTAN GURU', 'TARIKH DAFTAR', 'TARIKH KEMASKINI', 'STATUS']]);
+    }
+    
+    let schoolSheet = ss.getSheetByName('SEKOLAH');
+    if (!schoolSheet) {
+      schoolSheet = ss.insertSheet('SEKOLAH');
+      schoolSheet.getRange(1, 1, 1, 13).setValues([['ID PENDAFTARAN', 'NAMA SEKOLAH', 'JENIS SEKOLAH', 'JUMLAH GURU', 'JUMLAH PELAJAR', 'JUMLAH LELAKI', 'JUMLAH PEREMPUAN', 'JUMLAH U12', 'JUMLAH U15', 'JUMLAH U18', 'TARIKH DAFTAR', 'TARIKH KEMASKINI', 'STATUS']]);
+    }
+    
+    let studentSheet = ss.getSheetByName('PELAJAR');
+    if (!studentSheet) {
+      studentSheet = ss.insertSheet('PELAJAR');
+      studentSheet.getRange(1, 1, 1, 13).setValues([['ID PENDAFTARAN', 'NAMA SEKOLAH', 'NAMA PELAJAR', 'NO IC', 'JANTINA', 'KATEGORI UMUR', 'KATEGORI DISPLAY', 'ID PEMAIN', 'GURU KETUA', 'TELEFON GURU', 'TARIKH DAFTAR', 'TARIKH KEMASKINI', 'STATUS']]);
+    }
+    
+    const registrations = {};
+    
+    // Load data from sheets
+    const schoolData = schoolSheet.getDataRange().getValues();
+    const teacherData = teacherSheet.getDataRange().getValues();
+    const studentData = studentSheet.getDataRange().getValues();
+    
+    // Process schools (skip header row)
+    for (let i = 1; i < schoolData.length; i++) {
+      const row = schoolData[i];
+      const regId = row[0];
+      if (regId) {
+        registrations[regId] = {
+          schoolName: row[1],
+          schoolType: row[2],
+          createdAt: row[10],
+          updatedAt: row[11],
+          status: row[12],
+          teachers: [],
+          students: []
+        };
+      }
+    }
+    
+    // Process teachers (skip header row)
+    for (let i = 1; i < teacherData.length; i++) {
+      const row = teacherData[i];
+      const regId = row[0];
+      if (regId && registrations[regId]) {
+        registrations[regId].teachers.push({
+          name: row[2],
+          email: row[3],
+          phone: row[4],
+          position: row[5],
+          order: row[6]
+        });
+      }
+    }
+    
+    // Process students (skip header row)
+    for (let i = 1; i < studentData.length; i++) {
+      const row = studentData[i];
+      const regId = row[0];
+      if (regId && registrations[regId]) {
+        registrations[regId].students.push({
+          name: row[2],
+          ic: row[3],
+          gender: row[4],
+          category: row[5],
+          categoryDisplay: row[6],
+          playerId: row[7]
+        });
+      }
+    }
+    
+    return { registrations: registrations };
+    
+  } catch (error) {
+    return { error: 'Failed to load data: ' + error.toString() };
+  }
+}
+
+function saveRegistration(data) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const teacherSheet = ss.getSheetByName('GURU');
+    const schoolSheet = ss.getSheetByName('SEKOLAH');
+    const studentSheet = ss.getSheetByName('PELAJAR');
+    
+    const regId = data.registrationId;
+    const timestamp = new Date();
+    
+    // Determine school type
+    const schoolName = data.schoolName.toUpperCase();
+    let schoolType = 'LAIN-LAIN';
+    if (schoolName.includes('SK ')) schoolType = 'SEKOLAH KEBANGSAAN';
+    else if (schoolName.includes('SMK ')) schoolType = 'SEKOLAH MENENGAH KEBANGSAAN';
+    else if (schoolName.includes('SJKC ')) schoolType = 'SEKOLAH JENIS KEBANGSAAN (CINA)';
+    else if (schoolName.includes('SJKT ')) schoolType = 'SEKOLAH JENIS KEBANGSAAN (TAMIL)';
+    else if (schoolName.includes('SMKA ')) schoolType = 'SEKOLAH MENENGAH KEBANGSAAN AGAMA';
+    
+    // Calculate statistics
+    const totalTeachers = data.teachers.length;
+    const totalStudents = data.students.length;
+    let totalMale = 0, totalFemale = 0;
+    let totalU12 = 0, totalU15 = 0, totalU18 = 0;
+    
+    data.students.forEach(student => {
+      if (student.gender === 'Lelaki') totalMale++;
+      else totalFemale++;
+      
+      if (student.category.includes('12')) totalU12++;
+      else if (student.category.includes('15')) totalU15++;
+      else if (student.category.includes('18')) totalU18++;
+    });
+    
+    // Clear existing data for this registration
+    [teacherSheet, schoolSheet, studentSheet].forEach(sheet => {
+      const sheetData = sheet.getDataRange().getValues();
+      for (let i = sheetData.length - 1; i >= 1; i--) {
+        if (sheetData[i][0] === regId) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+    });
+    
+    // Save school data
+    schoolSheet.appendRow([
+      regId, data.schoolName, schoolType, totalTeachers, totalStudents,
+      totalMale, totalFemale, totalU12, totalU15, totalU18,
+      timestamp, timestamp, 'AKTIF'
+    ]);
+    
+    // Save teachers
+    data.teachers.forEach((teacher, index) => {
+      const position = index === 0 ? 'KETUA' : 'PENGIRING';
+      const order = index + 1;
+      
+      teacherSheet.appendRow([
+        regId, data.schoolName, teacher.name, teacher.email, teacher.phone,
+        position, order, timestamp, timestamp, 'AKTIF'
+      ]);
+    });
+    
+    // Save students
+    const headTeacher = data.teachers[0];
+    data.students.forEach(student => {
+      // Generate category display (L12, P15, etc.)
+      const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
+      const ageCode = student.category.includes('12') ? '12' : 
+                     student.category.includes('15') ? '15' : '18';
+      const categoryDisplay = genderCode + ageCode;
+      
+      studentSheet.appendRow([
+        regId, data.schoolName, student.name, student.ic, student.gender,
+        student.category, categoryDisplay, student.playerId,
+        headTeacher.name, headTeacher.phone, timestamp, timestamp, 'AKTIF'
+      ]);
+    });
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, registrationId: regId }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function searchRegistration(regId, password) {
+  try {
+    const registrations = loadRegistrations();
+    
+    if (registrations.error) {
+      return { found: false, error: registrations.error };
+    }
+    
+    const registration = registrations.registrations[regId];
+    if (!registration) {
+      return { found: false, error: 'Registration not found' };
+    }
+    
+    // Verify password (last 4 digits of first teacher's phone)
+    if (registration.teachers.length > 0) {
+      const phone = registration.teachers[0].phone.replace(/\\D/g, '');
+      const last4 = phone.slice(-4);
+      
+      if (last4 === password) {
+        return { found: true, registration: registration };
+      }
+    }
+    
+    return { found: false, error: 'Invalid password' };
+    
+  } catch (error) {
+    return { found: false, error: error.toString() };
+  }
+}`;
+
+            document.getElementById('appsScriptCode').textContent = scriptTemplate;
+        }
+
+        function testCurrentConnection() {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.textContent = 'Testing...';
+            statusEl.className = 'px-2 py-1 rounded text-xs bg-yellow-200 text-yellow-800';
+            
+            if (!GOOGLE_SCRIPT_URL) {
+                statusEl.textContent = 'Not configured';
+                statusEl.className = 'px-2 py-1 rounded text-xs bg-red-200 text-red-800';
+                return;
+            }
+            
+            // Test connection
+            const callbackName = 'testCallback_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                if (data && !data.error) {
+                    statusEl.textContent = 'Connected ✅';
+                    statusEl.className = 'px-2 py-1 rounded text-xs bg-green-200 text-green-800';
+                } else {
+                    statusEl.textContent = 'Error: ' + (data.error || 'Unknown error');
+                    statusEl.className = 'px-2 py-1 rounded text-xs bg-red-200 text-red-800';
+                }
+                delete window[callbackName];
+                if (script.parentNode) {
+                    document.head.removeChild(script);
+                }
+            };
+            
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL + '?action=load&callback=' + callbackName;
+            script.onerror = () => {
+                statusEl.textContent = 'Connection failed ❌';
+                statusEl.className = 'px-2 py-1 rounded text-xs bg-red-200 text-red-800';
+                delete window[callbackName];
+                if (script.parentNode) {
+                    document.head.removeChild(script);
+                }
+            };
+            
+            document.head.appendChild(script);
+            
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    statusEl.textContent = 'Timeout ⏰';
+                    statusEl.className = 'px-2 py-1 rounded text-xs bg-red-200 text-red-800';
+                    delete window[callbackName];
+                    if (script.parentNode) {
+                        document.head.removeChild(script);
+                    }
+                }
+            }, 10000);
+        }
+
+        function testGoogleSheetsConnection() {
+            const testUrl = document.getElementById('webAppUrl').value;
+            const resultEl = document.getElementById('testResult');
+            
+            if (!testUrl) {
+                resultEl.innerHTML = '<div class="text-red-600">❌ Please enter your Web App URL first</div>';
+                return;
+            }
+            
+            resultEl.innerHTML = '<div class="text-blue-600">🧪 Testing connection...</div>';
+            
+            const callbackName = 'testConnectionCallback_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                if (data && !data.error) {
+                    resultEl.innerHTML = '<div class="text-green-600">✅ Connection successful! Found ' + (Object.keys(data.registrations || {}).length) + ' registrations.</div>';
+                } else {
+                    resultEl.innerHTML = '<div class="text-red-600">❌ Connection failed: ' + (data.error || 'Unknown error') + '</div>';
+                }
+                delete window[callbackName];
+                if (script.parentNode) {
+                    document.head.removeChild(script);
+                }
+            };
+            
+            const script = document.createElement('script');
+            script.src = testUrl + '?action=load&callback=' + callbackName;
+            script.onerror = () => {
+                resultEl.innerHTML = '<div class="text-red-600">❌ Failed to load script. Check your URL and deployment settings.</div>';
+                delete window[callbackName];
+                if (script.parentNode) {
+                    document.head.removeChild(script);
+                }
+            };
+            
+            document.head.appendChild(script);
+            
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    resultEl.innerHTML = '<div class="text-red-600">⏰ Connection timeout. Check your script and try again.</div>';
+                    delete window[callbackName];
+                    if (script.parentNode) {
+                        document.head.removeChild(script);
+                    }
+                }
+            }, 15000);
+        }
+
+        function saveGoogleSheetsConfig() {
+            const spreadsheetId = document.getElementById('spreadsheetId').value;
+            const webAppUrl = document.getElementById('webAppUrl').value;
+            
+            if (!spreadsheetId || !webAppUrl) {
+                alert('Please fill in both Spreadsheet ID and Web App URL');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('spreadsheetId', spreadsheetId);
+            localStorage.setItem('webAppUrl', webAppUrl);
+            
+            // Update the global variable
+            GOOGLE_SCRIPT_URL = webAppUrl;
+            
+            // Show success message
+            showSyncStatus('✅ Configuration saved! You can now sync with Google Sheets.', 'success');
+            
+            // Close modal
+            closeSetupModal();
+            
+            // Test the new configuration
+            setTimeout(() => {
+                loadFromGoogleSheets();
+            }, 1000);
+        }
+
+        // Load saved configuration on page load
+        function loadSavedConfig() {
+            const savedWebAppUrl = localStorage.getItem('webAppUrl');
+            if (savedWebAppUrl) {
+                GOOGLE_SCRIPT_URL = savedWebAppUrl;
+            }
+        }
+
+        // Initialize saved config
+        loadSavedConfig();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e5f8c87f6a858',t:'MTc2MTE5MjUwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'996f7b5f115f1a53',t:'MTc2MTg3NTIyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
