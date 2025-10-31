@@ -196,7 +196,7 @@
         0
        </div>
        <div class="text-yellow-100 mt-2">
-        Jumlah Sekolah Layak
+        Jumlah Sekolah
        </div>
       </div>
       <div class="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6 text-white">
@@ -212,7 +212,7 @@
       <h3 class="text-xl font-bold text-indigo-800 mb-6 text-center">📊 Analisis Pendaftaran Mengikut Kategori</h3>
       <div id="treeDiagram" class="space-y-6"><!-- Root Level -->
        <div class="text-center">
-        <div class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold text-lg"><span id="treeTotal">0</span> Sekolah Layak Berdaftar
+        <div class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold text-lg"><span id="treeTotal">0</span> Sekolah Berdaftar
         </div>
         <div class="text-xs text-gray-600 mt-2">
          *Sekolah Rendah (U12) &amp; Sekolah Menengah (U15/U18)
@@ -884,17 +884,28 @@
             
             const categoryText = categoryBreakdown.join(', ');
             
-            const message = `📢 *NOTIFIKASI PENDAFTARAN BERJAYA*%0A%0A` +
-                `Assalamualaikum & Salam Sejahtera 👋%0A%0A` +
-                `Saya telah berjaya mendaftar pasukan sekolah untuk *PERTANDINGAN CATUR MSSD MUAR* ✅%0A%0A` +
-                `🏫 Nama Sekolah: ${data.schoolName}%0A` +
-                `🆔 ID Pendaftaran: ${regId}%0A` +
-                `👩‍🏫 Nama Guru (Ketua): ${data.teachers[0].name}%0A` +
-                `📞 No. Telefon Guru: ${data.teachers[0].phone}%0A` +
-                `👥 Jumlah Pelajar: ${data.students.length} orang (${categoryText})%0A%0A` +
-                `Terima kasih atas sokongan dan penyertaan anda.%0A` +
-                `Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur.%0A%0A` +
-                `♟ "Satukan Pemain, Gilap Bakat, Ukir Kejayaan"`;
+            // Create the complete WhatsApp message with proper encoding
+            const messageLines = [
+                '📢 NOTIFIKASI PENDAFTARAN BERJAYA',
+                '',
+                'Assalamualaikum & Salam Sejahtera 👋',
+                '',
+                'Saya telah berjaya mendaftar pasukan sekolah untuk PERTANDINGAN CATUR MSSD MUAR ✅',
+                '',
+                `🏫 Nama Sekolah: ${data.schoolName}`,
+                `🆔 ID Pendaftaran: ${regId}`,
+                `👩‍🏫 Nama Guru (Ketua): ${data.teachers[0].name}`,
+                `📞 No. Telefon Guru: ${data.teachers[0].phone}`,
+                `👥 Jumlah Pelajar: ${data.students.length} orang (${categoryText})`,
+                '',
+                'Terima kasih atas sokongan dan penyertaan anda. 🙏',
+                'Sebarang maklumat lanjut akan dimaklumkan melalui WhatsApp rasmi MSSD Catur. 📱',
+                '',
+                '♟️ "Satukan Pemain, Gilap Bakat, Ukir Kejayaan" 🏆'
+            ];
+            
+            // Join with line breaks and encode for URL
+            const message = encodeURIComponent(messageLines.join('\n'));
             
             const whatsappUrl = `https://wa.me/60182046224?text=${message}`;
             window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
@@ -1188,17 +1199,17 @@
             primarySchoolCount = primarySchools.size;
             secondarySchoolCount = secondarySchools.size;
             
-            // Calculate total valid schools (primary with U12 + secondary with U15/U18)
-            const totalValidSchools = primarySchoolCount + secondarySchoolCount;
+            // Calculate total schools (primary with U12 + secondary with U15/U18)
+            const totalSchools = primarySchoolCount + secondarySchoolCount;
             
             // Update summary cards
             document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalStudents').textContent = totalStudents;
-            document.getElementById('totalSchools').textContent = totalValidSchools;
+            document.getElementById('totalSchools').textContent = totalSchools;
             document.getElementById('totalTeachers').textContent = totalTeachers;
             
             // Update tree diagram
-            document.getElementById('treeTotal').textContent = totalValidSchools;
+            document.getElementById('treeTotal').textContent = totalSchools;
             document.getElementById('primarySchools').textContent = primarySchoolCount;
             document.getElementById('secondarySchools').textContent = secondarySchoolCount;
             document.getElementById('primary12Male').textContent = primary12Male;
@@ -1366,6 +1377,13 @@
 
         // Google Sheets Setup Functions
         function showGoogleSheetsChecklist() {
+            // Password protection for setup access
+            const password = prompt('Masukkan kata laluan untuk akses setup:');
+            if (password !== 'kamuscatur') {
+                alert('❌ Kata laluan salah! Akses ditolak.');
+                return;
+            }
+            
             document.getElementById('setupModal').classList.remove('hidden');
             
             // Show current configuration
@@ -1818,5 +1836,5 @@ function searchRegistration(regId, password) {
         // Initialize saved config
         loadSavedConfig();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'996f8e71a479cc5f',t:'MTc2MTg3NjAwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'996fa7f7963b6312',t:'MTc2MTg3NzA0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
