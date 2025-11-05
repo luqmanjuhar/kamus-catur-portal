@@ -2150,7 +2150,7 @@ function searchRegistration(regId, password) {
         }
 
         function verifyUpdateAccess(regId, password) {
-            // First check local data - this is instant
+            // ALWAYS check local data first - this is instant and most reliable
             const localReg = registrations[regId];
             if (localReg && localReg.teachers && localReg.teachers.length > 0) {
                 const phone = localReg.teachers[0].phone.replace(/\D/g, '');
@@ -2165,23 +2165,39 @@ function searchRegistration(regId, password) {
                 }
             }
             
-            // Show immediate feedback for server check
-            showNotification('🔍 Menyemak dengan server...', 'info');
+            // If local data exists but password is wrong, don't check server
+            if (localReg) {
+                showNotification('❌ Kata laluan tidak betul untuk pendaftaran ini', 'error');
+                resetUpdateButton();
+                return;
+            }
             
-            // If not found locally or password wrong, check Google Sheets with faster timeout
+            // Only check server if data doesn't exist locally
+            showNotification('🔍 Data tidak dijumpai tempatan, menyemak server...', 'info');
+            
             if (!GOOGLE_SCRIPT_URL) {
-                showNotification('❌ ID Pendaftaran atau kata laluan tidak betul', 'error');
+                showNotification('❌ ID Pendaftaran tidak dijumpai', 'error');
                 resetUpdateButton();
                 return;
             }
             
             const callbackName = 'updateVerifyCallback_' + Date.now();
+            let hasResponded = false;
             
             window[callbackName] = function(data) {
+                if (hasResponded) return; // Prevent multiple responses
+                hasResponded = true;
+                
                 if (data && data.found && data.registration) {
-                    // Access granted - show edit form
+                    // Access granted - show edit form and cache locally
+                    registrations[regId] = {
+                        ...data.registration,
+                        cachedAt: new Date().toISOString()
+                    };
+                    localStorage.setItem('registrations', JSON.stringify(registrations));
+                    
                     showEditForm(regId, data.registration);
-                    showNotification('✅ Data server ditemui - akses dibenarkan!', 'success');
+                    showNotification('✅ Data server ditemui - disimpan untuk akses pantas seterusnya!', 'success');
                 } else {
                     const errorMsg = data.error || 'ID Pendaftaran atau kata laluan tidak betul';
                     showNotification('❌ ' + errorMsg, 'error');
@@ -2195,10 +2211,12 @@ function searchRegistration(regId, password) {
             };
             
             const script = document.createElement('script');
-            script.src = `${GOOGLE_SCRIPT_URL}?action=search&regId=${regId}&password=${password}&callback=${callbackName}`;
+            script.src = `${GOOGLE_SCRIPT_URL}?action=search&regId=${regId}&password=${password}&callback=${callbackName}&t=${Date.now()}`;
             
             script.onerror = () => {
-                showNotification('❌ Gagal menyambung ke server. Menggunakan data tempatan sahaja.', 'error');
+                if (hasResponded) return;
+                hasResponded = true;
+                showNotification('❌ Gagal menyambung ke server', 'error');
                 resetUpdateButton();
                 delete window[callbackName];
                 if (script.parentNode) {
@@ -2208,17 +2226,18 @@ function searchRegistration(regId, password) {
             
             document.head.appendChild(script);
             
-            // Reduced timeout to 5 seconds for faster response
+            // Ultra-fast timeout - only 1.5 seconds for server check
             setTimeout(() => {
-                if (window[callbackName]) {
-                    showNotification('⏰ Server lambat bertindak balas. Sila cuba lagi atau gunakan data tempatan.', 'warning');
+                if (window[callbackName] && !hasResponded) {
+                    hasResponded = true;
+                    showNotification('⏰ Server lambat. ID tidak dijumpai atau cuba lagi.', 'warning');
                     resetUpdateButton();
                     delete window[callbackName];
                     if (script.parentNode) {
                         document.head.removeChild(script);
                     }
                 }
-            }, 5000); // Reduced from 10 seconds to 5 seconds
+            }, 1500); // Even faster - 1.5 seconds only!
         }
 
         function showEditForm(regId, registrationData) {
@@ -2575,5 +2594,5 @@ function searchRegistration(regId, password) {
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999afa24545aa858',t:'MTc2MjMzMTMwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999b101eb06ca858',t:'MTc2MjMzMjIwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
