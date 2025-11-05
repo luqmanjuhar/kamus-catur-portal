@@ -1433,11 +1433,10 @@
             console.log('🔄 Loading for edit - ID:', regId, 'Data:', data);
             document.getElementById('editModeIndicator').classList.add('active');
             
-            // Update submit button text and style for edit mode
+            // Update submit button text and style for edit mode - FORCE UPDATE
             const submitButton = document.getElementById('submitButton');
             submitButton.innerHTML = '✏️ Kemaskini Pendaftaran';
-            submitButton.classList.remove('bg-orange-600', 'hover:bg-orange-700');
-            submitButton.classList.add('bg-green-600', 'hover:bg-green-700');
+            submitButton.className = 'px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium';
             
             // Reset form first
             resetForm();
@@ -1503,11 +1502,10 @@
             currentEditId = null;
             document.getElementById('editModeIndicator').classList.remove('active');
             
-            // Reset submit button to default state
+            // Reset submit button to default state - FORCE RESET
             const submitButton = document.getElementById('submitButton');
             submitButton.innerHTML = '💾 Hantar Pendaftaran';
-            submitButton.classList.remove('bg-green-600', 'hover:bg-green-700');
-            submitButton.classList.add('bg-orange-600', 'hover:bg-orange-700');
+            submitButton.className = 'px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium';
             
             document.getElementById('registrationForm').reset();
             
@@ -2320,5 +2318,5 @@ function searchRegistration(regId, password) {
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999a3fc5f4b3a858',t:'MTc2MjMyMzY2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999a8a025742a858',t:'MTc2MjMyNjcwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
