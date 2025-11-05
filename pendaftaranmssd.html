@@ -2150,21 +2150,25 @@ function searchRegistration(regId, password) {
         }
 
         function verifyUpdateAccess(regId, password) {
-            // First check local data
+            // First check local data - this is instant
             const localReg = registrations[regId];
-            if (localReg) {
+            if (localReg && localReg.teachers && localReg.teachers.length > 0) {
                 const phone = localReg.teachers[0].phone.replace(/\D/g, '');
                 const last4 = phone.slice(-4);
                 
                 if (last4 === password) {
-                    // Access granted - show edit form
+                    // Access granted - show edit form immediately
                     showEditForm(regId, localReg);
                     resetUpdateButton();
+                    showNotification('✅ Data tempatan ditemui - akses segera!', 'success');
                     return;
                 }
             }
             
-            // If not found locally or password wrong, check Google Sheets
+            // Show immediate feedback for server check
+            showNotification('🔍 Menyemak dengan server...', 'info');
+            
+            // If not found locally or password wrong, check Google Sheets with faster timeout
             if (!GOOGLE_SCRIPT_URL) {
                 showNotification('❌ ID Pendaftaran atau kata laluan tidak betul', 'error');
                 resetUpdateButton();
@@ -2177,6 +2181,7 @@ function searchRegistration(regId, password) {
                 if (data && data.found && data.registration) {
                     // Access granted - show edit form
                     showEditForm(regId, data.registration);
+                    showNotification('✅ Data server ditemui - akses dibenarkan!', 'success');
                 } else {
                     const errorMsg = data.error || 'ID Pendaftaran atau kata laluan tidak betul';
                     showNotification('❌ ' + errorMsg, 'error');
@@ -2193,7 +2198,7 @@ function searchRegistration(regId, password) {
             script.src = `${GOOGLE_SCRIPT_URL}?action=search&regId=${regId}&password=${password}&callback=${callbackName}`;
             
             script.onerror = () => {
-                showNotification('❌ Gagal menyambung ke server. Sila cuba lagi.', 'error');
+                showNotification('❌ Gagal menyambung ke server. Menggunakan data tempatan sahaja.', 'error');
                 resetUpdateButton();
                 delete window[callbackName];
                 if (script.parentNode) {
@@ -2203,17 +2208,17 @@ function searchRegistration(regId, password) {
             
             document.head.appendChild(script);
             
-            // Timeout after 10 seconds
+            // Reduced timeout to 5 seconds for faster response
             setTimeout(() => {
                 if (window[callbackName]) {
-                    showNotification('❌ Masa tamat. Sila cuba lagi.', 'error');
+                    showNotification('⏰ Server lambat bertindak balas. Sila cuba lagi atau gunakan data tempatan.', 'warning');
                     resetUpdateButton();
                     delete window[callbackName];
                     if (script.parentNode) {
                         document.head.removeChild(script);
                     }
                 }
-            }, 10000);
+            }, 5000); // Reduced from 10 seconds to 5 seconds
         }
 
         function showEditForm(regId, registrationData) {
@@ -2570,5 +2575,5 @@ function searchRegistration(regId, password) {
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999ae64cf69ea858',t:'MTc2MjMzMDQ4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999afa24545aa858',t:'MTc2MjMzMTMwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
