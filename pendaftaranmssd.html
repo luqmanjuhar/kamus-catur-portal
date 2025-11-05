@@ -131,7 +131,7 @@
         </div>
        </div><button type="button" onclick="addStudent()" class="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ➕ Tambah Pelajar </button>
       </section>
-      <div class="flex gap-4 justify-end"><button type="button" onclick="resetForm()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> 🔄 Reset </button> <button type="submit" class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> 💾 Hantar Pendaftaran </button>
+      <div class="flex gap-4 justify-end"><button type="button" onclick="resetForm()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> 🔄 Reset </button> <button type="submit" id="submitButton" class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> 💾 Hantar Pendaftaran </button>
       </div>
      </form>
     </div>
@@ -147,7 +147,14 @@
      </form>
      <div id="searchResult" class="mt-6 hidden">
       <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-       <p class="text-green-800 font-medium">✅ Pendaftaran dijumpai! Sila tukar ke tab "Pendaftaran Baru" untuk mengedit.</p>
+       <p class="text-green-800 font-medium mb-3">✅ Pendaftaran dijumpai!</p>
+       <div id="foundRegistrationDetails" class="bg-white rounded-lg p-4 mb-4 border border-green-300"><!-- Registration details will be populated here -->
+       </div>
+       <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+        <p class="text-blue-800 text-sm"><span class="font-semibold">💡 Nota:</span> Data ini diambil terus dari Google Sheets untuk memastikan maklumat terkini. Sebarang perubahan yang anda buat akan disimpan ke Google Sheets dan boleh dilihat oleh pentadbir.</p>
+       </div>
+       <div class="flex gap-3"><button onclick="editFoundRegistration()" class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ✏️ Edit Pendaftaran Ini </button> <button onclick="clearSearch()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> 🔍 Cari Lain </button>
+       </div>
       </div>
      </div>
      <div id="searchError" class="mt-6 hidden">
@@ -168,114 +175,242 @@
         <p class="text-blue-100">Tempat: Dewan SMK TUN HABAB</p>
        </div>
       </div><!-- Primary School Schedule -->
-      <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-       <h4 class="text-lg font-bold text-green-800 mb-4 text-center">🏫 SEKOLAH RENDAH (L/P 12)</h4>
-       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Day 1 -->
-        <div class="bg-white rounded-lg p-4 border border-green-300">
-         <h5 class="font-bold text-green-700 mb-3 text-center">21 APRIL 2025 (ISNIN)</h5>
-         <div class="space-y-2 text-sm">
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">7.00 - 8.00 pagi</span> <span>Pendaftaran kontinjen</span>
+      <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6"><button onclick="toggleSchedule('primary')" class="w-full text-left hover:bg-green-100 transition-colors rounded-lg p-2 -m-2">
+        <div class="flex justify-between items-center">
+         <h4 class="text-lg font-bold text-green-800">🏫 SEKOLAH RENDAH (L/P 12)</h4><span id="primaryArrow" class="text-green-600 font-bold text-xl">▼</span>
+        </div></button>
+       <div id="primarySchedule" class="hidden mt-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Day 1 -->
+         <div class="bg-white rounded-lg p-4 border border-green-300 shadow-sm">
+          <h5 class="font-bold text-green-700 mb-4 text-center bg-green-100 py-2 rounded-lg">📅 21 APRIL 2025 (ISNIN)</h5>
+          <div class="overflow-x-auto">
+           <table class="w-full text-sm">
+            <thead>
+             <tr class="bg-green-50">
+              <th class="text-left py-2 px-3 font-semibold text-green-800 border-b">⏰ Masa</th>
+              <th class="text-left py-2 px-3 font-semibold text-green-800 border-b">📋 Aktiviti</th>
+             </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">7.00 - 8.00 pagi</td>
+              <td class="py-2 px-3">Pendaftaran kontinjen</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">8.30 pagi</td>
+              <td class="py-2 px-3">Taklimat pengurus, pengadil</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">8.45 pagi</td>
+              <td class="py-2 px-3">Taklimat kepada pemain</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">9.00 – 10.00 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 1</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">10.15 pagi</td>
+              <td class="py-2 px-3">Pemasangan Pusingan 2</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">10.30 – 11.30 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 2</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-blue-50">
+              <td class="py-2 px-3 font-medium text-gray-600">12.00 – 2.00 ptg</td>
+              <td class="py-2 px-3 text-gray-600">☕ Rehat</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">2.00 – 3.00 ptg</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 3</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">3.15 ptg</td>
+              <td class="py-2 px-3">Pemasangan pusingan 4</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">3.30 – 4.30 ptg</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 4</td>
+             </tr>
+            </tbody>
+           </table>
           </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">8.30 pagi</span> <span>Taklimat pengurus, pengadil</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">8.45 pagi</span> <span>Taklimat kepada pemain</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">9.00 – 10.00 pagi</span> <span>Pusingan 1</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">10.15 pagi</span> <span>Pemasangan Pusingan 2</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">10.30 – 11.30 pagi</span> <span>Pusingan 2</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">12.00 – 2.00 ptg</span> <span>Rehat</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">2.00 – 3.00 ptg</span> <span>Pusingan 3</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">3.15 ptg</span> <span>Pemasangan pusingan 4</span>
-          </div>
-          <div class="flex justify-between"><span class="font-medium">3.30 – 4.30 ptg</span> <span>Pusingan 4</span>
-          </div>
-         </div>
-        </div><!-- Day 2 -->
-        <div class="bg-white rounded-lg p-4 border border-green-300">
-         <h5 class="font-bold text-green-700 mb-3 text-center">22 APRIL 2025 (SELASA)</h5>
-         <div class="space-y-2 text-sm">
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">8.00 – 9.00 pagi</span> <span>Pusingan 5</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">9.15 pagi</span> <span>Pemasangan Pusingan 6</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">9.30 – 10.30 pagi</span> <span>Pusingan 6</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">10.45 pagi</span> <span>Pemasangan Pusingan 7</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">11.00 – 12.00 tgh</span> <span>Pusingan 7</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">12.00 – 2.00 ptg</span> <span>Rehat</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">2.00 – 3.00 ptg</span> <span>Pusingan 8</span>
-          </div>
-          <div class="flex justify-between"><span class="font-medium">3.15 petang</span> <span>Majlis Penutup</span>
+         </div><!-- Day 2 -->
+         <div class="bg-white rounded-lg p-4 border border-green-300 shadow-sm">
+          <h5 class="font-bold text-green-700 mb-4 text-center bg-green-100 py-2 rounded-lg">📅 22 APRIL 2025 (SELASA)</h5>
+          <div class="overflow-x-auto">
+           <table class="w-full text-sm">
+            <thead>
+             <tr class="bg-green-50">
+              <th class="text-left py-2 px-3 font-semibold text-green-800 border-b">⏰ Masa</th>
+              <th class="text-left py-2 px-3 font-semibold text-green-800 border-b">📋 Aktiviti</th>
+             </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">8.00 – 9.00 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 5</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">9.15 pagi</td>
+              <td class="py-2 px-3">Pemasangan Pusingan 6</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">9.30 – 10.30 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 6</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">10.45 pagi</td>
+              <td class="py-2 px-3">Pemasangan Pusingan 7</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">11.00 – 12.00 tgh</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 7</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-blue-50">
+              <td class="py-2 px-3 font-medium text-gray-600">12.00 – 2.00 ptg</td>
+              <td class="py-2 px-3 text-gray-600">☕ Rehat</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">2.00 – 3.00 ptg</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 8</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-red-50">
+              <td class="py-2 px-3 font-bold text-red-700">3.15 petang</td>
+              <td class="py-2 px-3 font-semibold">🏆 Majlis Penutup</td>
+             </tr>
+            </tbody>
+           </table>
           </div>
          </div>
         </div>
+        <div class="text-center mt-4 p-3 bg-green-100 rounded-lg">
+         <p class="text-green-700 text-sm italic">⚠️ Jadual tertakluk kepada pindaan, berdasarkan keadaan.</p>
+        </div>
        </div>
-       <p class="text-center text-green-700 text-sm mt-4 italic">Jadual tertakluk kepada pindaan, berdasarkan keadaan.</p>
       </div><!-- Secondary School Schedule -->
-      <div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
-       <h4 class="text-lg font-bold text-purple-800 mb-4 text-center">🎓 SEKOLAH MENENGAH (L/P 15/18)</h4>
-       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Day 1 -->
-        <div class="bg-white rounded-lg p-4 border border-purple-300">
-         <h5 class="font-bold text-purple-700 mb-3 text-center">23 APRIL 2025 (RABU)</h5>
-         <div class="space-y-2 text-sm">
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">7.00 - 8.00 pagi</span> <span>Pendaftaran kontinjen</span>
+      <div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6"><button onclick="toggleSchedule('secondary')" class="w-full text-left hover:bg-purple-100 transition-colors rounded-lg p-2 -m-2">
+        <div class="flex justify-between items-center">
+         <h4 class="text-lg font-bold text-purple-800">🎓 SEKOLAH MENENGAH (L/P 15/18)</h4><span id="secondaryArrow" class="text-purple-600 font-bold text-xl">▼</span>
+        </div></button>
+       <div id="secondarySchedule" class="hidden mt-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Day 1 -->
+         <div class="bg-white rounded-lg p-4 border border-purple-300 shadow-sm">
+          <h5 class="font-bold text-purple-700 mb-4 text-center bg-purple-100 py-2 rounded-lg">📅 23 APRIL 2025 (RABU)</h5>
+          <div class="overflow-x-auto">
+           <table class="w-full text-sm">
+            <thead>
+             <tr class="bg-purple-50">
+              <th class="text-left py-2 px-3 font-semibold text-purple-800 border-b">⏰ Masa</th>
+              <th class="text-left py-2 px-3 font-semibold text-purple-800 border-b">📋 Aktiviti</th>
+             </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">7.00 - 8.00 pagi</td>
+              <td class="py-2 px-3">Pendaftaran kontinjen</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">8.30 pagi</td>
+              <td class="py-2 px-3">Taklimat pengurus, pengadil</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">8.45 pagi</td>
+              <td class="py-2 px-3">Taklimat kepada pemain</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">9.00 – 10.00 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 1</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">10.15 pagi</td>
+              <td class="py-2 px-3">Pemasangan Pusingan 2</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">10.30 – 11.30 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 2</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-blue-50">
+              <td class="py-2 px-3 font-medium text-gray-600">12.00 – 2.00 ptg</td>
+              <td class="py-2 px-3 text-gray-600">☕ Rehat</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">2.00 – 3.00 ptg</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 3</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-green-50">
+              <td class="py-2 px-3 font-medium text-green-700">4.00 ptg</td>
+              <td class="py-2 px-3 font-medium">⚡ Catur Blitz (pegawai)</td>
+             </tr>
+            </tbody>
+           </table>
           </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">8.30 pagi</span> <span>Taklimat pengurus, pengadil</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">8.45 pagi</span> <span>Taklimat kepada pemain</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">9.00 – 10.00 pagi</span> <span>Pusingan 1</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">10.15 pagi</span> <span>Pemasangan Pusingan 2</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">10.30 – 11.30 tghri</span> <span>Pusingan 2</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">12.00 – 2.00 ptg</span> <span>Rehat</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">2.00 – 3.00 ptg</span> <span>Pusingan 3</span>
-          </div>
-          <div class="flex justify-between"><span class="font-medium">4.00 ptg</span> <span>Catur Blitz (pegawai)</span>
-          </div>
-         </div>
-        </div><!-- Day 2 -->
-        <div class="bg-white rounded-lg p-4 border border-purple-300">
-         <h5 class="font-bold text-purple-700 mb-3 text-center">24 APRIL 2025 (KHAMIS)</h5>
-         <div class="space-y-2 text-sm">
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">8.00 – 9.00 pagi</span> <span>Pusingan 4</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">9.15 pagi</span> <span>Pemasangan Pusingan 5</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">9.30 – 10.30 pagi</span> <span>Pusingan 5</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">10.45 pagi</span> <span>Pemasangan Pusingan 6</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">11.00 – 12.00 tgh</span> <span>Pusingan 6</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">12.00 – 2.00 ptg</span> <span>Rehat</span>
-          </div>
-          <div class="flex justify-between border-b pb-1"><span class="font-medium">2.00 – 3.00 ptg</span> <span>Pusingan 7</span>
-          </div>
-          <div class="flex justify-between"><span class="font-medium">3.15 petang</span> <span>Majlis Penutup</span>
+         </div><!-- Day 2 -->
+         <div class="bg-white rounded-lg p-4 border border-purple-300 shadow-sm">
+          <h5 class="font-bold text-purple-700 mb-4 text-center bg-purple-100 py-2 rounded-lg">📅 24 APRIL 2025 (KHAMIS)</h5>
+          <div class="overflow-x-auto">
+           <table class="w-full text-sm">
+            <thead>
+             <tr class="bg-purple-50">
+              <th class="text-left py-2 px-3 font-semibold text-purple-800 border-b">⏰ Masa</th>
+              <th class="text-left py-2 px-3 font-semibold text-purple-800 border-b">📋 Aktiviti</th>
+             </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">8.00 – 9.00 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 4</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">9.15 pagi</td>
+              <td class="py-2 px-3">Pemasangan Pusingan 5</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">9.30 – 10.30 pagi</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 5</td>
+             </tr>
+             <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-medium text-blue-700">10.45 pagi</td>
+              <td class="py-2 px-3">Pemasangan Pusingan 6</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">11.00 – 12.00 tgh</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 6</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-blue-50">
+              <td class="py-2 px-3 font-medium text-gray-600">12.00 – 2.00 ptg</td>
+              <td class="py-2 px-3 text-gray-600">☕ Rehat</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-yellow-50">
+              <td class="py-2 px-3 font-bold text-orange-700">2.00 – 3.00 ptg</td>
+              <td class="py-2 px-3 font-semibold">🏁 Pusingan 7</td>
+             </tr>
+             <tr class="hover:bg-gray-50 bg-red-50">
+              <td class="py-2 px-3 font-bold text-red-700">3.15 petang</td>
+              <td class="py-2 px-3 font-semibold">🏆 Majlis Penutup</td>
+             </tr>
+            </tbody>
+           </table>
           </div>
          </div>
         </div>
+        <div class="text-center mt-4 p-3 bg-purple-100 rounded-lg">
+         <p class="text-purple-700 text-sm italic">⚠️ Jadual tertakluk kepada pindaan, berdasarkan keadaan.</p>
+        </div>
        </div>
-       <p class="text-center text-purple-700 text-sm mt-4 italic">Jadual tertakluk kepada pindaan, berdasarkan keadaan.</p>
       </div>
-     </div><!-- Rules and Images Section -->
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- Rules -->
+     </div><!-- Rules, Images and Results Section -->
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- Rules -->
       <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
        <h3 class="text-lg font-bold text-yellow-800 mb-4">📋 Peraturan Pertandingan</h3>
        <div class="text-center">
         <p class="text-gray-700 mb-4">Sila rujuk peraturan lengkap pertandingan melalui pautan di bawah:</p><a href="https://drive.google.com/drive/folders/1234567890" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium"> 📖 Muat Turun Peraturan </a>
+       </div>
+      </div><!-- Chess Results -->
+      <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+       <h3 class="text-lg font-bold text-green-800 mb-4">🏆 Keputusan Catur</h3>
+       <div class="text-center">
+        <p class="text-gray-700 mb-4">Lihat keputusan terkini dan kedudukan pemain:</p><a href="https://chess-results.com/tnr1008926.aspx?lan=1" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"> 🏅 Lihat Keputusan </a>
        </div>
       </div><!-- Images -->
       <div class="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -945,14 +1080,42 @@
                     if (data.registrations && typeof data.registrations === 'object') {
                         console.log('✅ Valid registrations data received:', Object.keys(data.registrations).length, 'entries');
                         
-                        // Replace local data with Google Sheets data (no local storage)
-                        registrations = data.registrations;
+                        // Merge Google Sheets data with local data (preserve local changes)
+                        const sheetsData = data.registrations;
+                        const mergedData = { ...registrations }; // Start with local data
+                        
+                        // Add/update with Google Sheets data, but preserve newer local changes
+                        Object.keys(sheetsData).forEach(regId => {
+                            const sheetsReg = sheetsData[regId];
+                            const localReg = mergedData[regId];
+                            
+                            if (!localReg) {
+                                // New registration from sheets
+                                mergedData[regId] = sheetsReg;
+                            } else {
+                                // Compare timestamps if available
+                                const sheetsTime = new Date(sheetsReg.updatedAt || sheetsReg.createdAt || 0);
+                                const localTime = new Date(localReg.updatedAt || localReg.createdAt || 0);
+                                
+                                if (sheetsTime > localTime) {
+                                    // Sheets data is newer
+                                    mergedData[regId] = sheetsReg;
+                                }
+                                // Otherwise keep local data (it's newer)
+                            }
+                        });
+                        
+                        registrations = mergedData;
+                        
+                        // Save merged data to local storage
+                        localStorage.setItem('registrations', JSON.stringify(registrations));
                         
                         // Force update dashboard
                         updateDashboard();
                         
                         const sheetsCount = Object.keys(data.registrations).length;
-                        showSyncStatus(`✅ Segerak berjaya! ${sheetsCount} pendaftaran dimuat`, 'success');
+                        const totalCount = Object.keys(registrations).length;
+                        showSyncStatus(`✅ Segerak berjaya! ${sheetsCount} dari server, ${totalCount} jumlah`, 'success');
                     } else {
                         console.log('ℹ️ No registrations data in response');
                         showSyncStatus('ℹ️ Tiada data pendaftaran dari server', 'info');
@@ -1080,12 +1243,36 @@
             const data = collectFormData();
             const isNew = !currentEditId;
             
-            // Generate registration ID based on first student's category
+            console.log('📝 Submit - currentEditId:', currentEditId, 'isNew:', isNew);
+            
+            // Use existing registration ID for edit, or generate new one for new registration
             let regId = currentEditId;
             if (!regId && data.students.length > 0) {
                 regId = generateRegistrationId(data.students[0].category);
             }
             
+            console.log('📝 Submit - Final regId:', regId);
+            
+            // Ensure we have a valid registration ID
+            if (!regId) {
+                showNotification('❌ Ralat: Tidak dapat menentukan ID pendaftaran', 'error');
+                return;
+            }
+            
+            // Save to local storage immediately for offline access
+            const registrationData = {
+                schoolName: data.schoolName,
+                teachers: data.teachers,
+                students: data.students,
+                createdAt: isNew ? new Date().toISOString() : (registrations[regId]?.createdAt || new Date().toISOString()),
+                updatedAt: new Date().toISOString(),
+                status: 'AKTIF'
+            };
+            
+            registrations[regId] = registrationData;
+            localStorage.setItem('registrations', JSON.stringify(registrations));
+            
+            // Send to Google Sheets (async, won't block UI)
             sendToGoogleSheets(regId, data);
             
             showNotification(
@@ -1095,15 +1282,24 @@
                 'success'
             );
             
-            sendWhatsAppNotification(regId, data, isNew);
+            // Only send WhatsApp notification for new registrations
+            if (isNew) {
+                sendWhatsAppNotification(regId, data, isNew);
+            }
             
             resetForm();
             
-            // Refresh data from Google Sheets
+            // Update dashboard immediately with local data
+            updateDashboard();
+            
+            // Refresh data from Google Sheets in background
             setTimeout(() => {
                 loadFromGoogleSheets();
             }, 2000);
         }
+
+        let foundRegistrationData = null;
+        let foundRegistrationId = null;
 
         async function handleSearch(event) {
             event.preventDefault();
@@ -1111,29 +1307,137 @@
             const regId = document.getElementById('searchRegId').value;
             const password = document.getElementById('searchPassword').value;
             
-            showSyncStatus('🔍 Mencari pendaftaran...', 'info');
+            showSyncStatus('🔍 Mencari pendaftaran dari Google Sheets...', 'info');
             
+            // ALWAYS search from Google Sheets first for latest data
             const result = await searchRegistrationOnline(regId, password);
             
             if (result.found && result.registration) {
-                loadRegistrationForEdit(regId, result.registration);
-                document.getElementById('searchResult').classList.remove('hidden');
-                document.getElementById('searchError').classList.add('hidden');
-                showSyncStatus('✅ Pendaftaran dijumpai!', 'success');
+                console.log('✅ Found registration from Google Sheets:', regId);
+                foundRegistrationData = result.registration;
+                foundRegistrationId = regId;
                 
-                setTimeout(() => {
-                    switchTab('pendaftaran');
-                }, 1500);
+                // Update local storage with fresh data from Google Sheets
+                registrations[regId] = result.registration;
+                localStorage.setItem('registrations', JSON.stringify(registrations));
+                
+                displayFoundRegistration(regId, result.registration, 'Google Sheets (Terkini)');
+                showSyncStatus('✅ Pendaftaran dijumpai dari Google Sheets!', 'success');
             } else {
+                console.log('❌ Not found in Google Sheets, trying local data...');
+                // Only fallback to local data if Google Sheets search fails
+                const localReg = registrations[regId];
+                if (localReg) {
+                    // Verify password with local data
+                    const firstTeacher = localReg.teachers[0];
+                    if (firstTeacher) {
+                        const phone = firstTeacher.phone.replace(/\D/g, '');
+                        const last4 = phone.slice(-4);
+                        
+                        if (last4 === password) {
+                            foundRegistrationData = localReg;
+                            foundRegistrationId = regId;
+                            displayFoundRegistration(regId, localReg, 'Data Tempatan (Mungkin Lama)');
+                            showSyncStatus('⚠️ Pendaftaran dijumpai dari data tempatan (mungkin tidak terkini)', 'warning');
+                            return;
+                        }
+                    }
+                }
+                
                 document.getElementById('searchResult').classList.add('hidden');
                 document.getElementById('searchError').classList.remove('hidden');
-                showSyncStatus('❌ Pendaftaran tidak dijumpai', 'error');
+                showSyncStatus('❌ Pendaftaran tidak dijumpai atau kata laluan salah', 'error');
             }
+        }
+
+        function displayFoundRegistration(regId, data, source) {
+            const detailsContainer = document.getElementById('foundRegistrationDetails');
+            
+            // Generate category summary
+            const categorySummary = {
+                'L12': 0, 'P12': 0,
+                'L15': 0, 'P15': 0,
+                'L18': 0, 'P18': 0
+            };
+            
+            data.students.forEach(student => {
+                const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
+                const ageCode = student.category.includes('12') ? '12' : 
+                               student.category.includes('15') ? '15' : '18';
+                categorySummary[genderCode + ageCode]++;
+            });
+            
+            const summaryText = Object.entries(categorySummary)
+                .filter(([key, count]) => count > 0)
+                .map(([key, count]) => `${key}: ${count}`)
+                .join(' | ');
+            
+            // Determine source styling
+            let sourceClass = 'bg-blue-100 text-blue-800';
+            let sourceIcon = '💾';
+            
+            if (source.includes('Google Sheets')) {
+                sourceClass = 'bg-green-100 text-green-800';
+                sourceIcon = '☁️';
+            } else if (source.includes('Tempatan')) {
+                sourceClass = 'bg-yellow-100 text-yellow-800';
+                sourceIcon = '⚠️';
+            }
+            
+            detailsContainer.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-2">📋 Maklumat Pendaftaran</h4>
+                        <div class="space-y-1 text-sm">
+                            <div><strong>ID:</strong> ${regId}</div>
+                            <div><strong>Sekolah:</strong> ${data.schoolName}</div>
+                            <div><strong>Sumber Data:</strong> <span class="px-2 py-1 rounded text-xs ${sourceClass}">${sourceIcon} ${source}</span></div>
+                            <div><strong>Jumlah Pelajar:</strong> ${data.students.length} (${summaryText})</div>
+                            ${data.updatedAt ? `<div><strong>Kemaskini Terakhir:</strong> ${new Date(data.updatedAt).toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' })}</div>` : ''}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-2">👨‍🏫 Guru Ketua</h4>
+                        <div class="space-y-1 text-sm">
+                            <div><strong>Nama:</strong> ${data.teachers[0]?.name || 'N/A'}</div>
+                            <div><strong>Email:</strong> ${data.teachers[0]?.email || 'N/A'}</div>
+                            <div><strong>Telefon:</strong> ${data.teachers[0]?.phone || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('searchResult').classList.remove('hidden');
+            document.getElementById('searchError').classList.add('hidden');
+        }
+
+        function editFoundRegistration() {
+            if (foundRegistrationData && foundRegistrationId) {
+                loadRegistrationForEdit(foundRegistrationId, foundRegistrationData);
+                switchTab('pendaftaran');
+                clearSearch(); // Clear search results after loading for edit
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchRegId').value = '';
+            document.getElementById('searchPassword').value = '';
+            document.getElementById('searchResult').classList.add('hidden');
+            document.getElementById('searchError').classList.add('hidden');
+            foundRegistrationData = null;
+            foundRegistrationId = null;
         }
 
         function loadRegistrationForEdit(regId, data) {
             currentEditId = regId;
+            console.log('🔄 Loading for edit - ID:', regId, 'Data:', data);
             document.getElementById('editModeIndicator').classList.add('active');
+            
+            // Update submit button text and style for edit mode
+            const submitButton = document.getElementById('submitButton');
+            submitButton.innerHTML = '✏️ Kemaskini Pendaftaran';
+            submitButton.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+            submitButton.classList.add('bg-green-600', 'hover:bg-green-700');
             
             // Reset form first
             resetForm();
@@ -1195,8 +1499,16 @@
         }
 
         function resetForm() {
+            console.log('🔄 Resetting form - currentEditId was:', currentEditId);
             currentEditId = null;
             document.getElementById('editModeIndicator').classList.remove('active');
+            
+            // Reset submit button to default state
+            const submitButton = document.getElementById('submitButton');
+            submitButton.innerHTML = '💾 Hantar Pendaftaran';
+            submitButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+            submitButton.classList.add('bg-orange-600', 'hover:bg-orange-700');
+            
             document.getElementById('registrationForm').reset();
             
             const teachersContainer = document.getElementById('teachersContainer');
@@ -1507,6 +1819,22 @@
         }
 
         // Load data on page load
+        function loadLocalData() {
+            const savedRegistrations = localStorage.getItem('registrations');
+            if (savedRegistrations) {
+                try {
+                    registrations = JSON.parse(savedRegistrations);
+                    console.log('✅ Data tempatan dimuat:', Object.keys(registrations).length, 'pendaftaran');
+                    updateDashboard();
+                } catch (error) {
+                    console.error('❌ Ralat memuat data tempatan:', error);
+                    registrations = {};
+                }
+            }
+        }
+        
+        // Load local data first, then sync with Google Sheets
+        loadLocalData();
         loadFromGoogleSheets();
         
         // Auto-sync every 30 seconds when dashboard is active
@@ -1977,6 +2305,20 @@ function searchRegistration(regId, password) {
 
         // Initialize saved config
         loadSavedConfig();
+
+        // Toggle schedule function
+        function toggleSchedule(type) {
+            const scheduleDiv = document.getElementById(type + 'Schedule');
+            const arrow = document.getElementById(type + 'Arrow');
+            
+            if (scheduleDiv.classList.contains('hidden')) {
+                scheduleDiv.classList.remove('hidden');
+                arrow.textContent = '▲';
+            } else {
+                scheduleDiv.classList.add('hidden');
+                arrow.textContent = '▼';
+            }
+        }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99956cf750b3a84c',t:'MTc2MjI3MzA4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999a3fc5f4b3a858',t:'MTc2MjMyMzY2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
