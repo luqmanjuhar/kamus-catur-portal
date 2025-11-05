@@ -22,144 +22,177 @@
             display: block;
         }
         
-        .edit-mode-indicator {
+        .reg-tab-content {
             display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ea580c;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 1000;
         }
         
-        .edit-mode-indicator.active {
+        .reg-tab-content.active {
             display: block;
         }
+        
+
     </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body class="bg-gradient-to-br from-orange-50 to-orange-100 min-h-full">
-  <div class="edit-mode-indicator" id="editModeIndicator">
-   🔄 MOD EDIT AKTIF
-  </div>
   <div class="container mx-auto px-4 py-8 max-w-7xl">
    <header class="bg-white rounded-lg shadow-lg p-6 mb-6">
     <h1 class="text-3xl font-bold text-orange-600 text-center">Dashboard Sukan Catur MSSD</h1>
     <p class="text-center text-gray-600 mt-2">Sistem Pendaftaran Kejohanan Catur Peringkat Daerah</p>
    </header>
    <nav class="bg-white rounded-lg shadow-md p-4 mb-6">
-    <div class="flex flex-wrap gap-3 justify-center"><button onclick="switchTab('pendaftaran')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-orange-600 text-white" data-tab="pendaftaran"> 📝 Pendaftaran Baru </button> <button onclick="switchTab('edit')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-tab="edit"> ✏️ Edit Pendaftaran </button> <button onclick="switchTab('dashboard')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-tab="dashboard"> 📊 Dashboard Pendaftaran </button> <button onclick="switchTab('pengumuman')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-tab="pengumuman"> 📢 Pengumuman </button> <button onclick="switchTab('dokumen')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-tab="dokumen"> 📄 Dokumen Tambahan </button>
+    <div class="flex flex-wrap gap-3 justify-center"><button onclick="switchTab('pendaftaran')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-orange-600 text-white" data-tab="pendaftaran"> 📝 Pendaftaran </button> <button onclick="switchTab('dashboard')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-tab="dashboard"> 📊 Dashboard Pendaftaran </button> <button onclick="switchTab('pengumuman')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-tab="pengumuman"> 📢 Pengumuman </button> <button onclick="switchTab('dokumen')" class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-tab="dokumen"> 📄 Dokumen Tambahan </button>
     </div>
    </nav>
    <div id="pendaftaran" class="tab-content active">
     <div class="bg-white rounded-lg shadow-lg p-6">
-     <h2 class="text-2xl font-bold text-orange-600 mb-6">Pendaftaran Baru</h2>
-     <form id="registrationForm" onsubmit="handleSubmit(event)">
-      <section class="mb-8">
-       <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Maklumat Sekolah</h3>
-       <div class="mb-4"><label for="schoolName" class="block text-gray-700 font-medium mb-2">Nama Sekolah *</label> <input type="text" id="schoolName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Contoh: SK Taman Desa">
-        <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-         <p class="text-sm text-blue-800"><span class="font-semibold">💡 Tips:</span> Anda boleh gunakan singkatan sahaja:</p>
-         <div class="text-xs text-blue-700 mt-1 grid grid-cols-2 gap-2">
-          <div>
-           • <strong>SK</strong> - Sekolah Kebangsaan
-          </div>
-          <div>
-           • <strong>SMK</strong> - Sekolah Menengah Kebangsaan
-          </div>
-          <div>
-           • <strong>SJKC</strong> - Sekolah Jenis Kebangsaan (Cina)
-          </div>
-          <div>
-           • <strong>SJKT</strong> - Sekolah Jenis Kebangsaan (Tamil)
-          </div>
-          <div>
-           • <strong>SMKA</strong> - Sekolah Menengah Kebangsaan Agama
+     <h2 class="text-2xl font-bold text-orange-600 mb-6">Pendaftaran</h2><!-- Sub-tabs for Registration -->
+     <div class="mb-6">
+      <div class="flex gap-2 justify-center"><button onclick="switchRegistrationTab('daftar-baru')" class="reg-tab-btn px-4 py-2 rounded-lg font-medium transition-all bg-orange-600 text-white" data-reg-tab="daftar-baru"> ➕ Daftar Baru </button> <button onclick="switchRegistrationTab('kemaskini')" class="reg-tab-btn px-4 py-2 rounded-lg font-medium transition-all bg-gray-200 text-gray-700 hover:bg-gray-300" data-reg-tab="kemaskini"> ✏️ Kemaskini Pendaftaran </button>
+      </div>
+     </div><!-- Daftar Baru Content -->
+     <div id="daftar-baru" class="reg-tab-content active">
+      <h3 class="text-xl font-semibold text-orange-600 mb-4">Pendaftaran Baru</h3>
+      <form id="registrationForm" onsubmit="handleSubmit(event)">
+       <section class="mb-8">
+        <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Maklumat Sekolah</h3>
+        <div class="mb-4"><label for="schoolName" class="block text-gray-700 font-medium mb-2">Nama Sekolah *</label> <input type="text" id="schoolName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Contoh: SK Taman Desa">
+         <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p class="text-sm text-blue-800"><span class="font-semibold">💡 Tips:</span> Anda boleh gunakan singkatan sahaja:</p>
+          <div class="text-xs text-blue-700 mt-1 grid grid-cols-2 gap-2">
+           <div>
+            • <strong>SK</strong> - Sekolah Kebangsaan
+           </div>
+           <div>
+            • <strong>SMK</strong> - Sekolah Menengah Kebangsaan
+           </div>
+           <div>
+            • <strong>SJKC</strong> - Sekolah Jenis Kebangsaan (Cina)
+           </div>
+           <div>
+            • <strong>SJKT</strong> - Sekolah Jenis Kebangsaan (Tamil)
+           </div>
+           <div>
+            • <strong>SMKA</strong> - Sekolah Menengah Kebangsaan Agama
+           </div>
           </div>
          </div>
         </div>
-       </div>
-      </section>
-      <section class="mb-8">
-       <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Maklumat Guru</h3>
-       <div id="teachersContainer">
-        <div class="teacher-entry bg-orange-50 p-4 rounded-lg mb-4" data-teacher-index="0">
-         <div class="flex justify-between items-center mb-3">
-          <h4 class="font-semibold text-orange-700">Guru 1 (Ketua) *</h4>
+       </section>
+       <section class="mb-8">
+        <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Maklumat Guru</h3>
+        <div id="teachersContainer">
+         <div class="teacher-entry bg-orange-50 p-4 rounded-lg mb-4" data-teacher-index="0">
+          <div class="flex justify-between items-center mb-3">
+           <h4 class="font-semibold text-orange-700">Guru 1 (Ketua) *</h4>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+           <div><label class="block text-gray-700 font-medium mb-2">Nama Guru *</label> <input type="text" required class="teacher-name w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Nama penuh guru">
+           </div>
+           <div><label class="block text-gray-700 font-medium mb-2">Email Guru *</label> <input type="email" required class="teacher-email w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="email@example.com">
+           </div>
+           <div><label class="block text-gray-700 font-medium mb-2">Nombor Telefon *</label> <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13">
+           </div>
+          </div>
          </div>
-         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div><label class="block text-gray-700 font-medium mb-2">Nama Guru *</label> <input type="text" required class="teacher-name w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Nama penuh guru">
+        </div><button type="button" onclick="addTeacher()" class="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ➕ Tambah Guru Pengiring (Pilihan) </button>
+        <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+         <p class="text-sm text-blue-800"><span class="font-semibold">💡 Nota:</span> Guru 1 (Ketua) adalah wajib. Guru pengiring adalah pilihan dan boleh ditambah mengikut keperluan.</p>
+        </div>
+       </section>
+       <section class="mb-8">
+        <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Pendaftaran Pelajar</h3>
+        <div id="studentsContainer">
+         <div class="student-entry bg-orange-50 p-4 rounded-lg mb-4" data-student-index="0">
+          <div class="flex justify-between items-center mb-3">
+           <h4 class="font-semibold text-orange-700">Pelajar 1</h4><button type="button" onclick="removeStudent(0)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"> 🗑️ Buang </button>
           </div>
-          <div><label class="block text-gray-700 font-medium mb-2">Email Guru *</label> <input type="email" required class="teacher-email w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="email@example.com">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+           <div><label class="block text-gray-700 font-medium mb-2">Nama Pelajar *</label> <input type="text" required class="student-name w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Nama penuh pelajar">
+           </div>
+           <div><label class="block text-gray-700 font-medium mb-2">Nombor IC *</label> <input type="text" required class="student-ic w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="XXXXXX-XX-XXXX" maxlength="14">
+           </div>
           </div>
-          <div><label class="block text-gray-700 font-medium mb-2">Nombor Telefon *</label> <input type="tel" required class="teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+           <div><label class="block text-gray-700 font-medium mb-2">Jantina *</label> <select required class="student-gender w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"> <option value="">Pilih Jantina</option> <option value="Lelaki">Lelaki</option> <option value="Perempuan">Perempuan</option> </select>
+           </div>
+           <div><label class="block text-gray-700 font-medium mb-2">Kategori *</label> <select required class="student-category w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"> <option value="">Pilih Kategori</option> <option value="Bawah 12 Tahun">Bawah 12 Tahun</option> <option value="Bawah 15 Tahun">Bawah 15 Tahun</option> <option value="Bawah 18 Tahun">Bawah 18 Tahun</option> </select>
+           </div>
+           <div><label class="block text-gray-700 font-medium mb-2">ID Pemain</label> <input type="text" readonly class="student-id w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100" placeholder="Auto-generated">
+           </div>
           </div>
+         </div>
+        </div><button type="button" onclick="addStudent()" class="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ➕ Tambah Pelajar </button>
+       </section>
+       <div class="flex gap-4 justify-end"><button type="button" onclick="resetForm()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> 🔄 Reset </button> <button type="submit" id="submitButton" class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> 💾 Hantar Pendaftaran </button>
+       </div>
+      </form>
+     </div><!-- Kemaskini Pendaftaran Content -->
+     <div id="kemaskini" class="reg-tab-content hidden">
+      <h3 class="text-xl font-semibold text-orange-600 mb-4">Kemaskini Pendaftaran</h3>
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+       <div class="flex items-start gap-3">
+        <div class="text-blue-600 text-2xl">
+         ℹ️
+        </div>
+        <div>
+         <h4 class="font-semibold text-blue-800 mb-2">Cara Kemaskini Pendaftaran</h4>
+         <ul class="text-sm text-blue-700 space-y-1">
+          <li>• Masukkan ID Pendaftaran yang betul (contoh: MSSD-01-01)</li>
+          <li>• Masukkan 4 digit akhir nombor telefon Guru Ketua sebagai kata laluan</li>
+          <li>• Sistem akan paparkan borang untuk kemaskini data secara terus</li>
+          <li>• Kemaskini akan disimpan ke Google Sheets secara automatik</li>
+         </ul>
+        </div>
+       </div>
+      </div><!-- Login Form -->
+      <div id="updateLoginForm">
+       <form id="updateForm" onsubmit="handleUpdateRequest(event)" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <div><label for="updateRegId" class="block text-gray-700 font-medium mb-2">ID Pendaftaran *</label> <input type="text" id="updateRegId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="MSSD-01-01" maxlength="10">
+          <p class="text-xs text-gray-500 mt-1">Format: MSSD-XX-XX (contoh: MSSD-01-01)</p>
+         </div>
+         <div><label for="updatePassword" class="block text-gray-700 font-medium mb-2">Kata Laluan (4 digit akhir telefon Guru Ketua) *</label> <input type="password" id="updatePassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="1234" maxlength="4" pattern="[0-9]{4}">
+          <p class="text-xs text-gray-500 mt-1">Masukkan 4 digit akhir nombor telefon Guru Ketua</p>
          </div>
         </div>
-       </div><button type="button" onclick="addTeacher()" class="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ➕ Tambah Guru Pengiring (Pilihan) </button>
-       <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <p class="text-sm text-blue-800"><span class="font-semibold">💡 Nota:</span> Guru 1 (Ketua) adalah wajib. Guru pengiring adalah pilihan dan boleh ditambah mengikut keperluan.</p>
-       </div>
-      </section>
-      <section class="mb-8">
-       <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Pendaftaran Pelajar</h3>
-       <div id="studentsContainer">
-        <div class="student-entry bg-orange-50 p-4 rounded-lg mb-4" data-student-index="0">
-         <div class="flex justify-between items-center mb-3">
-          <h4 class="font-semibold text-orange-700">Pelajar 1</h4><button type="button" onclick="removeStudent(0)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"> 🗑️ Buang </button>
+        <div class="flex gap-4 justify-end"><button type="button" onclick="clearUpdateForm()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> 🔄 Reset </button> <button type="submit" id="updateButton" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"> 🔍 Akses Kemaskini </button>
+        </div>
+       </form>
+      </div><!-- Edit Form (Hidden initially) -->
+      <div id="updateEditForm" class="hidden">
+       <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center gap-3">
+         <div class="text-green-600 text-xl">
+          ✅
          </div>
-         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-          <div><label class="block text-gray-700 font-medium mb-2">Nama Pelajar *</label> <input type="text" required class="student-name w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Nama penuh pelajar">
-          </div>
-          <div><label class="block text-gray-700 font-medium mb-2">Nombor IC *</label> <input type="text" required class="student-ic w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="XXXXXX-XX-XXXX" maxlength="14">
-          </div>
-         </div>
-         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div><label class="block text-gray-700 font-medium mb-2">Jantina *</label> <select required class="student-gender w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"> <option value="">Pilih Jantina</option> <option value="Lelaki">Lelaki</option> <option value="Perempuan">Perempuan</option> </select>
-          </div>
-          <div><label class="block text-gray-700 font-medium mb-2">Kategori *</label> <select required class="student-category w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"> <option value="">Pilih Kategori</option> <option value="Bawah 12 Tahun">Bawah 12 Tahun</option> <option value="Bawah 15 Tahun">Bawah 15 Tahun</option> <option value="Bawah 18 Tahun">Bawah 18 Tahun</option> </select>
-          </div>
-          <div><label class="block text-gray-700 font-medium mb-2">ID Pemain</label> <input type="text" readonly class="student-id w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100" placeholder="Auto-generated">
-          </div>
+         <div>
+          <h4 class="font-semibold text-green-800">Akses Dibenarkan</h4>
+          <p class="text-sm text-green-700 mt-1">Anda boleh kemaskini data pendaftaran di bawah. Perubahan akan disimpan ke Google Sheets.</p>
          </div>
         </div>
-       </div><button type="button" onclick="addStudent()" class="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ➕ Tambah Pelajar </button>
-      </section>
-      <div class="flex gap-4 justify-end"><button type="button" onclick="resetForm()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> 🔄 Reset </button> <button type="submit" id="submitButton" class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> 💾 Hantar Pendaftaran </button>
-      </div>
-     </form>
-    </div>
-   </div>
-   <div id="edit" class="tab-content">
-    <div class="bg-white rounded-lg shadow-lg p-6">
-     <h2 class="text-2xl font-bold text-orange-600 mb-6">Edit Pendaftaran</h2>
-     <form id="searchForm" onsubmit="handleSearch(event)" class="max-w-2xl mx-auto">
-      <div class="mb-4"><label for="searchRegId" class="block text-gray-700 font-medium mb-2">ID Pendaftaran *</label> <input type="text" id="searchRegId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="REG-001-2026">
-      </div>
-      <div class="mb-6"><label for="searchPassword" class="block text-gray-700 font-medium mb-2">Kata Laluan (4 Digit Terakhir No Telefon Guru Ketua) *</label> <input type="text" id="searchPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="6789" maxlength="4">
-      </div><button type="submit" class="w-full px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> 🔍 Cari Pendaftaran </button>
-     </form>
-     <div id="searchResult" class="mt-6 hidden">
-      <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-       <p class="text-green-800 font-medium mb-3">✅ Pendaftaran dijumpai!</p>
-       <div id="foundRegistrationDetails" class="bg-white rounded-lg p-4 mb-4 border border-green-300"><!-- Registration details will be populated here -->
        </div>
-       <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-        <p class="text-blue-800 text-sm"><span class="font-semibold">💡 Nota:</span> Data ini diambil terus dari Google Sheets untuk memastikan maklumat terkini. Sebarang perubahan yang anda buat akan disimpan ke Google Sheets dan boleh dilihat oleh pentadbir.</p>
-       </div>
-       <div class="flex gap-3"><button onclick="editFoundRegistration()" class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ✏️ Edit Pendaftaran Ini </button> <button onclick="clearSearch()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> 🔍 Cari Lain </button>
-       </div>
-      </div>
-     </div>
-     <div id="searchError" class="mt-6 hidden">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-       <p class="text-red-800 font-medium">❌ Pendaftaran tidak dijumpai atau kata laluan salah.</p>
+       <form id="editRegistrationForm" onsubmit="handleUpdateSubmit(event)"><!-- School Information -->
+        <section class="mb-8">
+         <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Maklumat Sekolah</h3>
+         <div class="mb-4"><label for="editSchoolName" class="block text-gray-700 font-medium mb-2">Nama Sekolah *</label> <input type="text" id="editSchoolName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Contoh: SK Taman Desa">
+         </div>
+        </section><!-- Teachers Section -->
+        <section class="mb-8">
+         <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Maklumat Guru</h3>
+         <div id="editTeachersContainer"><!-- Teachers will be populated here -->
+         </div><button type="button" onclick="addEditTeacher()" class="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ➕ Tambah Guru Pengiring </button>
+        </section><!-- Students Section -->
+        <section class="mb-8">
+         <h3 class="text-xl font-semibold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">Pendaftaran Pelajar</h3>
+         <div id="editStudentsContainer"><!-- Students will be populated here -->
+         </div><button type="button" onclick="addEditStudent()" class="mt-4 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"> ➕ Tambah Pelajar </button>
+        </section>
+        <div class="flex gap-4 justify-end"><button type="button" onclick="cancelEdit()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"> ❌ Batal </button> <button type="submit" id="saveUpdateButton" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"> 💾 Simpan Kemaskini </button>
+        </div>
+       </form>
       </div>
      </div>
     </div>
@@ -677,7 +710,6 @@
   </div>
   <script>
         let registrations = {};
-        let currentEditId = null;
         let teacherCount = 1;
         let studentCount = 1;
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWNUtbfV4VKvsmbGyD4RWNUEVFdKwkk8bOsXuPdBkfgJ_-QFySGx0uJmfsBW5087mlPQ/exec';
@@ -702,6 +734,21 @@
                 // Auto-sync with Google Sheets when dashboard is opened
                 loadFromGoogleSheets();
             }
+        }
+
+        function switchRegistrationTab(tabName) {
+            document.querySelectorAll('.reg-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.reg-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-orange-600', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-reg-tab="${tabName}"]`).classList.remove('bg-gray-200', 'text-gray-700');
+            document.querySelector(`[data-reg-tab="${tabName}"]`).classList.add('bg-orange-600', 'text-white');
         }
 
         function formatSchoolName(name) {
@@ -992,7 +1039,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        action: currentEditId ? 'update' : 'submit',
+                        action: 'submit',
                         registrationId: regId,
                         schoolName: data.schoolName,
                         teachers: data.teachers,
@@ -1133,55 +1180,7 @@
             }
         }
 
-        async function searchRegistrationOnline(regId, password) {
-            if (!GOOGLE_SCRIPT_URL) {
-                return { found: false, error: 'No Google Sheets URL configured' };
-            }
-            
-            try {
-                const callbackName = 'searchCallback_' + Date.now();
-                
-                const dataPromise = new Promise((resolve, reject) => {
-                    window[callbackName] = function(data) {
-                        resolve(data);
-                        delete window[callbackName];
-                        if (script.parentNode) {
-                            document.head.removeChild(script);
-                        }
-                    };
-                    
-                    const script = document.createElement('script');
-                    const requestUrl = `${GOOGLE_SCRIPT_URL}?action=search&regId=${encodeURIComponent(regId)}&password=${encodeURIComponent(password)}&callback=${callbackName}`;
-                    script.src = requestUrl;
-                    
-                    script.onerror = (error) => {
-                        reject(new Error('Failed to load script'));
-                        delete window[callbackName];
-                        if (script.parentNode) {
-                            document.head.removeChild(script);
-                        }
-                    };
-                    
-                    document.head.appendChild(script);
-                    
-                    setTimeout(() => {
-                        if (window[callbackName]) {
-                            reject(new Error('Request timeout'));
-                            delete window[callbackName];
-                            if (script.parentNode) {
-                                document.head.removeChild(script);
-                            }
-                        }
-                    }, 10000);
-                });
-                
-                return await dataPromise;
-                
-            } catch (error) {
-                console.error('Error searching registration:', error);
-                return { found: false, error: error.message };
-            }
-        }
+
 
         function sendWhatsAppNotification(regId, data, isNew) {
             if (!isNew) return;
@@ -1241,17 +1240,12 @@
             event.preventDefault();
             
             const data = collectFormData();
-            const isNew = !currentEditId;
             
-            console.log('📝 Submit - currentEditId:', currentEditId, 'isNew:', isNew);
-            
-            // Use existing registration ID for edit, or generate new one for new registration
-            let regId = currentEditId;
-            if (!regId && data.students.length > 0) {
+            // Generate new registration ID
+            let regId;
+            if (data.students.length > 0) {
                 regId = generateRegistrationId(data.students[0].category);
             }
-            
-            console.log('📝 Submit - Final regId:', regId);
             
             // Ensure we have a valid registration ID
             if (!regId) {
@@ -1264,7 +1258,7 @@
                 schoolName: data.schoolName,
                 teachers: data.teachers,
                 students: data.students,
-                createdAt: isNew ? new Date().toISOString() : (registrations[regId]?.createdAt || new Date().toISOString()),
+                createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 status: 'AKTIF'
             };
@@ -1276,16 +1270,12 @@
             sendToGoogleSheets(regId, data);
             
             showNotification(
-                isNew 
-                    ? `✅ Pendaftaran berjaya! ID Pendaftaran: ${regId}. Sila simpan ID ini untuk tujuan edit.`
-                    : `✅ Kemaskini berjaya! ID Pendaftaran: ${regId}`,
+                `✅ Pendaftaran berjaya! ID Pendaftaran: ${regId}. Sila simpan ID ini untuk rujukan.`,
                 'success'
             );
             
-            // Only send WhatsApp notification for new registrations
-            if (isNew) {
-                sendWhatsAppNotification(regId, data, isNew);
-            }
+            // Send WhatsApp notification
+            sendWhatsAppNotification(regId, data, true);
             
             resetForm();
             
@@ -1298,211 +1288,18 @@
             }, 2000);
         }
 
-        let foundRegistrationData = null;
-        let foundRegistrationId = null;
 
-        async function handleSearch(event) {
-            event.preventDefault();
-            
-            const regId = document.getElementById('searchRegId').value;
-            const password = document.getElementById('searchPassword').value;
-            
-            showSyncStatus('🔍 Mencari pendaftaran dari Google Sheets...', 'info');
-            
-            // ALWAYS search from Google Sheets first for latest data
-            const result = await searchRegistrationOnline(regId, password);
-            
-            if (result.found && result.registration) {
-                console.log('✅ Found registration from Google Sheets:', regId);
-                foundRegistrationData = result.registration;
-                foundRegistrationId = regId;
-                
-                // Update local storage with fresh data from Google Sheets
-                registrations[regId] = result.registration;
-                localStorage.setItem('registrations', JSON.stringify(registrations));
-                
-                displayFoundRegistration(regId, result.registration, 'Google Sheets (Terkini)');
-                showSyncStatus('✅ Pendaftaran dijumpai dari Google Sheets!', 'success');
-            } else {
-                console.log('❌ Not found in Google Sheets, trying local data...');
-                // Only fallback to local data if Google Sheets search fails
-                const localReg = registrations[regId];
-                if (localReg) {
-                    // Verify password with local data
-                    const firstTeacher = localReg.teachers[0];
-                    if (firstTeacher) {
-                        const phone = firstTeacher.phone.replace(/\D/g, '');
-                        const last4 = phone.slice(-4);
-                        
-                        if (last4 === password) {
-                            foundRegistrationData = localReg;
-                            foundRegistrationId = regId;
-                            displayFoundRegistration(regId, localReg, 'Data Tempatan (Mungkin Lama)');
-                            showSyncStatus('⚠️ Pendaftaran dijumpai dari data tempatan (mungkin tidak terkini)', 'warning');
-                            return;
-                        }
-                    }
-                }
-                
-                document.getElementById('searchResult').classList.add('hidden');
-                document.getElementById('searchError').classList.remove('hidden');
-                showSyncStatus('❌ Pendaftaran tidak dijumpai atau kata laluan salah', 'error');
-            }
-        }
 
-        function displayFoundRegistration(regId, data, source) {
-            const detailsContainer = document.getElementById('foundRegistrationDetails');
-            
-            // Generate category summary
-            const categorySummary = {
-                'L12': 0, 'P12': 0,
-                'L15': 0, 'P15': 0,
-                'L18': 0, 'P18': 0
-            };
-            
-            data.students.forEach(student => {
-                const genderCode = student.gender === 'Lelaki' ? 'L' : 'P';
-                const ageCode = student.category.includes('12') ? '12' : 
-                               student.category.includes('15') ? '15' : '18';
-                categorySummary[genderCode + ageCode]++;
-            });
-            
-            const summaryText = Object.entries(categorySummary)
-                .filter(([key, count]) => count > 0)
-                .map(([key, count]) => `${key}: ${count}`)
-                .join(' | ');
-            
-            // Determine source styling
-            let sourceClass = 'bg-blue-100 text-blue-800';
-            let sourceIcon = '💾';
-            
-            if (source.includes('Google Sheets')) {
-                sourceClass = 'bg-green-100 text-green-800';
-                sourceIcon = '☁️';
-            } else if (source.includes('Tempatan')) {
-                sourceClass = 'bg-yellow-100 text-yellow-800';
-                sourceIcon = '⚠️';
-            }
-            
-            detailsContainer.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <h4 class="font-semibold text-gray-700 mb-2">📋 Maklumat Pendaftaran</h4>
-                        <div class="space-y-1 text-sm">
-                            <div><strong>ID:</strong> ${regId}</div>
-                            <div><strong>Sekolah:</strong> ${data.schoolName}</div>
-                            <div><strong>Sumber Data:</strong> <span class="px-2 py-1 rounded text-xs ${sourceClass}">${sourceIcon} ${source}</span></div>
-                            <div><strong>Jumlah Pelajar:</strong> ${data.students.length} (${summaryText})</div>
-                            ${data.updatedAt ? `<div><strong>Kemaskini Terakhir:</strong> ${new Date(data.updatedAt).toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' })}</div>` : ''}
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-700 mb-2">👨‍🏫 Guru Ketua</h4>
-                        <div class="space-y-1 text-sm">
-                            <div><strong>Nama:</strong> ${data.teachers[0]?.name || 'N/A'}</div>
-                            <div><strong>Email:</strong> ${data.teachers[0]?.email || 'N/A'}</div>
-                            <div><strong>Telefon:</strong> ${data.teachers[0]?.phone || 'N/A'}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('searchResult').classList.remove('hidden');
-            document.getElementById('searchError').classList.add('hidden');
-        }
 
-        function editFoundRegistration() {
-            if (foundRegistrationData && foundRegistrationId) {
-                loadRegistrationForEdit(foundRegistrationId, foundRegistrationData);
-                switchTab('pendaftaran');
-                clearSearch(); // Clear search results after loading for edit
-            }
-        }
 
-        function clearSearch() {
-            document.getElementById('searchRegId').value = '';
-            document.getElementById('searchPassword').value = '';
-            document.getElementById('searchResult').classList.add('hidden');
-            document.getElementById('searchError').classList.add('hidden');
-            foundRegistrationData = null;
-            foundRegistrationId = null;
-        }
 
-        function loadRegistrationForEdit(regId, data) {
-            currentEditId = regId;
-            console.log('🔄 Loading for edit - ID:', regId, 'Data:', data);
-            document.getElementById('editModeIndicator').classList.add('active');
-            
-            // Update submit button text and style for edit mode - FORCE UPDATE
-            const submitButton = document.getElementById('submitButton');
-            submitButton.innerHTML = '✏️ Kemaskini Pendaftaran';
-            submitButton.className = 'px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium';
-            
-            // Reset form first
-            resetForm();
-            
-            // Load school name
-            document.getElementById('schoolName').value = data.schoolName;
-            
-            // Load teachers
-            const teachersContainer = document.getElementById('teachersContainer');
-            const existingTeachers = teachersContainer.querySelectorAll('.teacher-entry');
-            
-            // Add additional teachers if needed
-            while (existingTeachers.length < data.teachers.length) {
-                addTeacher();
-            }
-            
-            // Fill teacher data
-            data.teachers.forEach((teacher, index) => {
-                const entries = teachersContainer.querySelectorAll('.teacher-entry');
-                const entry = entries[index];
-                if (entry) {
-                    entry.querySelector('.teacher-name').value = teacher.name;
-                    entry.querySelector('.teacher-email').value = teacher.email;
-                    entry.querySelector('.teacher-phone').value = teacher.phone;
-                }
-            });
-            
-            // Load students
-            const studentsContainer = document.getElementById('studentsContainer');
-            const existingStudents = studentsContainer.querySelectorAll('.student-entry');
-            
-            // Remove existing students except first one
-            existingStudents.forEach((student, index) => {
-                if (index > 0) {
-                    student.remove();
-                }
-            });
-            
-            // Add students as needed
-            while (studentsContainer.querySelectorAll('.student-entry').length < data.students.length) {
-                addStudent();
-            }
-            
-            // Fill student data
-            data.students.forEach((student, index) => {
-                const entries = studentsContainer.querySelectorAll('.student-entry');
-                const entry = entries[index];
-                if (entry) {
-                    entry.querySelector('.student-name').value = student.name;
-                    entry.querySelector('.student-ic').value = student.ic;
-                    entry.querySelector('.student-gender').value = student.gender;
-                    entry.querySelector('.student-category').value = student.category;
-                    
-                    // Use existing player ID or generate new one
-                    const playerId = student.playerId || generatePlayerId(student.gender, data.schoolName, index, student.category, regId);
-                    entry.querySelector('.student-id').value = playerId;
-                }
-            });
-        }
+
+
+
+
 
         function resetForm() {
-            console.log('🔄 Resetting form - currentEditId was:', currentEditId);
-            currentEditId = null;
-            document.getElementById('editModeIndicator').classList.remove('active');
-            
-            // Reset submit button to default state - FORCE RESET
+            // Reset submit button to default state
             const submitButton = document.getElementById('submitButton');
             submitButton.innerHTML = '💾 Hantar Pendaftaran';
             submitButton.className = 'px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium';
@@ -2042,7 +1839,17 @@ function saveRegistration(data) {
     const studentSheet = ss.getSheetByName('PELAJAR');
     
     const regId = data.registrationId;
-    const timestamp = new Date();
+    const isUpdate = data.action === 'update';
+    
+    // For updates, preserve original creation date
+    let createdDate, updatedDate;
+    if (isUpdate && data.originalCreatedAt) {
+      createdDate = new Date(data.originalCreatedAt);
+      updatedDate = new Date(data.updateTimestamp);
+    } else {
+      // New registration - both dates are the same
+      createdDate = updatedDate = new Date(data.timestamp || new Date());
+    }
     
     // Determine school type
     const schoolName = data.schoolName.toUpperCase();
@@ -2078,25 +1885,25 @@ function saveRegistration(data) {
       }
     });
     
-    // Save school data
+    // Save school data - preserve original creation date for updates
     schoolSheet.appendRow([
       regId, data.schoolName, schoolType, totalTeachers, totalStudents,
       totalMale, totalFemale, totalU12, totalU15, totalU18,
-      timestamp, timestamp, 'AKTIF'
+      createdDate, updatedDate, 'AKTIF'
     ]);
     
-    // Save teachers
+    // Save teachers - preserve original creation date for updates
     data.teachers.forEach((teacher, index) => {
       const position = index === 0 ? 'KETUA' : 'PENGIRING';
       const order = index + 1;
       
       teacherSheet.appendRow([
         regId, data.schoolName, teacher.name, teacher.email, teacher.phone,
-        position, order, timestamp, timestamp, 'AKTIF'
+        position, order, createdDate, updatedDate, 'AKTIF'
       ]);
     });
     
-    // Save students
+    // Save students - preserve original creation date for updates
     const headTeacher = data.teachers[0];
     data.students.forEach(student => {
       // Generate category display (L12, P15, etc.)
@@ -2108,7 +1915,7 @@ function saveRegistration(data) {
       studentSheet.appendRow([
         regId, data.schoolName, student.name, student.ic, student.gender,
         student.category, categoryDisplay, student.playerId,
-        headTeacher.name, headTeacher.phone, timestamp, timestamp, 'AKTIF'
+        headTeacher.name, headTeacher.phone, createdDate, updatedDate, 'AKTIF'
       ]);
     });
     
@@ -2304,6 +2111,451 @@ function searchRegistration(regId, password) {
         // Initialize saved config
         loadSavedConfig();
 
+        // Update form functions
+        let currentEditData = null;
+        let editTeacherCount = 0;
+        let editStudentCount = 0;
+
+        function handleUpdateRequest(event) {
+            event.preventDefault();
+            
+            const regId = document.getElementById('updateRegId').value.trim().toUpperCase();
+            const password = document.getElementById('updatePassword').value.trim();
+            
+            if (!regId || !password) {
+                showNotification('❌ Sila masukkan ID Pendaftaran dan kata laluan', 'error');
+                return;
+            }
+            
+            // Validate registration ID format
+            const regIdPattern = /^MSSD-\d{2}-\d{2}$/;
+            if (!regIdPattern.test(regId)) {
+                showNotification('❌ Format ID Pendaftaran tidak betul. Contoh: MSSD-01-01', 'error');
+                return;
+            }
+            
+            // Validate password (4 digits)
+            if (!/^\d{4}$/.test(password)) {
+                showNotification('❌ Kata laluan mesti 4 digit nombor', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const updateButton = document.getElementById('updateButton');
+            updateButton.innerHTML = '🔍 Menyemak...';
+            updateButton.disabled = true;
+            
+            // Verify with Google Sheets
+            verifyUpdateAccess(regId, password);
+        }
+
+        function verifyUpdateAccess(regId, password) {
+            // First check local data
+            const localReg = registrations[regId];
+            if (localReg) {
+                const phone = localReg.teachers[0].phone.replace(/\D/g, '');
+                const last4 = phone.slice(-4);
+                
+                if (last4 === password) {
+                    // Access granted - show edit form
+                    showEditForm(regId, localReg);
+                    resetUpdateButton();
+                    return;
+                }
+            }
+            
+            // If not found locally or password wrong, check Google Sheets
+            if (!GOOGLE_SCRIPT_URL) {
+                showNotification('❌ ID Pendaftaran atau kata laluan tidak betul', 'error');
+                resetUpdateButton();
+                return;
+            }
+            
+            const callbackName = 'updateVerifyCallback_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                if (data && data.found && data.registration) {
+                    // Access granted - show edit form
+                    showEditForm(regId, data.registration);
+                } else {
+                    const errorMsg = data.error || 'ID Pendaftaran atau kata laluan tidak betul';
+                    showNotification('❌ ' + errorMsg, 'error');
+                }
+                
+                resetUpdateButton();
+                delete window[callbackName];
+                if (script.parentNode) {
+                    document.head.removeChild(script);
+                }
+            };
+            
+            const script = document.createElement('script');
+            script.src = `${GOOGLE_SCRIPT_URL}?action=search&regId=${regId}&password=${password}&callback=${callbackName}`;
+            
+            script.onerror = () => {
+                showNotification('❌ Gagal menyambung ke server. Sila cuba lagi.', 'error');
+                resetUpdateButton();
+                delete window[callbackName];
+                if (script.parentNode) {
+                    document.head.removeChild(script);
+                }
+            };
+            
+            document.head.appendChild(script);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    showNotification('❌ Masa tamat. Sila cuba lagi.', 'error');
+                    resetUpdateButton();
+                    delete window[callbackName];
+                    if (script.parentNode) {
+                        document.head.removeChild(script);
+                    }
+                }
+            }, 10000);
+        }
+
+        function showEditForm(regId, registrationData) {
+            currentEditData = { regId, data: registrationData };
+            
+            // Hide login form and show edit form
+            document.getElementById('updateLoginForm').classList.add('hidden');
+            document.getElementById('updateEditForm').classList.remove('hidden');
+            
+            // Populate form with existing data
+            populateEditForm(registrationData);
+            
+            showNotification('✅ Data dimuat berjaya. Anda boleh kemaskini sekarang.', 'success');
+        }
+
+        function populateEditForm(data) {
+            // Populate school name
+            document.getElementById('editSchoolName').value = data.schoolName || '';
+            
+            // Populate teachers
+            const teachersContainer = document.getElementById('editTeachersContainer');
+            teachersContainer.innerHTML = '';
+            editTeacherCount = 0;
+            
+            data.teachers.forEach((teacher, index) => {
+                addEditTeacher(teacher, index === 0);
+            });
+            
+            // Populate students
+            const studentsContainer = document.getElementById('editStudentsContainer');
+            studentsContainer.innerHTML = '';
+            editStudentCount = 0;
+            
+            data.students.forEach(student => {
+                addEditStudent(student);
+            });
+        }
+
+        function addEditTeacher(teacherData = null, isHead = false) {
+            const container = document.getElementById('editTeachersContainer');
+            const teacherDiv = document.createElement('div');
+            teacherDiv.className = 'edit-teacher-entry bg-orange-50 p-4 rounded-lg mb-4';
+            teacherDiv.setAttribute('data-edit-teacher-index', editTeacherCount);
+            
+            const position = isHead || editTeacherCount === 0 ? 'Ketua' : 'Pengiring';
+            const isRequired = editTeacherCount === 0;
+            
+            teacherDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-orange-700">Guru ${editTeacherCount + 1} (${position}) ${isRequired ? '*' : ''}</h4>
+                    ${!isRequired ? `<button type="button" onclick="removeEditTeacher(${editTeacherCount})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">🗑️ Buang</button>` : ''}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Nama Guru ${isRequired ? '*' : ''}</label>
+                        <input type="text" ${isRequired ? 'required' : ''} class="edit-teacher-name w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Nama penuh guru" value="${teacherData ? teacherData.name : ''}">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Email Guru ${isRequired ? '*' : ''}</label>
+                        <input type="email" ${isRequired ? 'required' : ''} class="edit-teacher-email w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="email@example.com" value="${teacherData ? teacherData.email : ''}">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Nombor Telefon ${isRequired ? '*' : ''}</label>
+                        <input type="tel" ${isRequired ? 'required' : ''} class="edit-teacher-phone w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="012-345 6789" maxlength="13" value="${teacherData ? teacherData.phone : ''}">
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(teacherDiv);
+            editTeacherCount++;
+        }
+
+        function removeEditTeacher(index) {
+            if (index === 0) {
+                showNotification('❌ Guru Ketua tidak boleh dibuang!', 'error');
+                return;
+            }
+            
+            const teacher = document.querySelector(`[data-edit-teacher-index="${index}"]`);
+            if (teacher) {
+                teacher.remove();
+            }
+        }
+
+        function addEditStudent(studentData = null) {
+            const container = document.getElementById('editStudentsContainer');
+            const studentDiv = document.createElement('div');
+            studentDiv.className = 'edit-student-entry bg-orange-50 p-4 rounded-lg mb-4';
+            studentDiv.setAttribute('data-edit-student-index', editStudentCount);
+            
+            studentDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-orange-700">Pelajar ${editStudentCount + 1}</h4>
+                    <button type="button" onclick="removeEditStudent(${editStudentCount})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">🗑️ Buang</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Nama Pelajar *</label>
+                        <input type="text" required class="edit-student-name w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Nama penuh pelajar" value="${studentData ? studentData.name : ''}">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Nombor IC *</label>
+                        <input type="text" required class="edit-student-ic w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="XXXXXX-XX-XXXX" maxlength="14" value="${studentData ? studentData.ic : ''}">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Jantina *</label>
+                        <select required class="edit-student-gender w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">Pilih Jantina</option>
+                            <option value="Lelaki" ${studentData && studentData.gender === 'Lelaki' ? 'selected' : ''}>Lelaki</option>
+                            <option value="Perempuan" ${studentData && studentData.gender === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Kategori *</label>
+                        <select required class="edit-student-category w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="">Pilih Kategori</option>
+                            <option value="Bawah 12 Tahun" ${studentData && studentData.category === 'Bawah 12 Tahun' ? 'selected' : ''}>Bawah 12 Tahun</option>
+                            <option value="Bawah 15 Tahun" ${studentData && studentData.category === 'Bawah 15 Tahun' ? 'selected' : ''}>Bawah 15 Tahun</option>
+                            <option value="Bawah 18 Tahun" ${studentData && studentData.category === 'Bawah 18 Tahun' ? 'selected' : ''}>Bawah 18 Tahun</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">ID Pemain</label>
+                        <input type="text" readonly class="edit-student-id w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100" placeholder="Auto-generated" value="${studentData ? studentData.playerId : ''}">
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(studentDiv);
+            editStudentCount++;
+        }
+
+        function removeEditStudent(index) {
+            const student = document.querySelector(`[data-edit-student-index="${index}"]`);
+            if (student) {
+                student.remove();
+            }
+        }
+
+        function handleUpdateSubmit(event) {
+            event.preventDefault();
+            
+            if (!currentEditData) {
+                showNotification('❌ Tiada data untuk kemaskini', 'error');
+                return;
+            }
+            
+            // Collect updated form data
+            const updatedData = collectEditFormData();
+            
+            // Show loading state
+            const saveButton = document.getElementById('saveUpdateButton');
+            saveButton.innerHTML = '💾 Menyimpan...';
+            saveButton.disabled = true;
+            
+            // Update local storage - PRESERVE original createdAt date
+            registrations[currentEditData.regId] = {
+                ...updatedData,
+                createdAt: currentEditData.data.createdAt || currentEditData.data.createdAt, // Keep original registration date
+                updatedAt: new Date().toISOString(), // Only update the modification date
+                status: 'AKTIF'
+            };
+            localStorage.setItem('registrations', JSON.stringify(registrations));
+            
+            // Send to Google Sheets with preserved dates
+            sendUpdateToGoogleSheets(currentEditData.regId, updatedData, currentEditData.data.createdAt);
+            
+            showNotification('✅ Kemaskini berjaya disimpan!', 'success');
+            
+            // Reset form
+            setTimeout(() => {
+                cancelEdit();
+                updateDashboard();
+                loadFromGoogleSheets(); // Refresh from server
+            }, 2000);
+        }
+
+        function collectEditFormData() {
+            const schoolName = document.getElementById('editSchoolName').value;
+            
+            const teachers = [];
+            document.querySelectorAll('.edit-teacher-entry').forEach((entry, index) => {
+                teachers.push({
+                    name: entry.querySelector('.edit-teacher-name').value,
+                    email: entry.querySelector('.edit-teacher-email').value,
+                    phone: entry.querySelector('.edit-teacher-phone').value,
+                    position: index === 0 ? 'Ketua' : 'Pengiring'
+                });
+            });
+            
+            const students = [];
+            document.querySelectorAll('.edit-student-entry').forEach((entry, index) => {
+                const gender = entry.querySelector('.edit-student-gender').value;
+                const category = entry.querySelector('.edit-student-category').value;
+                
+                // Generate new player ID if needed
+                let playerId = entry.querySelector('.edit-student-id').value;
+                if (gender && category && schoolName) {
+                    playerId = generatePlayerId(gender, schoolName, index, category, currentEditData.regId);
+                }
+                
+                students.push({
+                    name: entry.querySelector('.edit-student-name').value,
+                    ic: entry.querySelector('.edit-student-ic').value,
+                    gender: gender,
+                    category: category,
+                    playerId: playerId
+                });
+            });
+            
+            return { schoolName, teachers, students };
+        }
+
+        async function sendUpdateToGoogleSheets(regId, data, originalCreatedAt) {
+            if (!GOOGLE_SCRIPT_URL) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update',
+                        registrationId: regId,
+                        schoolName: data.schoolName,
+                        teachers: data.teachers,
+                        students: data.students,
+                        originalCreatedAt: originalCreatedAt, // Pass original registration date
+                        updateTimestamp: new Date().toISOString() // Only update timestamp changes
+                    })
+                });
+            } catch (error) {
+                console.error('Error updating Google Sheets:', error);
+            }
+        }
+
+        function cancelEdit() {
+            // Reset form state
+            currentEditData = null;
+            editTeacherCount = 0;
+            editStudentCount = 0;
+            
+            // Show login form and hide edit form
+            document.getElementById('updateLoginForm').classList.remove('hidden');
+            document.getElementById('updateEditForm').classList.add('hidden');
+            
+            // Reset save button
+            const saveButton = document.getElementById('saveUpdateButton');
+            saveButton.innerHTML = '💾 Simpan Kemaskini';
+            saveButton.disabled = false;
+            
+            // Clear login form
+            clearUpdateForm();
+        }
+
+        function resetUpdateButton() {
+            const updateButton = document.getElementById('updateButton');
+            updateButton.innerHTML = '🔍 Akses Kemaskini';
+            updateButton.disabled = false;
+        }
+
+        function clearUpdateForm() {
+            document.getElementById('updateForm').reset();
+        }
+
+        // Format registration ID input and edit form inputs
+        document.addEventListener('input', function(e) {
+            if (e.target.id === 'updateRegId') {
+                let value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+                
+                // Auto-format as MSSD-XX-XX
+                if (value.length > 0 && !value.startsWith('MSSD-')) {
+                    if (value.startsWith('MSSD')) {
+                        value = value.replace('MSSD', 'MSSD-');
+                    } else {
+                        value = 'MSSD-' + value;
+                    }
+                }
+                
+                // Add second dash
+                if (value.length > 7 && value.charAt(7) !== '-') {
+                    value = value.substring(0, 7) + '-' + value.substring(7);
+                }
+                
+                // Limit length
+                if (value.length > 10) {
+                    value = value.substring(0, 10);
+                }
+                
+                e.target.value = value;
+            }
+            
+            if (e.target.id === 'updatePassword') {
+                // Only allow digits
+                e.target.value = e.target.value.replace(/\D/g, '');
+            }
+            
+            // Format edit form inputs
+            if (e.target.classList.contains('edit-teacher-name') || e.target.classList.contains('edit-student-name') || e.target.id === 'editSchoolName') {
+                e.target.value = e.target.value.toUpperCase();
+            }
+            
+            if (e.target.classList.contains('edit-teacher-phone')) {
+                e.target.value = formatPhoneNumber(e.target.value);
+            }
+            
+            if (e.target.classList.contains('edit-student-ic')) {
+                e.target.value = formatIC(e.target.value);
+            }
+            
+            // Update student IDs when gender or category changes in edit form
+            if (e.target.classList.contains('edit-student-gender') || e.target.classList.contains('edit-student-category')) {
+                updateEditStudentIds();
+            }
+        });
+
+        function updateEditStudentIds() {
+            if (!currentEditData) return;
+            
+            const schoolName = document.getElementById('editSchoolName').value;
+            const students = document.querySelectorAll('.edit-student-entry');
+            
+            students.forEach((student, index) => {
+                const gender = student.querySelector('.edit-student-gender').value;
+                const category = student.querySelector('.edit-student-category').value;
+                const idField = student.querySelector('.edit-student-id');
+                
+                if (gender && schoolName && category) {
+                    idField.value = generatePlayerId(gender, schoolName, index, category, currentEditData.regId);
+                }
+            });
+        }
+
         // Toggle schedule function
         function toggleSchedule(type) {
             const scheduleDiv = document.getElementById(type + 'Schedule');
@@ -2318,5 +2570,5 @@ function searchRegistration(regId, password) {
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999a8a025742a858',t:'MTc2MjMyNjcwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999ae64cf69ea858',t:'MTc2MjMzMDQ4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
