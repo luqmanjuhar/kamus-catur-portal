@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Academy Rating System</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        .chess-pattern {
+            background-image: 
+                linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
+                linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
+                linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="container mx-auto px-4 py-8 max-w-6xl"><!-- Header -->
+   <div class="text-center mb-8">
+    <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4"><span class="text-2xl">♔</span>
+    </div>
+    <h1 id="academy-title" class="text-4xl font-bold text-gray-800 mb-2">Chess Academy Rating System</h1>
+    <p id="welcome-text" class="text-lg text-gray-600">Track your child's chess tournament progress and rating</p>
+   </div><!-- Navigation -->
+   <div class="flex justify-center mb-8">
+    <div class="bg-white rounded-lg shadow-md p-1 flex"><button id="students-tab" class="px-6 py-2 rounded-md font-medium transition-colors bg-indigo-600 text-white">Students</button> <button id="submit-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-indigo-600">Submit Record</button> <button id="pending-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-indigo-600">Pending Approval</button>
+    </div>
+   </div><!-- Students View -->
+   <div id="students-view" class="space-y-6"><!-- Add Student Form -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Daftar Pelajar Baru / Register New Student</h2>
+     <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      </div>
+      <div><label for="parent-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu Bapa / Parent Name</label> <input type="text" id="parent-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      </div>
+      <div><label for="parent-email" class="block text-sm font-medium text-gray-700 mb-2">Emel Ibu Bapa / Parent Email</label> <input type="email" id="parent-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      </div>
+      <div class="flex items-end"><button type="submit" id="add-student-btn" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors font-medium"> Daftar Pelajar / Register Student </button>
+      </div>
+     </form>
+    </div><!-- Students List -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Registered Students</h2>
+     <div id="students-list" class="space-y-4">
+      <div class="text-center text-gray-500 py-8">
+       No students registered yet. Add your first student above.
+      </div>
+     </div>
+    </div>
+   </div><!-- Submit Record View -->
+   <div id="submit-view" class="hidden">
+    <div class="bg-white rounded-lg shadow-md p-6">
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Hantar Rekod Kejohanan / Submit Tournament Record</h2><!-- Tournament Level Points -->
+     <div class="bg-blue-50 rounded-lg p-4 mb-6">
+      <h3 class="font-semibold text-gray-800 mb-3">Tournament Level Base Points</h3>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
+       <div class="text-center">
+        <div class="font-medium text-blue-600">
+         Sekolah
+        </div>
+        <div class="text-gray-600">
+         5 points
+        </div>
+       </div>
+       <div class="text-center">
+        <div class="font-medium text-green-600">
+         Daerah
+        </div>
+        <div class="text-gray-600">
+         8 points
+        </div>
+       </div>
+       <div class="text-center">
+        <div class="font-medium text-yellow-600">
+         Negeri
+        </div>
+        <div class="text-gray-600">
+         10 points
+        </div>
+       </div>
+       <div class="text-center">
+        <div class="font-medium text-orange-600">
+         Kebangsaan
+        </div>
+        <div class="text-gray-600">
+         12 points
+        </div>
+       </div>
+       <div class="text-center">
+        <div class="font-medium text-red-600">
+         Antarabangsa
+        </div>
+        <div class="text-gray-600">
+         15 points
+        </div>
+       </div>
+      </div>
+     </div><!-- Performance Bonus Points -->
+     <div class="bg-green-50 rounded-lg p-4 mb-6">
+      <h3 class="font-semibold text-gray-800 mb-3">Performance Bonus Points</h3>
+      <div class="overflow-x-auto">
+       <table class="w-full text-xs">
+        <thead>
+         <tr class="border-b">
+          <th class="text-left py-2">Level</th>
+          <th class="text-center py-2">Top 20%/Special</th>
+          <th class="text-center py-2">Top 30%</th>
+          <th class="text-center py-2">Top 40%</th>
+          <th class="text-center py-2">Top 50%</th>
+          <th class="text-center py-2">Top 60%</th>
+          <th class="text-center py-2">Top 70%</th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr class="border-b">
+          <td class="py-1 font-medium text-blue-600">Sekolah</td>
+          <td class="text-center text-green-600">+3</td>
+          <td class="text-center text-green-600">+2</td>
+          <td class="text-center text-green-600">+1</td>
+          <td class="text-center text-gray-600">0</td>
+          <td class="text-center text-red-600">-2</td>
+          <td class="text-center text-red-600">-4</td>
+         </tr>
+         <tr class="border-b">
+          <td class="py-1 font-medium text-green-600">Daerah</td>
+          <td class="text-center text-green-600">+4</td>
+          <td class="text-center text-green-600">+3</td>
+          <td class="text-center text-green-600">+2</td>
+          <td class="text-center text-gray-600">0</td>
+          <td class="text-center text-red-600">-2</td>
+          <td class="text-center text-red-600">-4</td>
+         </tr>
+         <tr class="border-b">
+          <td class="py-1 font-medium text-yellow-600">Negeri</td>
+          <td class="text-center text-green-600">+5</td>
+          <td class="text-center text-green-600">+4</td>
+          <td class="text-center text-green-600">+3</td>
+          <td class="text-center text-gray-600">0</td>
+          <td class="text-center text-red-600">-2</td>
+          <td class="text-center text-red-600">-4</td>
+         </tr>
+         <tr class="border-b">
+          <td class="py-1 font-medium text-orange-600">Kebangsaan</td>
+          <td class="text-center text-green-600">+6</td>
+          <td class="text-center text-green-600">+5</td>
+          <td class="text-center text-green-600">+4</td>
+          <td class="text-center text-gray-600">0</td>
+          <td class="text-center text-red-600">-3</td>
+          <td class="text-center text-red-600">-5</td>
+         </tr>
+         <tr>
+          <td class="py-1 font-medium text-red-600">Antarabangsa</td>
+          <td class="text-center text-green-600">+7</td>
+          <td class="text-center text-green-600">+6</td>
+          <td class="text-center text-green-600">+5</td>
+          <td class="text-center text-gray-600">0</td>
+          <td class="text-center text-red-600">-3</td>
+          <td class="text-center text-red-600">-5</td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+      <p class="text-xs text-gray-600 mt-2">*Special prizes automatically count as Top 20% performance</p>
+     </div>
+     <form id="record-form" class="space-y-4"><!-- Student Selection -->
+      <div><label for="record-student" class="block text-sm font-medium text-gray-700 mb-2">Pilih Pelajar / Select Student</label> <select id="record-student" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih pelajar / Choose a student</option> </select>
+      </div><!-- Tournament Basic Info -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div><label for="tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Kejohanan / Tournament Name</label> <input type="text" id="tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+       </div>
+       <div><label for="tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tarikh Kejohanan / Tournament Date</label> <input type="date" id="tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+       </div>
+      </div><!-- Tournament Details -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+       <div><label for="time-control" class="block text-sm font-medium text-gray-700 mb-2">Kawalan Masa / Time Control</label> <select id="time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih kawalan masa / Select time control</option> <option value="Blitz">Blitz (≤ 10 minit / minutes)</option> <option value="Rapid">Rapid (10-60 minit / minutes)</option> <option value="Classical">Classical (&gt; 60 minit / minutes)</option> </select>
+       </div>
+       <div><label for="tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Kategori Kejohanan / Tournament Category</label> <select id="tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih kategori / Select category</option> <option value="U6">Bawah 6 / Under 6 (U6)</option> <option value="U7">Bawah 7 / Under 7 (U7)</option> <option value="U8">Bawah 8 / Under 8 (U8)</option> <option value="U9">Bawah 9 / Under 9 (U9)</option> <option value="U10">Bawah 10 / Under 10 (U10)</option> <option value="U11">Bawah 11 / Under 11 (U11)</option> <option value="U12">Bawah 12 / Under 12 (U12)</option> <option value="U13">Bawah 13 / Under 13 (U13)</option> <option value="U14">Bawah 14 / Under 14 (U14)</option> <option value="U15">Bawah 15 / Under 15 (U15)</option> <option value="U16">Bawah 16 / Under 16 (U16)</option> <option value="U17">Bawah 17 / Under 17 (U17)</option> <option value="U18">Bawah 18 / Under 18 (U18)</option> <option value="U19">Bawah 19 / Under 19 (U19)</option> <option value="U20">Bawah 20 / Under 20 (U20)</option> <option value="Team">Pasukan / Team</option> <option value="Women">Wanita / Women</option> <option value="Challenger">Pencabar / Challenger</option> <option value="Open">Terbuka / Open</option> </select>
+       </div>
+       <div><label for="tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tahap Kejohanan / Tournament Level</label> <select id="tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih tahap / Select level</option> <option value="Sekolah">Sekolah / School (5 mata / points)</option> <option value="Daerah">Daerah / District (8 mata / points)</option> <option value="Negeri">Negeri / State (10 mata / points)</option> <option value="Kebangsaan">Kebangsaan / National (12 mata / points)</option> <option value="Antarabangsa">Antarabangsa / International (15 mata / points)</option> </select>
+       </div>
+      </div><!-- Performance Calculation Section -->
+      <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+       <h3 class="font-semibold text-gray-800">Butiran Prestasi / Performance Details</h3>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Kedudukan Akhir / Final Ranking</label> <input type="number" id="final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="cth: 5 / e.g., 5" required>
+        </div>
+        <div><label for="total-players" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pemain dalam Kategori / Total Players in Category</label> <input type="number" id="total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="cth: 50 / e.g., 50" required>
+        </div>
+       </div><!-- Special Prize Section -->
+       <div class="border-t pt-4">
+        <div class="flex items-center mb-3"><input type="checkbox" id="special-prize" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"> <label for="special-prize" class="ml-2 block text-sm font-medium text-gray-700"> Menerima Hadiah Khas / Received Special Prize (automatik dikira sebagai 20% teratas / automatically counts as Top 20%) </label>
+        </div>
+        <div id="special-prize-details" class="hidden"><label for="prize-description" class="block text-sm font-medium text-gray-700 mb-2">Keterangan Hadiah Khas / Special Prize Description</label> <input type="text" id="prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="cth: Pemain Wanita Terbaik / e.g., Best Female Player">
+        </div>
+       </div><!-- Performance Calculation Display -->
+       <div id="performance-calculation" class="bg-white rounded-lg p-3 border hidden">
+        <h4 class="font-medium text-gray-800 mb-2">Calculated Performance</h4>
+        <div class="text-sm space-y-1">
+         <div>
+          Ranking: <span id="calc-ranking">-</span> out of <span id="calc-total">-</span> players
+         </div>
+         <div>
+          Percentile: <span id="calc-percentile">-</span>
+         </div>
+         <div>
+          Base Points: <span id="calc-base">-</span>
+         </div>
+         <div>
+          Performance Bonus: <span id="calc-bonus">-</span>
+         </div>
+         <div class="font-semibold border-t pt-1">
+          Total Points: <span id="calc-total-points">-</span>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div><label for="additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Nota Tambahan (Pilihan) / Additional Notes (Optional)</label> <textarea id="additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Sebarang maklumat tambahan tentang prestasi / Any additional information about the performance"></textarea>
+      </div><button type="submit" id="submit-record-btn" class="w-full bg-green-600 text-white px-4 py-3 rounded-md hover:bg-green-700 transition-colors font-medium"> Hantar untuk Kelulusan / Submit for Approval </button>
+     </form>
+    </div>
+   </div><!-- Pending Approval View -->
+   <div id="pending-view" class="hidden">
+    <div class="bg-white rounded-lg shadow-md p-6">
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Pending Approval</h2>
+     <div id="pending-list" class="space-y-4">
+      <div class="text-center text-gray-500 py-8">
+       No pending submissions.
+      </div>
+     </div>
+    </div>
+   </div><!-- Contact Info -->
+   <div class="mt-8 text-center">
+    <p id="contact-text" class="text-gray-600">For questions, contact your chess academy administrator</p>
+   </div>
+  </div>
+  <script>
+        // Configuration
+        const defaultConfig = {
+            academy_name: "Chess Academy Rating System",
+            welcome_message: "Track your child's chess tournament progress and rating",
+            contact_info: "For questions, contact your chess academy administrator"
+        };
+
+        // Tournament level points
+        const tournamentPoints = {
+            'Sekolah': 5,
+            'Daerah': 8,
+            'Negeri': 10,
+            'Kebangsaan': 12,
+            'Antarabangsa': 15
+        };
+
+        // Performance bonus points based on percentile
+        const performanceBonus = {
+            'Sekolah': [3, 2, 1, 0, -2, -4],
+            'Daerah': [4, 3, 2, 0, -2, -4],
+            'Negeri': [5, 4, 3, 0, -2, -4],
+            'Kebangsaan': [6, 5, 4, 0, -3, -5],
+            'Antarabangsa': [7, 6, 5, 0, -3, -5]
+        };
+
+        // Global state
+        let students = [];
+        let pendingRecords = [];
+        let currentView = 'students';
+
+        // Data SDK handler
+        const dataHandler = {
+            onDataChanged(data) {
+                students = data.filter(item => item.student_id);
+                updateStudentsList();
+                updateStudentSelect();
+            }
+        };
+
+        // Element SDK configuration
+        async function onConfigChange(config) {
+            const academyTitle = document.getElementById('academy-title');
+            const welcomeText = document.getElementById('welcome-text');
+            const contactText = document.getElementById('contact-text');
+            
+            if (academyTitle) academyTitle.textContent = config.academy_name || defaultConfig.academy_name;
+            if (welcomeText) welcomeText.textContent = config.welcome_message || defaultConfig.welcome_message;
+            if (contactText) contactText.textContent = config.contact_info || defaultConfig.contact_info;
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [
+                    {
+                        get: () => config.primary_color || "#4f46e5",
+                        set: (value) => {
+                            config.primary_color = value;
+                            window.elementSdk.setConfig({ primary_color: value });
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["academy_name", config.academy_name || defaultConfig.academy_name],
+                ["welcome_message", config.welcome_message || defaultConfig.welcome_message],
+                ["contact_info", config.contact_info || defaultConfig.contact_info]
+            ]);
+        }
+
+        // Initialize SDKs
+        async function initializeApp() {
+            try {
+                // Initialize Data SDK
+                const dataResult = await window.dataSdk.init(dataHandler);
+                if (!dataResult.isOk) {
+                    console.error("Failed to initialize data SDK");
+                    return;
+                }
+
+                // Initialize Element SDK
+                if (window.elementSdk) {
+                    window.elementSdk.init({
+                        defaultConfig,
+                        onConfigChange,
+                        mapToCapabilities,
+                        mapToEditPanelValues
+                    });
+                }
+
+                setupEventListeners();
+            } catch (error) {
+                console.error("Failed to initialize app:", error);
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Tab navigation
+            document.getElementById('students-tab').addEventListener('click', () => switchView('students'));
+            document.getElementById('submit-tab').addEventListener('click', () => switchView('submit'));
+            document.getElementById('pending-tab').addEventListener('click', () => switchView('pending'));
+
+            // Student form
+            document.getElementById('student-form').addEventListener('submit', handleStudentSubmit);
+
+            // Record form
+            document.getElementById('record-form').addEventListener('submit', handleRecordSubmit);
+
+            // Performance calculation listeners
+            document.getElementById('final-ranking').addEventListener('input', calculatePerformance);
+            document.getElementById('total-players').addEventListener('input', calculatePerformance);
+            document.getElementById('tournament-level').addEventListener('change', calculatePerformance);
+            document.getElementById('special-prize').addEventListener('change', toggleSpecialPrize);
+        }
+
+        // View switching
+        function switchView(view) {
+            // Hide all views
+            document.getElementById('students-view').classList.add('hidden');
+            document.getElementById('submit-view').classList.add('hidden');
+            document.getElementById('pending-view').classList.add('hidden');
+
+            // Show selected view
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+
+            // Update tab styles
+            document.querySelectorAll('[id$="-tab"]').forEach(tab => {
+                tab.classList.remove('bg-indigo-600', 'text-white');
+                tab.classList.add('text-gray-600', 'hover:text-indigo-600');
+            });
+            
+            document.getElementById(`${view}-tab`).classList.add('bg-indigo-600', 'text-white');
+            document.getElementById(`${view}-tab`).classList.remove('text-gray-600', 'hover:text-indigo-600');
+
+            currentView = view;
+        }
+
+        // Handle student registration
+        async function handleStudentSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('add-student-btn');
+            const originalText = submitBtn.textContent;
+            
+            if (students.length >= 999) {
+                showMessage('Maximum limit of 999 students reached. Please contact administrator.', 'error');
+                return;
+            }
+
+            try {
+                submitBtn.textContent = 'Registering...';
+                submitBtn.disabled = true;
+
+                const studentName = document.getElementById('student-name').value;
+                const parentName = document.getElementById('parent-name').value;
+                const parentEmail = document.getElementById('parent-email').value;
+
+                const studentData = {
+                    student_id: generateId(),
+                    student_name: studentName,
+                    current_rating: 1000,
+                    parent_name: parentName,
+                    parent_email: parentEmail,
+                    created_at: new Date().toISOString()
+                };
+
+                const result = await window.dataSdk.create(studentData);
+                
+                if (result.isOk) {
+                    document.getElementById('student-form').reset();
+                    showMessage('Student registered successfully!', 'success');
+                } else {
+                    showMessage('Failed to register student. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Calculate performance bonus
+        function calculatePerformance() {
+            const ranking = parseInt(document.getElementById('final-ranking').value);
+            const totalPlayers = parseInt(document.getElementById('total-players').value);
+            const tournamentLevel = document.getElementById('tournament-level').value;
+            const hasSpecialPrize = document.getElementById('special-prize').checked;
+
+            if (!ranking || !totalPlayers || !tournamentLevel || ranking > totalPlayers) {
+                document.getElementById('performance-calculation').classList.add('hidden');
+                return;
+            }
+
+            // Calculate percentile
+            let percentile;
+            if (hasSpecialPrize) {
+                percentile = 20; // Special prize automatically counts as top 20%
+            } else {
+                percentile = Math.ceil((ranking / totalPlayers) * 100);
+            }
+
+            // Determine bonus points based on percentile ranges
+            let bonusPoints = 0;
+            const bonusArray = performanceBonus[tournamentLevel];
+            
+            if (percentile <= 20) bonusPoints = bonusArray[0];
+            else if (percentile <= 30) bonusPoints = bonusArray[1];
+            else if (percentile <= 40) bonusPoints = bonusArray[2];
+            else if (percentile <= 50) bonusPoints = bonusArray[3];
+            else if (percentile <= 60) bonusPoints = bonusArray[4];
+            else if (percentile <= 70) bonusPoints = bonusArray[5];
+            else bonusPoints = 0; // No bonus for bottom 30%
+
+            const basePoints = tournamentPoints[tournamentLevel];
+            const totalPoints = basePoints + bonusPoints;
+
+            // Update display
+            document.getElementById('calc-ranking').textContent = ranking;
+            document.getElementById('calc-total').textContent = totalPlayers;
+            document.getElementById('calc-percentile').textContent = hasSpecialPrize ? 'Top 20% (Special Prize)' : `Top ${percentile}%`;
+            document.getElementById('calc-base').textContent = basePoints;
+            document.getElementById('calc-bonus').textContent = bonusPoints >= 0 ? `+${bonusPoints}` : bonusPoints;
+            document.getElementById('calc-total-points').textContent = totalPoints;
+
+            document.getElementById('performance-calculation').classList.remove('hidden');
+        }
+
+        // Toggle special prize details
+        function toggleSpecialPrize() {
+            const checkbox = document.getElementById('special-prize');
+            const details = document.getElementById('special-prize-details');
+            
+            if (checkbox.checked) {
+                details.classList.remove('hidden');
+            } else {
+                details.classList.add('hidden');
+                document.getElementById('prize-description').value = '';
+            }
+            
+            calculatePerformance();
+        }
+
+        // Handle record submission
+        async function handleRecordSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-record-btn');
+            const originalText = submitBtn.textContent;
+
+            try {
+                submitBtn.textContent = 'Submitting...';
+                submitBtn.disabled = true;
+
+                const studentId = document.getElementById('record-student').value;
+                const tournamentLevel = document.getElementById('tournament-level').value;
+                const tournamentCategory = document.getElementById('tournament-category').value;
+                const timeControl = document.getElementById('time-control').value;
+                const tournamentName = document.getElementById('tournament-name').value;
+                const tournamentDate = document.getElementById('tournament-date').value;
+                const finalRanking = parseInt(document.getElementById('final-ranking').value);
+                const totalPlayers = parseInt(document.getElementById('total-players').value);
+                const hasSpecialPrize = document.getElementById('special-prize').checked;
+                const prizeDescription = document.getElementById('prize-description').value;
+                const notes = document.getElementById('additional-notes').value;
+
+                // Calculate performance
+                let percentile;
+                if (hasSpecialPrize) {
+                    percentile = 20;
+                } else {
+                    percentile = Math.ceil((finalRanking / totalPlayers) * 100);
+                }
+
+                const bonusArray = performanceBonus[tournamentLevel];
+                let bonusPoints = 0;
+                
+                if (percentile <= 20) bonusPoints = bonusArray[0];
+                else if (percentile <= 30) bonusPoints = bonusArray[1];
+                else if (percentile <= 40) bonusPoints = bonusArray[2];
+                else if (percentile <= 50) bonusPoints = bonusArray[3];
+                else if (percentile <= 60) bonusPoints = bonusArray[4];
+                else if (percentile <= 70) bonusPoints = bonusArray[5];
+
+                const basePoints = tournamentPoints[tournamentLevel];
+                const totalPoints = basePoints + bonusPoints;
+
+                const record = {
+                    id: generateId(),
+                    student_id: studentId,
+                    tournament_level: tournamentLevel,
+                    tournament_category: tournamentCategory,
+                    time_control: timeControl,
+                    tournament_name: tournamentName,
+                    tournament_date: tournamentDate,
+                    final_ranking: finalRanking,
+                    total_players: totalPlayers,
+                    percentile: percentile,
+                    has_special_prize: hasSpecialPrize,
+                    prize_description: prizeDescription,
+                    base_points: basePoints,
+                    bonus_points: bonusPoints,
+                    total_points: totalPoints,
+                    additional_notes: notes,
+                    status: 'pending',
+                    submitted_at: new Date().toISOString()
+                };
+
+                // Add to pending records (in real app, this would go to a separate collection)
+                pendingRecords.push(record);
+                updatePendingList();
+                
+                document.getElementById('record-form').reset();
+                document.getElementById('performance-calculation').classList.add('hidden');
+                document.getElementById('special-prize-details').classList.add('hidden');
+                showMessage('Tournament record submitted for approval!', 'success');
+                
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Update students list
+        function updateStudentsList() {
+            const container = document.getElementById('students-list');
+            
+            if (students.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        No students registered yet. Add your first student above.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = students.map(student => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold text-lg text-gray-800">${student.student_name}</h3>
+                            <p class="text-gray-600">Parent: ${student.parent_name}</p>
+                            <p class="text-gray-600">Email: ${student.parent_email}</p>
+                            <p class="text-sm text-gray-500">Registered: ${new Date(student.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-indigo-600">${student.current_rating}</div>
+                            <div class="text-sm text-gray-500">Current Rating</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update student select dropdown
+        function updateStudentSelect() {
+            const select = document.getElementById('record-student');
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">Pilih pelajar / Choose a student</option>' + 
+                students.map(student => 
+                    `<option value="${student.student_id}">${student.student_name}</option>`
+                ).join('');
+            
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+
+        // Update pending list
+        function updatePendingList() {
+            const container = document.getElementById('pending-list');
+            
+            if (pendingRecords.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        No pending submissions.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = pendingRecords.map(record => {
+                const student = students.find(s => s.student_id === record.student_id);
+                const studentName = student ? student.student_name : 'Unknown Student';
+                
+                return `
+                    <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-semibold text-lg text-gray-800">${studentName}</h3>
+                            <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium">
+                                Pending (+${record.total_points} pts)
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                            <div><strong>Tournament:</strong> ${record.tournament_name}</div>
+                            <div><strong>Level:</strong> ${record.tournament_level}</div>
+                            <div><strong>Category:</strong> ${record.tournament_category}</div>
+                            <div><strong>Time Control:</strong> ${record.time_control}</div>
+                            <div><strong>Date:</strong> ${new Date(record.tournament_date).toLocaleDateString()}</div>
+                            <div><strong>Ranking:</strong> ${record.final_ranking} out of ${record.total_players}</div>
+                        </div>
+
+                        <!-- Performance Breakdown -->
+                        <div class="bg-white rounded-lg p-3 mb-3 border">
+                            <h4 class="font-medium text-gray-800 mb-2">Performance Breakdown</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                <div>
+                                    <div class="text-gray-500">Percentile</div>
+                                    <div class="font-medium">${record.has_special_prize ? 'Top 20% (Special)' : `Top ${record.percentile}%`}</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-500">Base Points</div>
+                                    <div class="font-medium">${record.base_points}</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-500">Bonus Points</div>
+                                    <div class="font-medium ${record.bonus_points >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                        ${record.bonus_points >= 0 ? '+' : ''}${record.bonus_points}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-500">Total Points</div>
+                                    <div class="font-semibold text-indigo-600">${record.total_points}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${record.has_special_prize ? `<div class="bg-purple-50 border border-purple-200 rounded-lg p-2 mb-2">
+                            <div class="text-sm"><strong>Special Prize:</strong> ${record.prize_description || 'Not specified'}</div>
+                        </div>` : ''}
+                        
+                        ${record.additional_notes ? `<div class="text-sm text-gray-600 mb-2"><strong>Notes:</strong> ${record.additional_notes}</div>` : ''}
+                        
+                        <div class="text-xs text-gray-500">
+                            Submitted: ${new Date(record.submitted_at).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Utility functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            messageDiv.textContent = message;
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99fdf19786baa858',t:'MTc2MzM2OTA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
