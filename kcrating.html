@@ -58,22 +58,11 @@
     <div class="bg-white rounded-lg shadow-md p-1 flex flex-wrap gap-1"><button id="students-tab" class="px-6 py-2 rounded-md font-medium transition-colors bg-orange-600 text-white">Students</button> <button id="submit-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Submit Record</button> <button id="admin-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Admin</button> <button id="dashboard-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Dashboard</button>
     </div>
    </div><!-- Students View -->
-   <div id="students-view" class="space-y-6"><!-- Google Sheets Connection -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Google Sheets Connection</h2>
-     <div class="space-y-4">
-      <div><label for="apps-script-url" class="block text-sm font-medium text-gray-700 mb-2">Google Apps Script URL</label> <input type="url" id="apps-script-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
-       <p class="text-xs text-gray-500 mt-1">Enter your Google Apps Script web app URL</p>
-      </div>
-      <div class="flex space-x-3"><button id="save-url-btn" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"> Save URL </button> <button id="test-connection-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"> Test Connection </button> <button id="sync-data-btn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"> Sync Data </button>
-      </div>
-      <div id="connection-message" class="hidden p-3 rounded-md"></div>
-     </div>
-    </div><!-- Add Student Form -->
+   <div id="students-view" class="space-y-6"><!-- Add Student Form -->
     <div class="bg-white rounded-lg shadow-md p-6">
      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Daftar KC ID / Register KC ID</h2>
      <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+      <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
       </div>
       <div><label for="ic-number" class="block text-sm font-medium text-gray-700 mb-2">No Kad Pengenalan / IC Number</label> <input type="text" id="ic-number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="YYMMDD-PB-XXXX" maxlength="14" required>
        <p class="text-xs text-gray-500 mt-1">Format: YYMMDD-PB-XXXX (tanpa ruang / without spaces)</p>
@@ -378,7 +367,7 @@
        </div>
       </div><!-- Tournament Basic Info -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <div><label for="tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Kejohanan / Tournament Name</label> <input type="text" id="tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+       <div><label for="tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Kejohanan / Tournament Name</label> <input type="text" id="tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
        </div>
        <div><label for="tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tarikh Kejohanan / Tournament Date</label> <input type="date" id="tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
        </div>
@@ -440,10 +429,21 @@
       <p class="text-xs text-gray-500 mt-1">Default password: kamuscatur</p>
      </div>
     </div><!-- Admin Panel (Hidden until login) -->
-    <div id="admin-panel" class="hidden">
+    <div id="admin-panel" class="hidden space-y-6"><!-- Google Sheets Connection -->
+     <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Google Sheets Connection</h2>
+      <div class="space-y-4">
+       <div><label for="apps-script-url" class="block text-sm font-medium text-gray-700 mb-2">Google Apps Script URL</label> <input type="url" id="apps-script-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" value="https://script.google.com/macros/s/AKfycby4lKDuvtA8hco6xlYhfQq_qYv_ooKoaH9iVcjLYJzCYqfbEDJ5SqDVEhXBab1-z0G3/exec">
+        <p class="text-xs text-gray-500 mt-1">Enter your Google Apps Script web app URL</p>
+       </div>
+       <div class="flex space-x-3"><button id="save-url-btn" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"> Save URL </button> <button id="test-connection-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"> Test Connection </button> <button id="sync-data-btn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"> Sync Data </button>
+       </div>
+       <div id="connection-message" class="hidden p-3 rounded-md"></div>
+      </div>
+     </div><!-- Pending Approvals -->
      <div class="bg-white rounded-lg shadow-md p-6">
       <div class="flex justify-between items-center mb-4">
-       <h2 class="text-2xl font-semibold text-gray-800">Pending Approval - Admin Panel</h2><button id="admin-logout-btn" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"> Logout </button>
+       <h2 class="text-2xl font-semibold text-gray-800">Pending Approval</h2><button id="admin-logout-btn" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"> Logout </button>
       </div>
       <div id="pending-list" class="space-y-4">
        <div class="text-center text-gray-500 py-8">
@@ -596,10 +596,11 @@
             contact_info: "For questions, contact your chess academy administrator"
         };
 
-        // Google Apps Script Configuration
-        let APPS_SCRIPT_URL = '';
+        // Google Apps Script Configuration - PRE-CONFIGURED
+        let APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4lKDuvtA8hco6xlYhfQq_qYv_ooKoaH9iVcjLYJzCYqfbEDJ5SqDVEhXBab1-z0G3/exec';
         let isConnected = false;
         let connectionStatus = 'disconnected';
+        let isLoadingFromSheets = false; // Prevent concurrent loads
 
         // Tournament level points
         const tournamentPoints = {
@@ -746,7 +747,53 @@
         }
 
         // ============================================
-        // GOOGLE SHEETS INTEGRATION
+        // LOCAL STORAGE BACKUP
+        // ============================================
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('chess_students', JSON.stringify(students));
+                localStorage.setItem('chess_pending_records', JSON.stringify(pendingRecords));
+                localStorage.setItem('chess_approved_records', JSON.stringify(approvedRecords));
+                localStorage.setItem('chess_last_save', new Date().toISOString());
+                console.log('✅ Data saved to localStorage:', {
+                    students: students.length,
+                    pending: pendingRecords.length,
+                    approved: approvedRecords.length
+                });
+            } catch (error) {
+                console.error('Failed to save to localStorage:', error);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const savedStudents = localStorage.getItem('chess_students');
+                const savedPending = localStorage.getItem('chess_pending_records');
+                const savedApproved = localStorage.getItem('chess_approved_records');
+                
+                if (savedStudents) students = JSON.parse(savedStudents);
+                if (savedPending) pendingRecords = JSON.parse(savedPending);
+                if (savedApproved) approvedRecords = JSON.parse(savedApproved);
+                
+                console.log('✅ Data loaded from localStorage:', {
+                    students: students.length,
+                    pending: pendingRecords.length,
+                    approved: approvedRecords.length
+                });
+                
+                updateStudentsList();
+                updatePendingList();
+                if (currentView === 'dashboard') {
+                    updateDashboard();
+                }
+            } catch (error) {
+                console.error('Failed to load from localStorage:', error);
+            }
+        }
+
+        // ============================================
+        // GOOGLE SHEETS INTEGRATION - FIXED VERSION
         // ============================================
 
         function updateConnectionStatus(status, message) {
@@ -788,6 +835,10 @@
             if (savedUrl) {
                 APPS_SCRIPT_URL = savedUrl;
                 document.getElementById('apps-script-url').value = savedUrl;
+            } else {
+                // Use pre-configured URL
+                document.getElementById('apps-script-url').value = APPS_SCRIPT_URL;
+                localStorage.setItem('apps_script_url', APPS_SCRIPT_URL);
             }
         }
 
@@ -831,42 +882,106 @@
                 approvedRecords: approvedRecords
             };
 
+            console.log('📤 Syncing data to sheets:', {
+                students: students.length,
+                pending: pendingRecords.length,
+                approved: approvedRecords.length
+            });
+
             const url = APPS_SCRIPT_URL + '?action=sync&data=' + encodeURIComponent(JSON.stringify(data));
             
             jsonp(url, function(response) {
                 if (response && response.status === 'success') {
                     updateConnectionStatus('connected');
                     showConnectionMessage('Data synced successfully!', 'success');
+                    console.log('✅ Data synced to Google Sheets successfully');
                 } else {
                     updateConnectionStatus('disconnected', 'Sync Failed');
                     showConnectionMessage('Sync failed: ' + (response.error || 'Unknown error'), 'error');
+                    console.error('❌ Sync failed:', response);
                 }
             });
         }
 
         function loadDataFromSheets() {
-            if (!APPS_SCRIPT_URL) {
+            if (!APPS_SCRIPT_URL || isLoadingFromSheets) {
                 return;
             }
 
+            isLoadingFromSheets = true;
             updateConnectionStatus('connecting', 'Loading...');
+            console.log('📥 Loading data from Google Sheets...');
 
             jsonp(APPS_SCRIPT_URL + '?action=load', function(response) {
+                isLoadingFromSheets = false;
+                
                 if (response && response.status === 'success' && response.data) {
-                    students = response.data.students || [];
-                    pendingRecords = response.data.pendingRecords || [];
-                    approvedRecords = response.data.approvedRecords || [];
+                    console.log('📦 Received data from sheets:', response.data);
                     
-                    updateConnectionStatus('connected');
-                    updateStudentsList();
-                    updatePendingList();
-                    if (currentView === 'dashboard') {
-                        updateDashboard();
+                    // Check if sheets actually have data
+                    const hasSheetData = (response.data.students && Array.isArray(response.data.students) && response.data.students.length > 0) ||
+                                        (response.data.pendingRecords && Array.isArray(response.data.pendingRecords) && response.data.pendingRecords.length > 0) ||
+                                        (response.data.approvedRecords && Array.isArray(response.data.approvedRecords) && response.data.approvedRecords.length > 0);
+                    
+                    const hasLocalData = students.length > 0 || pendingRecords.length > 0 || approvedRecords.length > 0;
+                    
+                    console.log('📊 Data status:', {
+                        hasSheetData,
+                        hasLocalData,
+                        sheetStudents: response.data.students?.length || 0,
+                        localStudents: students.length
+                    });
+                    
+                    if (hasSheetData) {
+                        // Sheets have data - use it (this is the source of truth)
+                        console.log('✅ Using data from Google Sheets');
+                        
+                        if (response.data.students && Array.isArray(response.data.students)) {
+                            students = response.data.students;
+                        }
+                        if (response.data.pendingRecords && Array.isArray(response.data.pendingRecords)) {
+                            pendingRecords = response.data.pendingRecords;
+                        }
+                        if (response.data.approvedRecords && Array.isArray(response.data.approvedRecords)) {
+                            approvedRecords = response.data.approvedRecords;
+                        }
+                        
+                        // Save to localStorage as backup
+                        saveToLocalStorage();
+                        
+                        updateConnectionStatus('connected');
+                        updateStudentsList();
+                        updatePendingList();
+                        if (currentView === 'dashboard') {
+                            updateDashboard();
+                        }
+                        showConnectionMessage('Data loaded from Google Sheets!', 'success');
+                    } else if (!hasLocalData) {
+                        // Both sheets and local are empty - this is fine (new installation)
+                        console.log('ℹ️ Both sheets and local storage are empty (new installation)');
+                        updateConnectionStatus('connected');
+                        showConnectionMessage('Connected to Google Sheets (no data yet)', 'success');
+                    } else {
+                        // CRITICAL: Sheets are empty BUT we have local data
+                        // DO NOT overwrite local data - keep it and warn user
+                        console.warn('⚠️ PREVENTED DATA LOSS: Sheets are empty but local data exists');
+                        console.log('🛡️ Keeping local data:', {
+                            students: students.length,
+                            pending: pendingRecords.length,
+                            approved: approvedRecords.length
+                        });
+                        
+                        updateConnectionStatus('connected');
+                        showConnectionMessage('⚠️ Google Sheets is empty but you have local data. Click "Sync Data" to upload your data to sheets.', 'error');
                     }
-                    showConnectionMessage('Data loaded from Google Sheets!', 'success');
                 } else {
+                    // Connection failed or error response
+                    console.error('❌ Failed to load from sheets:', response);
                     updateConnectionStatus('disconnected', 'Load Failed');
                     showConnectionMessage('Failed to load data: ' + (response.error || 'Unknown error'), 'error');
+                    
+                    // CRITICAL: Keep existing data - don't overwrite with nothing
+                    console.log('🛡️ Keeping existing local data due to load failure');
                 }
             });
         }
@@ -977,6 +1092,8 @@
 
         async function initializeApp() {
             try {
+                console.log('🚀 Initializing Chess Academy Rating System...');
+                
                 // Initialize Element SDK
                 if (window.elementSdk) {
                     window.elementSdk.init({
@@ -989,16 +1106,27 @@
 
                 setupEventListeners();
                 
-                // Load Apps Script URL from local storage
+                // Load Apps Script URL from local storage or use pre-configured
                 loadAppsScriptUrl();
                 
-                // Try to load data from Google Sheets if URL is configured
-                if (APPS_SCRIPT_URL) {
-                    loadDataFromSheets();
-                }
+                // Load data from localStorage first (instant)
+                console.log('📂 Loading data from localStorage...');
+                loadFromLocalStorage();
+                
+                // Auto-test connection on load (but DON'T load data yet)
+                setTimeout(() => {
+                    console.log('🔌 Testing Google Sheets connection...');
+                    testConnection();
+                    
+                    // Only load from sheets if connection is successful
+                    // AND we want to sync (user can manually click Sync Data button)
+                    // DO NOT auto-load to prevent data loss
+                }, 500);
+                
+                console.log('✅ App initialized successfully');
                 
             } catch (error) {
-                console.error("Failed to initialize app:", error);
+                console.error("❌ Failed to initialize app:", error);
                 showMessage('Failed to initialize application. Please refresh the page.', 'error');
             }
         }
@@ -1228,11 +1356,14 @@
 
                 students.push(studentData);
                 
+                // Save to localStorage immediately
+                saveToLocalStorage();
+                
                 // Save to Google Sheets if connected
                 if (isConnected) {
                     const sheetResponse = await saveStudentToSheets(studentData);
                     if (sheetResponse.status !== 'success') {
-                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally only.', 'error');
+                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally.', 'error');
                     }
                 }
                 
@@ -1399,11 +1530,14 @@
 
                 pendingRecords.push(recordData);
                 
+                // Save to localStorage immediately
+                saveToLocalStorage();
+                
                 // Save to Google Sheets if connected
                 if (isConnected) {
                     const sheetResponse = await saveRecordToSheets(recordData);
                     if (sheetResponse.status !== 'success') {
-                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally only.', 'error');
+                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally.', 'error');
                     }
                 }
                 
@@ -1863,6 +1997,9 @@
                     pendingRecords.splice(index, 1);
                 }
 
+                // Save to localStorage immediately
+                saveToLocalStorage();
+
                 // Sync to Google Sheets if connected
                 if (isConnected) {
                     const sheetResponse = await approveRecordInSheets(submissionId);
@@ -1896,6 +2033,9 @@
                 if (index > -1) {
                     pendingRecords.splice(index, 1);
                 }
+
+                // Save to localStorage immediately
+                saveToLocalStorage();
 
                 // Sync to Google Sheets if connected
                 if (isConnected) {
@@ -2005,6 +2145,9 @@
                 currentEditingRecord.bonus_points = bonusPoints;
                 currentEditingRecord.total_points = totalPoints;
                 currentEditingRecord.additional_notes = document.getElementById('edit-additional-notes').value || '';
+
+                // Save to localStorage immediately
+                saveToLocalStorage();
 
                 // Sync to Google Sheets if connected
                 if (isConnected) {
@@ -2270,5 +2413,5 @@
             initializeApp();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a05c28ea07538f8',t:'MTc2MzQ1MTAwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a084f1cf299a856',t:'MTc2MzQ3NzcyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
