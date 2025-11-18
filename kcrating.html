@@ -36,11 +36,29 @@
                 opacity: 1;
             }
         }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ea580c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="min-h-full bg-gradient-to-br from-orange-50 to-red-100">
+ <body class="min-h-full bg-gradient-to-br from-orange-50 to-red-100"><!-- Loading Overlay -->
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+   <div class="bg-white rounded-lg p-6 flex flex-col items-center">
+    <div class="spinner mb-4"></div>
+    <p class="text-gray-700 font-medium">Loading data from Google Sheets...</p>
+   </div>
+  </div>
   <div class="container mx-auto px-4 py-8 max-w-6xl"><!-- Header -->
    <div class="text-center mb-8">
     <div class="inline-flex items-center justify-center w-20 h-20 mb-4"><img src="https://github.com/luqmanjuhar/kamus-catur-portal/blob/2fcbf8eed6119fca7f52430b5074fb9a67b7fabc/Asset%2028.png?raw=true" alt="Kamus Catur Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -49,10 +67,7 @@
      </div>
     </div>
     <h1 id="academy-title" class="text-4xl font-bold text-gray-800 mb-2">Chess Academy Rating System</h1>
-    <p id="welcome-text" class="text-lg text-gray-600">Track your child's chess tournament progress and rating</p><!-- Connection Status -->
-    <div class="mt-4 flex items-center justify-center space-x-2">
-     <div id="connection-indicator" class="w-3 h-3 rounded-full bg-gray-400"></div><span id="connection-status-text" class="text-sm text-gray-600">Not Connected</span>
-    </div>
+    <p id="welcome-text" class="text-lg text-gray-600">Track your child's chess tournament progress and rating</p>
    </div><!-- Navigation -->
    <div class="flex justify-center mb-8">
     <div class="bg-white rounded-lg shadow-md p-1 flex flex-wrap gap-1"><button id="students-tab" class="px-6 py-2 rounded-md font-medium transition-colors bg-orange-600 text-white">Students</button> <button id="submit-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Submit Record</button> <button id="admin-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Admin</button> <button id="dashboard-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Dashboard</button>
@@ -429,18 +444,7 @@
       <p class="text-xs text-gray-500 mt-1">Default password: kamuscatur</p>
      </div>
     </div><!-- Admin Panel (Hidden until login) -->
-    <div id="admin-panel" class="hidden space-y-6"><!-- Google Sheets Connection -->
-     <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Google Sheets Connection</h2>
-      <div class="space-y-4">
-       <div><label for="apps-script-url" class="block text-sm font-medium text-gray-700 mb-2">Google Apps Script URL</label> <input type="url" id="apps-script-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" value="https://script.google.com/macros/s/AKfycby4lKDuvtA8hco6xlYhfQq_qYv_ooKoaH9iVcjLYJzCYqfbEDJ5SqDVEhXBab1-z0G3/exec">
-        <p class="text-xs text-gray-500 mt-1">Enter your Google Apps Script web app URL</p>
-       </div>
-       <div class="flex space-x-3"><button id="save-url-btn" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"> Save URL </button> <button id="test-connection-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"> Test Connection </button> <button id="sync-data-btn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"> Sync Data </button>
-       </div>
-       <div id="connection-message" class="hidden p-3 rounded-md"></div>
-      </div>
-     </div><!-- Pending Approvals -->
+    <div id="admin-panel" class="hidden space-y-6"><!-- Pending Approvals -->
      <div class="bg-white rounded-lg shadow-md p-6">
       <div class="flex justify-between items-center mb-4">
        <h2 class="text-2xl font-semibold text-gray-800">Pending Approval</h2><button id="admin-logout-btn" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"> Logout </button>
@@ -590,17 +594,13 @@
         // CONFIGURATION
         // ============================================
         
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxE2guZ6zCcWXYnGeJv7XfQB8CyTehYncheyp4wM9u2GkphJczCiaMAuEOESxVbvpfv/exec';
+        
         const defaultConfig = {
             academy_name: "Chess Academy Rating System",
             welcome_message: "Track your child's chess tournament progress and rating",
             contact_info: "For questions, contact your chess academy administrator"
         };
-
-        // Google Apps Script Configuration - PRE-CONFIGURED
-        let APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4lKDuvtA8hco6xlYhfQq_qYv_ooKoaH9iVcjLYJzCYqfbEDJ5SqDVEhXBab1-z0G3/exec';
-        let isConnected = false;
-        let connectionStatus = 'disconnected';
-        let isLoadingFromSheets = false; // Prevent concurrent loads
 
         // Tournament level points
         const tournamentPoints = {
@@ -725,62 +725,59 @@
         };
 
         // ============================================
-        // JSONP HELPER FUNCTIONS
+        // GOOGLE SHEETS API FUNCTIONS
         // ============================================
 
-        function jsonp(url, callback) {
-            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                callback(data);
-            };
-
-            const script = document.createElement('script');
-            script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
-            script.onerror = function() {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                callback({ error: 'Connection failed' });
-            };
-            document.body.appendChild(script);
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
         }
 
-        // ============================================
-        // LOCAL STORAGE BACKUP
-        // ============================================
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
 
-        function saveToLocalStorage() {
+        async function fetchFromGoogleSheets(action) {
             try {
-                localStorage.setItem('chess_students', JSON.stringify(students));
-                localStorage.setItem('chess_pending_records', JSON.stringify(pendingRecords));
-                localStorage.setItem('chess_approved_records', JSON.stringify(approvedRecords));
-                localStorage.setItem('chess_last_save', new Date().toISOString());
-                console.log('✅ Data saved to localStorage:', {
-                    students: students.length,
-                    pending: pendingRecords.length,
-                    approved: approvedRecords.length
-                });
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=${action}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    return result.data;
+                } else {
+                    throw new Error(result.data.error || 'Failed to fetch data');
+                }
             } catch (error) {
-                console.error('Failed to save to localStorage:', error);
+                console.error('Fetch error:', error);
+                throw error;
             }
         }
 
-        function loadFromLocalStorage() {
+        async function postToGoogleSheets(action, data) {
             try {
-                const savedStudents = localStorage.getItem('chess_students');
-                const savedPending = localStorage.getItem('chess_pending_records');
-                const savedApproved = localStorage.getItem('chess_approved_records');
-                
-                if (savedStudents) students = JSON.parse(savedStudents);
-                if (savedPending) pendingRecords = JSON.parse(savedPending);
-                if (savedApproved) approvedRecords = JSON.parse(savedApproved);
-                
-                console.log('✅ Data loaded from localStorage:', {
-                    students: students.length,
-                    pending: pendingRecords.length,
-                    approved: approvedRecords.length
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=${action}`, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
                 });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    return result.data;
+                } else {
+                    throw new Error(result.data.error || 'Operation failed');
+                }
+            } catch (error) {
+                console.error('Post error:', error);
+                throw error;
+            }
+        }
+
+        async function loadAllData() {
+            showLoading();
+            try {
+                students = await fetchFromGoogleSheets('getStudents');
+                pendingRecords = await fetchFromGoogleSheets('getPendingRecords');
+                approvedRecords = await fetchFromGoogleSheets('getApprovedRecords');
                 
                 updateStudentsList();
                 updatePendingList();
@@ -788,261 +785,11 @@
                     updateDashboard();
                 }
             } catch (error) {
-                console.error('Failed to load from localStorage:', error);
+                console.error('Failed to load data:', error);
+                showMessage('Failed to load data from Google Sheets. Please refresh the page.', 'error');
+            } finally {
+                hideLoading();
             }
-        }
-
-        // ============================================
-        // GOOGLE SHEETS INTEGRATION - FIXED VERSION
-        // ============================================
-
-        function updateConnectionStatus(status, message) {
-            connectionStatus = status;
-            const indicator = document.getElementById('connection-indicator');
-            const statusText = document.getElementById('connection-status-text');
-            
-            if (status === 'connected') {
-                indicator.className = 'w-3 h-3 rounded-full bg-green-500';
-                statusText.textContent = 'Connected to Google Sheets';
-                statusText.className = 'text-sm text-green-600';
-                isConnected = true;
-            } else if (status === 'connecting') {
-                indicator.className = 'w-3 h-3 rounded-full bg-yellow-500 animate-pulse';
-                statusText.textContent = 'Connecting...';
-                statusText.className = 'text-sm text-yellow-600';
-            } else {
-                indicator.className = 'w-3 h-3 rounded-full bg-gray-400';
-                statusText.textContent = message || 'Not Connected';
-                statusText.className = 'text-sm text-gray-600';
-                isConnected = false;
-            }
-        }
-
-        function saveAppsScriptUrl() {
-            const url = document.getElementById('apps-script-url').value.trim();
-            if (!url) {
-                showConnectionMessage('Please enter a valid URL', 'error');
-                return;
-            }
-            
-            APPS_SCRIPT_URL = url;
-            localStorage.setItem('apps_script_url', url);
-            showConnectionMessage('URL saved successfully!', 'success');
-        }
-
-        function loadAppsScriptUrl() {
-            const savedUrl = localStorage.getItem('apps_script_url');
-            if (savedUrl) {
-                APPS_SCRIPT_URL = savedUrl;
-                document.getElementById('apps-script-url').value = savedUrl;
-            } else {
-                // Use pre-configured URL
-                document.getElementById('apps-script-url').value = APPS_SCRIPT_URL;
-                localStorage.setItem('apps_script_url', APPS_SCRIPT_URL);
-            }
-        }
-
-        function testConnection() {
-            if (!APPS_SCRIPT_URL) {
-                showConnectionMessage('Please save the Apps Script URL first', 'error');
-                return;
-            }
-
-            updateConnectionStatus('connecting');
-            showConnectionMessage('Testing connection...', 'info');
-
-            jsonp(APPS_SCRIPT_URL + '?action=test', function(response) {
-                if (response && response.status === 'success') {
-                    updateConnectionStatus('connected');
-                    showConnectionMessage('Connection successful!', 'success');
-                } else {
-                    updateConnectionStatus('disconnected', 'Connection Failed');
-                    showConnectionMessage('Connection failed: ' + (response.error || 'Unknown error'), 'error');
-                }
-            });
-        }
-
-        function syncDataToSheets() {
-            if (!APPS_SCRIPT_URL) {
-                showConnectionMessage('Please save the Apps Script URL first', 'error');
-                return;
-            }
-
-            if (!isConnected) {
-                showConnectionMessage('Please test connection first', 'error');
-                return;
-            }
-
-            updateConnectionStatus('connecting', 'Syncing...');
-            showConnectionMessage('Syncing data to Google Sheets...', 'info');
-
-            const data = {
-                students: students,
-                pendingRecords: pendingRecords,
-                approvedRecords: approvedRecords
-            };
-
-            console.log('📤 Syncing data to sheets:', {
-                students: students.length,
-                pending: pendingRecords.length,
-                approved: approvedRecords.length
-            });
-
-            const url = APPS_SCRIPT_URL + '?action=sync&data=' + encodeURIComponent(JSON.stringify(data));
-            
-            jsonp(url, function(response) {
-                if (response && response.status === 'success') {
-                    updateConnectionStatus('connected');
-                    showConnectionMessage('Data synced successfully!', 'success');
-                    console.log('✅ Data synced to Google Sheets successfully');
-                } else {
-                    updateConnectionStatus('disconnected', 'Sync Failed');
-                    showConnectionMessage('Sync failed: ' + (response.error || 'Unknown error'), 'error');
-                    console.error('❌ Sync failed:', response);
-                }
-            });
-        }
-
-        function loadDataFromSheets() {
-            if (!APPS_SCRIPT_URL || isLoadingFromSheets) {
-                return;
-            }
-
-            isLoadingFromSheets = true;
-            updateConnectionStatus('connecting', 'Loading...');
-            console.log('📥 Loading data from Google Sheets...');
-
-            jsonp(APPS_SCRIPT_URL + '?action=load', function(response) {
-                isLoadingFromSheets = false;
-                
-                if (response && response.status === 'success' && response.data) {
-                    console.log('📦 Received data from sheets:', response.data);
-                    
-                    // Check if sheets actually have data
-                    const hasSheetData = (response.data.students && Array.isArray(response.data.students) && response.data.students.length > 0) ||
-                                        (response.data.pendingRecords && Array.isArray(response.data.pendingRecords) && response.data.pendingRecords.length > 0) ||
-                                        (response.data.approvedRecords && Array.isArray(response.data.approvedRecords) && response.data.approvedRecords.length > 0);
-                    
-                    const hasLocalData = students.length > 0 || pendingRecords.length > 0 || approvedRecords.length > 0;
-                    
-                    console.log('📊 Data status:', {
-                        hasSheetData,
-                        hasLocalData,
-                        sheetStudents: response.data.students?.length || 0,
-                        localStudents: students.length
-                    });
-                    
-                    if (hasSheetData) {
-                        // Sheets have data - use it (this is the source of truth)
-                        console.log('✅ Using data from Google Sheets');
-                        
-                        if (response.data.students && Array.isArray(response.data.students)) {
-                            students = response.data.students;
-                        }
-                        if (response.data.pendingRecords && Array.isArray(response.data.pendingRecords)) {
-                            pendingRecords = response.data.pendingRecords;
-                        }
-                        if (response.data.approvedRecords && Array.isArray(response.data.approvedRecords)) {
-                            approvedRecords = response.data.approvedRecords;
-                        }
-                        
-                        // Save to localStorage as backup
-                        saveToLocalStorage();
-                        
-                        updateConnectionStatus('connected');
-                        updateStudentsList();
-                        updatePendingList();
-                        if (currentView === 'dashboard') {
-                            updateDashboard();
-                        }
-                        showConnectionMessage('Data loaded from Google Sheets!', 'success');
-                    } else if (!hasLocalData) {
-                        // Both sheets and local are empty - this is fine (new installation)
-                        console.log('ℹ️ Both sheets and local storage are empty (new installation)');
-                        updateConnectionStatus('connected');
-                        showConnectionMessage('Connected to Google Sheets (no data yet)', 'success');
-                    } else {
-                        // CRITICAL: Sheets are empty BUT we have local data
-                        // DO NOT overwrite local data - keep it and warn user
-                        console.warn('⚠️ PREVENTED DATA LOSS: Sheets are empty but local data exists');
-                        console.log('🛡️ Keeping local data:', {
-                            students: students.length,
-                            pending: pendingRecords.length,
-                            approved: approvedRecords.length
-                        });
-                        
-                        updateConnectionStatus('connected');
-                        showConnectionMessage('⚠️ Google Sheets is empty but you have local data. Click "Sync Data" to upload your data to sheets.', 'error');
-                    }
-                } else {
-                    // Connection failed or error response
-                    console.error('❌ Failed to load from sheets:', response);
-                    updateConnectionStatus('disconnected', 'Load Failed');
-                    showConnectionMessage('Failed to load data: ' + (response.error || 'Unknown error'), 'error');
-                    
-                    // CRITICAL: Keep existing data - don't overwrite with nothing
-                    console.log('🛡️ Keeping existing local data due to load failure');
-                }
-            });
-        }
-
-        function saveStudentToSheets(studentData) {
-            if (!APPS_SCRIPT_URL || !isConnected) {
-                return Promise.resolve({ status: 'error', error: 'Not connected to Google Sheets' });
-            }
-
-            return new Promise((resolve) => {
-                const url = APPS_SCRIPT_URL + '?action=addStudent&data=' + encodeURIComponent(JSON.stringify(studentData));
-                jsonp(url, function(response) {
-                    resolve(response);
-                });
-            });
-        }
-
-        function saveRecordToSheets(recordData) {
-            if (!APPS_SCRIPT_URL || !isConnected) {
-                return Promise.resolve({ status: 'error', error: 'Not connected to Google Sheets' });
-            }
-
-            return new Promise((resolve) => {
-                const url = APPS_SCRIPT_URL + '?action=addRecord&data=' + encodeURIComponent(JSON.stringify(recordData));
-                jsonp(url, function(response) {
-                    resolve(response);
-                });
-            });
-        }
-
-        function approveRecordInSheets(submissionId) {
-            if (!APPS_SCRIPT_URL || !isConnected) {
-                return Promise.resolve({ status: 'error', error: 'Not connected to Google Sheets' });
-            }
-
-            return new Promise((resolve) => {
-                const url = APPS_SCRIPT_URL + '?action=approveRecord&submissionId=' + encodeURIComponent(submissionId);
-                jsonp(url, function(response) {
-                    resolve(response);
-                });
-            });
-        }
-
-        function showConnectionMessage(message, type) {
-            const messageDiv = document.getElementById('connection-message');
-            messageDiv.className = 'p-3 rounded-md';
-            
-            if (type === 'success') {
-                messageDiv.className += ' bg-green-50 text-green-700 border border-green-200';
-            } else if (type === 'error') {
-                messageDiv.className += ' bg-red-50 text-red-700 border border-red-200';
-            } else {
-                messageDiv.className += ' bg-blue-50 text-blue-700 border border-blue-200';
-            }
-            
-            messageDiv.textContent = message;
-            messageDiv.classList.remove('hidden');
-            
-            setTimeout(() => {
-                messageDiv.classList.add('hidden');
-            }, 5000);
         }
 
         // ============================================
@@ -1092,8 +839,6 @@
 
         async function initializeApp() {
             try {
-                console.log('🚀 Initializing Chess Academy Rating System...');
-                
                 // Initialize Element SDK
                 if (window.elementSdk) {
                     window.elementSdk.init({
@@ -1105,28 +850,10 @@
                 }
 
                 setupEventListeners();
-                
-                // Load Apps Script URL from local storage or use pre-configured
-                loadAppsScriptUrl();
-                
-                // Load data from localStorage first (instant)
-                console.log('📂 Loading data from localStorage...');
-                loadFromLocalStorage();
-                
-                // Auto-test connection on load (but DON'T load data yet)
-                setTimeout(() => {
-                    console.log('🔌 Testing Google Sheets connection...');
-                    testConnection();
-                    
-                    // Only load from sheets if connection is successful
-                    // AND we want to sync (user can manually click Sync Data button)
-                    // DO NOT auto-load to prevent data loss
-                }, 500);
-                
-                console.log('✅ App initialized successfully');
+                await loadAllData();
                 
             } catch (error) {
-                console.error("❌ Failed to initialize app:", error);
+                console.error("Failed to initialize app:", error);
                 showMessage('Failed to initialize application. Please refresh the page.', 'error');
             }
         }
@@ -1142,19 +869,18 @@
             document.getElementById('admin-tab').addEventListener('click', () => switchView('admin'));
             document.getElementById('dashboard-tab').addEventListener('click', () => switchView('dashboard'));
 
-            // Google Sheets connection
-            document.getElementById('save-url-btn').addEventListener('click', saveAppsScriptUrl);
-            document.getElementById('test-connection-btn').addEventListener('click', testConnection);
-            document.getElementById('sync-data-btn').addEventListener('click', syncDataToSheets);
-
             // Student form
             document.getElementById('student-form').addEventListener('submit', handleStudentSubmit);
 
             // Record form
             document.getElementById('record-form').addEventListener('submit', handleRecordSubmit);
             
-            // KC ID verification
-            document.getElementById('kc-id-input').addEventListener('input', verifyKcId);
+            // KC ID verification - use debounced version
+            let kcIdTimeout;
+            document.getElementById('kc-id-input').addEventListener('input', (e) => {
+                clearTimeout(kcIdTimeout);
+                kcIdTimeout = setTimeout(() => verifyKcId(), 500);
+            });
             
             // IC verification
             document.getElementById('ic-last-4').addEventListener('input', verifyIcLast4);
@@ -1326,11 +1052,6 @@
                     throw new Error('Please enter a valid IC number');
                 }
 
-                const existingStudent = students.find(s => s.ic_number === icNumber);
-                if (existingStudent) {
-                    throw new Error('Student with this IC number is already registered');
-                }
-
                 const kcId = generateKcId(genderCode);
                 const tierInfo = getTierInfo(1400);
                 
@@ -1354,23 +1075,8 @@
                     current_sub_tier: tierInfo.subTier
                 };
 
-                students.push(studentData);
-                
-                // Save to localStorage immediately
-                saveToLocalStorage();
-                
-                // Save to Google Sheets if connected
-                if (isConnected) {
-                    const sheetResponse = await saveStudentToSheets(studentData);
-                    if (sheetResponse.status !== 'success') {
-                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally.', 'error');
-                    }
-                }
-                
-                updateStudentsList();
-                if (currentView === 'dashboard') {
-                    updateDashboard();
-                }
+                await postToGoogleSheets('addStudent', studentData);
+                await loadAllData();
 
                 showKcId(kcId);
 
@@ -1473,8 +1179,8 @@
             btn.disabled = true;
 
             try {
-                const kcId = document.getElementById('kc-id-input').value.trim();
-                const student = students.find(s => s.kc_id === kcId);
+                const kcId = document.getElementById('kc-id-input').value.trim().toUpperCase();
+                const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
                 
                 if (!student) {
                     throw new Error('Student not found');
@@ -1528,23 +1234,8 @@
                     parent_contact: student.parent_phone || ''
                 };
 
-                pendingRecords.push(recordData);
-                
-                // Save to localStorage immediately
-                saveToLocalStorage();
-                
-                // Save to Google Sheets if connected
-                if (isConnected) {
-                    const sheetResponse = await saveRecordToSheets(recordData);
-                    if (sheetResponse.status !== 'success') {
-                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally.', 'error');
-                    }
-                }
-                
-                updatePendingList();
-                if (currentView === 'dashboard') {
-                    updateDashboard();
-                }
+                await postToGoogleSheets('addPendingRecord', recordData);
+                await loadAllData();
 
                 document.getElementById('record-form').reset();
                 document.getElementById('student-verification').classList.add('hidden');
@@ -1629,8 +1320,8 @@
         // KC ID VERIFICATION
         // ============================================
 
-        function verifyKcId() {
-            const kcId = document.getElementById('kc-id-input').value.trim();
+        async function verifyKcId() {
+            const kcId = document.getElementById('kc-id-input').value.trim().toUpperCase();
             const verificationDiv = document.getElementById('student-verification');
             const foundDiv = document.getElementById('student-found');
             const notFoundDiv = document.getElementById('student-not-found');
@@ -1644,7 +1335,16 @@
                 return;
             }
             
-            const student = students.find(s => s.kc_id === kcId);
+            // Reload students data when KC ID is complete (9 digits)
+            if (kcId.length >= 9) {
+                try {
+                    students = await fetchFromGoogleSheets('getStudents');
+                } catch (error) {
+                    console.error('Failed to fetch students:', error);
+                }
+            }
+            
+            const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
             
             verificationDiv.classList.remove('hidden');
             
@@ -1663,7 +1363,7 @@
         }
 
         function verifyIcLast4() {
-            const kcId = document.getElementById('kc-id-input').value.trim();
+            const kcId = document.getElementById('kc-id-input').value.trim().toUpperCase();
             const icLast4 = document.getElementById('ic-last-4').value.trim();
             const resultDiv = document.getElementById('ic-verification-result');
             const verifiedDiv = document.getElementById('ic-verified');
@@ -1674,7 +1374,7 @@
                 return;
             }
             
-            const student = students.find(s => s.kc_id === kcId);
+            const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
             if (!student || !student.ic_number) {
                 resultDiv.classList.add('hidden');
                 return;
@@ -1700,12 +1400,12 @@
         }
 
         function isUserVerified() {
-            const kcId = document.getElementById('kc-id-input').value.trim();
+            const kcId = document.getElementById('kc-id-input').value.trim().toUpperCase();
             const icLast4 = document.getElementById('ic-last-4').value.trim();
             
             if (!kcId || icLast4.length !== 4) return false;
             
-            const student = students.find(s => s.kc_id === kcId);
+            const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
             if (!student || !student.ic_number) return false;
             
             const studentIcLast4 = student.ic_number.toString().slice(-4);
@@ -1911,7 +1611,7 @@
             
             setTimeout(() => {
                 messageDiv.remove();
-            }, 3000);
+            }, 5000);
         }
 
         // ============================================
@@ -1956,6 +1656,7 @@
                 return;
             }
 
+            showLoading();
             try {
                 const record = pendingRecords.find(r => r.submission_id === submissionId);
                 if (!record) {
@@ -1968,8 +1669,8 @@
                 }
 
                 const originalRating = student.current_rating || 1400;
-
                 const newRating = originalRating + record.total_points;
+                
                 student.current_rating = Math.max(0, newRating);
                 student.last_updated = new Date().toISOString();
                 student.total_tournaments = (student.total_tournaments || 0) + 1;
@@ -1979,46 +1680,26 @@
                 student.current_tier = tierInfo.mainTier;
                 student.current_sub_tier = tierInfo.subTier;
 
-                record.status = 'Approved';
-                
-                const tournamentRecord = {
-                    ...record,
+                const approvalData = {
+                    submission_id: submissionId,
                     record_id: generateId(),
                     approved_date: new Date().toISOString(),
                     approved_by: 'Admin',
                     rating_before: originalRating,
-                    rating_after: student.current_rating
+                    rating_after: student.current_rating,
+                    student: student
                 };
 
-                approvedRecords.push(tournamentRecord);
-
-                const index = pendingRecords.findIndex(r => r.submission_id === submissionId);
-                if (index > -1) {
-                    pendingRecords.splice(index, 1);
-                }
-
-                // Save to localStorage immediately
-                saveToLocalStorage();
-
-                // Sync to Google Sheets if connected
-                if (isConnected) {
-                    const sheetResponse = await approveRecordInSheets(submissionId);
-                    if (sheetResponse.status !== 'success') {
-                        showMessage('Warning: Failed to sync approval to Google Sheets.', 'error');
-                    }
-                }
-
-                updateStudentsList();
-                updatePendingList();
-                if (currentView === 'dashboard') {
-                    updateDashboard();
-                }
+                await postToGoogleSheets('approveRecord', approvalData);
+                await loadAllData();
 
                 showMessage(`Record approved! ${student.student_name}'s rating updated to ${student.current_rating}`, 'success');
 
             } catch (error) {
                 console.error('Approval failed:', error);
                 showMessage(error.message || 'Approval failed. Please try again.', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -2028,30 +1709,18 @@
                 return;
             }
 
+            showLoading();
             try {
-                const index = pendingRecords.findIndex(r => r.submission_id === submissionId);
-                if (index > -1) {
-                    pendingRecords.splice(index, 1);
-                }
-
-                // Save to localStorage immediately
-                saveToLocalStorage();
-
-                // Sync to Google Sheets if connected
-                if (isConnected) {
-                    await syncDataToSheets();
-                }
-
-                updatePendingList();
-                if (currentView === 'dashboard') {
-                    updateDashboard();
-                }
+                await postToGoogleSheets('rejectRecord', { submission_id: submissionId });
+                await loadAllData();
 
                 showMessage('Record rejected successfully', 'success');
 
             } catch (error) {
                 console.error('Rejection failed:', error);
                 showMessage(error.message || 'Rejection failed. Please try again.', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -2106,6 +1775,7 @@
                 return;
             }
 
+            showLoading();
             try {
                 const ranking = parseInt(document.getElementById('edit-final-ranking').value);
                 const totalPlayers = parseInt(document.getElementById('edit-total-players').value);
@@ -2131,33 +1801,26 @@
                 const basePoints = tournamentPoints[tournamentLevel];
                 const totalPoints = basePoints + bonusPoints;
 
-                currentEditingRecord.tournament_name = document.getElementById('edit-tournament-name').value;
-                currentEditingRecord.tournament_date = document.getElementById('edit-tournament-date').value;
-                currentEditingRecord.tournament_level = tournamentLevel;
-                currentEditingRecord.tournament_category = document.getElementById('edit-tournament-category').value;
-                currentEditingRecord.time_control = document.getElementById('edit-time-control').value;
-                currentEditingRecord.final_ranking = ranking;
-                currentEditingRecord.total_players = totalPlayers;
-                currentEditingRecord.percentile = percentile;
-                currentEditingRecord.has_special_prize = hasSpecialPrize;
-                currentEditingRecord.prize_description = document.getElementById('edit-prize-description').value || '';
-                currentEditingRecord.base_points = basePoints;
-                currentEditingRecord.bonus_points = bonusPoints;
-                currentEditingRecord.total_points = totalPoints;
-                currentEditingRecord.additional_notes = document.getElementById('edit-additional-notes').value || '';
+                const updatedRecord = {
+                    submission_id: currentEditingRecord.submission_id,
+                    tournament_name: document.getElementById('edit-tournament-name').value,
+                    tournament_date: document.getElementById('edit-tournament-date').value,
+                    tournament_level: tournamentLevel,
+                    tournament_category: document.getElementById('edit-tournament-category').value,
+                    time_control: document.getElementById('edit-time-control').value,
+                    final_ranking: ranking,
+                    total_players: totalPlayers,
+                    percentile: percentile,
+                    has_special_prize: hasSpecialPrize,
+                    prize_description: document.getElementById('edit-prize-description').value || '',
+                    base_points: basePoints,
+                    bonus_points: bonusPoints,
+                    total_points: totalPoints,
+                    additional_notes: document.getElementById('edit-additional-notes').value || ''
+                };
 
-                // Save to localStorage immediately
-                saveToLocalStorage();
-
-                // Sync to Google Sheets if connected
-                if (isConnected) {
-                    await syncDataToSheets();
-                }
-
-                updatePendingList();
-                if (currentView === 'dashboard') {
-                    updateDashboard();
-                }
+                await postToGoogleSheets('updatePendingRecord', updatedRecord);
+                await loadAllData();
 
                 closeEditModal();
                 showMessage('Record updated successfully!', 'success');
@@ -2165,6 +1828,8 @@
             } catch (error) {
                 console.error('Edit failed:', error);
                 showMessage(error.message || 'Update failed. Please try again.', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -2413,5 +2078,5 @@
             initializeApp();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a084f1cf299a856',t:'MTc2MzQ3NzcyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a08f990535ca856',t:'MTc2MzQ4NDcxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
