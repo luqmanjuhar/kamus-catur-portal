@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chess Academy Rating System</title>
-  <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -20,34 +19,216 @@
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
   <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100">
+ <body class="min-h-full bg-gradient-to-br from-orange-50 to-red-100">
   <div class="container mx-auto px-4 py-8 max-w-6xl"><!-- Header -->
    <div class="text-center mb-8">
-    <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4"><span class="text-2xl">♔</span>
+    <div class="inline-flex items-center justify-center w-20 h-20 mb-4"><img src="https://github.com/luqmanjuhar/kamus-catur-portal/blob/2fcbf8eed6119fca7f52430b5074fb9a67b7fabc/Asset%2028.png?raw=true" alt="Kamus Catur Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+     <div class="w-16 h-16 bg-orange-600 rounded-full items-center justify-center text-2xl text-white hidden">
+      ♔
+     </div>
     </div>
     <h1 id="academy-title" class="text-4xl font-bold text-gray-800 mb-2">Chess Academy Rating System</h1>
-    <p id="welcome-text" class="text-lg text-gray-600">Track your child's chess tournament progress and rating</p>
+    <p id="welcome-text" class="text-lg text-gray-600">Track your child's chess tournament progress and rating</p><!-- Connection Status -->
+    <div class="mt-4 flex items-center justify-center space-x-2">
+     <div id="connection-indicator" class="w-3 h-3 rounded-full bg-gray-400"></div><span id="connection-status-text" class="text-sm text-gray-600">Not Connected</span>
+    </div>
    </div><!-- Navigation -->
    <div class="flex justify-center mb-8">
-    <div class="bg-white rounded-lg shadow-md p-1 flex"><button id="students-tab" class="px-6 py-2 rounded-md font-medium transition-colors bg-indigo-600 text-white">Students</button> <button id="submit-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-indigo-600">Submit Record</button> <button id="pending-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-indigo-600">Pending Approval</button>
+    <div class="bg-white rounded-lg shadow-md p-1 flex flex-wrap gap-1"><button id="students-tab" class="px-6 py-2 rounded-md font-medium transition-colors bg-orange-600 text-white">Students</button> <button id="submit-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Submit Record</button> <button id="admin-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Admin</button> <button id="dashboard-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Dashboard</button>
     </div>
    </div><!-- Students View -->
-   <div id="students-view" class="space-y-6"><!-- Add Student Form -->
+   <div id="students-view" class="space-y-6"><!-- Google Sheets Connection -->
     <div class="bg-white rounded-lg shadow-md p-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Daftar Pelajar Baru / Register New Student</h2>
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Google Sheets Connection</h2>
+     <div class="space-y-4">
+      <div><label for="apps-script-url" class="block text-sm font-medium text-gray-700 mb-2">Google Apps Script URL</label> <input type="url" id="apps-script-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+       <p class="text-xs text-gray-500 mt-1">Enter your Google Apps Script web app URL</p>
+      </div>
+      <div class="flex space-x-3"><button id="save-url-btn" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"> Save URL </button> <button id="test-connection-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"> Test Connection </button> <button id="sync-data-btn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"> Sync Data </button>
+      </div>
+      <div id="connection-message" class="hidden p-3 rounded-md"></div>
+     </div>
+    </div><!-- Add Student Form -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Daftar KC ID / Register KC ID</h2>
      <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
       </div>
-      <div><label for="parent-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu Bapa / Parent Name</label> <input type="text" id="parent-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      <div><label for="ic-number" class="block text-sm font-medium text-gray-700 mb-2">No Kad Pengenalan / IC Number</label> <input type="text" id="ic-number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="YYMMDD-PB-XXXX" maxlength="14" required>
+       <p class="text-xs text-gray-500 mt-1">Format: YYMMDD-PB-XXXX (tanpa ruang / without spaces)</p>
       </div>
-      <div><label for="parent-email" class="block text-sm font-medium text-gray-700 mb-2">Emel Ibu Bapa / Parent Email</label> <input type="email" id="parent-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      <div><label for="parent-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu Bapa / Parent Name</label> <input type="text" id="parent-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
       </div>
-      <div class="flex items-end"><button type="submit" id="add-student-btn" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors font-medium"> Daftar Pelajar / Register Student </button>
+      <div><label for="parent-phone" class="block text-sm font-medium text-gray-700 mb-2">No Telefon Ibu Bapa / Parent Phone</label>
+       <div class="flex"><span class="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l-md">+60</span> <input type="tel" id="parent-phone" class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="12-3456789" required>
+       </div>
       </div>
-     </form>
+      <div><label for="parent-email" class="block text-sm font-medium text-gray-700 mb-2">Emel Ibu Bapa / Parent Email</label> <input type="email" id="parent-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+      </div><!-- IC Information Display -->
+      <div id="ic-info-display" class="hidden col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
+       <h4 class="font-medium text-blue-800 mb-2">Maklumat dari No Kad Pengenalan / Information from IC Number:</h4>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+        <div><span class="text-gray-600">Jantina / Gender:</span> <span id="detected-gender" class="font-medium ml-2"></span>
+        </div>
+        <div><span class="text-gray-600">Umur / Age:</span> <span id="detected-age" class="font-medium ml-2"></span>
+        </div>
+        <div><span class="text-gray-600">Negeri / State:</span> <span id="detected-state" class="font-medium ml-2"></span>
+        </div>
+       </div>
+      </div>
+      <div class="flex items-end"><button type="submit" id="add-student-btn" class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors font-medium"> Daftar KC ID / Register KC ID </button>
+      </div>
+     </form><!-- KC ID Display -->
+     <div id="kc-id-display" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+      <h3 class="font-semibold text-green-800 mb-2">KC ID Berjaya Didaftar! / KC ID Successfully Registered!</h3>
+      <div class="bg-white p-3 rounded border">
+       <p class="text-sm text-gray-600 mb-2">KC ID (Kamus Catur ID) untuk pelajar ini:</p>
+       <div class="flex items-center justify-between bg-gray-50 p-2 rounded"><span id="generated-kc-id" class="font-mono text-lg font-bold text-orange-600"></span> <button id="copy-kc-id" class="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"> Salin / Copy </button>
+       </div>
+       <p class="text-xs text-gray-500 mt-2">Simpan KC ID ini dengan selamat. Anda memerlukannya untuk menghantar rekod kejohanan. <br>
+        Keep this KC ID safe. You will need it to submit tournament records. <br><br>
+        Format: YYMMGGXXX (YY=Tahun, MM=Bulan, GG=Jantina 01=Lelaki/02=Perempuan, XXX=No Giliran)</p>
+      </div>
+     </div>
+    </div><!-- Tier System Overview -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Chess Rating Tier System</h2>
+     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div class="text-center p-3 bg-gray-50 rounded-lg border-2 border-gray-200">
+       <div class="text-2xl mb-2">
+        🔰
+       </div>
+       <div class="font-semibold text-gray-600">
+        Beginner
+       </div>
+       <div class="text-xs text-gray-500">
+        &lt; 1400
+       </div>
+      </div>
+      <div class="text-center p-3 bg-yellow-50 rounded-lg border-2" style="border-color: #8B4513">
+       <div class="text-2xl mb-2">
+        ♟
+       </div>
+       <div class="font-semibold" style="color: #8B4513">
+        Pawn
+       </div>
+       <div class="text-xs text-gray-500">
+        1400-1500
+       </div>
+      </div>
+      <div class="text-center p-3 bg-gray-50 rounded-lg border-2" style="border-color: #4A5568">
+       <div class="text-2xl mb-2">
+        ♞
+       </div>
+       <div class="font-semibold" style="color: #4A5568">
+        Knight
+       </div>
+       <div class="text-xs text-gray-500">
+        1501-1600
+       </div>
+      </div>
+      <div class="text-center p-3 bg-purple-50 rounded-lg border-2" style="border-color: #805AD5">
+       <div class="text-2xl mb-2">
+        ♝
+       </div>
+       <div class="font-semibold" style="color: #805AD5">
+        Bishop
+       </div>
+       <div class="text-xs text-gray-500">
+        1601-1700
+       </div>
+      </div>
+      <div class="text-center p-3 bg-green-50 rounded-lg border-2" style="border-color: #38A169">
+       <div class="text-2xl mb-2">
+        ♜
+       </div>
+       <div class="font-semibold" style="color: #38A169">
+        Rook
+       </div>
+       <div class="text-xs text-gray-500">
+        1701-1800
+       </div>
+      </div>
+      <div class="text-center p-3 bg-yellow-50 rounded-lg border-2" style="border-color: #D69E2E">
+       <div class="text-2xl mb-2">
+        ♛
+       </div>
+       <div class="font-semibold" style="color: #D69E2E">
+        Queen
+       </div>
+       <div class="text-xs text-gray-500">
+        1801-1900
+       </div>
+      </div>
+      <div class="text-center p-3 bg-red-50 rounded-lg border-2" style="border-color: #E53E3E">
+       <div class="text-2xl mb-2">
+        ♚
+       </div>
+       <div class="font-semibold" style="color: #E53E3E">
+        King
+       </div>
+       <div class="text-xs text-gray-500">
+        1901-2000
+       </div>
+      </div>
+      <div class="text-center p-3 bg-purple-50 rounded-lg border-2" style="border-color: #9F7AEA">
+       <div class="text-2xl mb-2">
+        👑
+       </div>
+       <div class="font-semibold" style="color: #9F7AEA">
+        Grandmaster
+       </div>
+       <div class="text-xs text-gray-500">
+        &gt; 2000
+       </div>
+      </div>
+     </div>
+     <div class="mt-4 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg"><strong>Note:</strong> Each tier has 5 sub-levels with 20-point ranges (progression from 5 to 1): 
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2 text-xs">
+       <div>
+        <strong>Pawn:</strong> 5 (1400-1420), 4 (1421-1440), 3 (1441-1460), 2 (1461-1480), 1 (1481-1500)
+       </div>
+       <div>
+        <strong>Knight:</strong> 5 (1501-1520), 4 (1521-1540), 3 (1541-1560), 2 (1561-1580), 1 (1581-1600)
+       </div>
+       <div>
+        <strong>Bishop:</strong> 5 (1601-1620), 4 (1621-1640), 3 (1641-1660), 2 (1661-1680), 1 (1681-1700)
+       </div>
+       <div>
+        <strong>Rook:</strong> 5 (1701-1720), 4 (1721-1740), 3 (1741-1760), 2 (1761-1780), 1 (1781-1800)
+       </div>
+       <div>
+        <strong>Queen:</strong> 5 (1801-1820), 4 (1821-1840), 3 (1841-1860), 2 (1861-1880), 1 (1881-1900)
+       </div>
+       <div>
+        <strong>King:</strong> 5 (1901-1920), 4 (1921-1940), 3 (1941-1960), 2 (1961-1980), 1 (1981-2000)
+       </div>
+      </div>
+      <div class="mt-2">
+       <strong>Starting Point:</strong> All students begin at 1400 rating (Pawn 5)
+      </div>
+     </div>
     </div><!-- Students List -->
     <div class="bg-white rounded-lg shadow-md p-6">
      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Registered Students</h2>
@@ -170,37 +351,58 @@
         </tbody>
        </table>
       </div>
-      <p class="text-xs text-gray-600 mt-2">*Special prizes automatically count as Top 20% performance</p>
+      <p class="text-xs text-gray-600 mt-2">*Special prizes and Top 10 finishers (rank 1-10) automatically count as Top 20% performance</p>
      </div>
-     <form id="record-form" class="space-y-4"><!-- Student Selection -->
-      <div><label for="record-student" class="block text-sm font-medium text-gray-700 mb-2">Pilih Pelajar / Select Student</label> <select id="record-student" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih pelajar / Choose a student</option> </select>
+     <form id="record-form" class="space-y-4"><!-- KC ID Input -->
+      <div><label for="kc-id-input" class="block text-sm font-medium text-gray-700 mb-2">KC ID (Kamus Catur ID)</label> <input type="text" id="kc-id-input" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="Masukkan KC ID / Enter KC ID" required>
+       <p class="text-xs text-gray-500 mt-1">Masukkan KC ID yang diterima semasa pendaftaran / Enter the KC ID received during registration</p>
+       <div id="student-verification" class="hidden mt-2 p-2 rounded-md">
+        <div id="student-found" class="hidden text-green-700 bg-green-50 p-2 rounded">
+         ✓ Pelajar dijumpai: <span id="verified-student-name" class="font-semibold"></span>
+        </div>
+        <div id="student-not-found" class="hidden text-red-700 bg-red-50 p-2 rounded">
+         ✗ KC ID tidak dijumpai. Sila semak KC ID anda.
+        </div>
+       </div>
+      </div><!-- IC Verification (shown only when student is found) -->
+      <div id="ic-verification-section" class="hidden"><label for="ic-last-4" class="block text-sm font-medium text-gray-700 mb-2"> Pengesahan Identiti / Identity Verification </label> <input type="text" id="ic-last-4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="Masukkan 4 digit terakhir IC / Enter last 4 digits of IC" maxlength="4" pattern="[0-9]{4}">
+       <p class="text-xs text-gray-500 mt-1">Untuk keselamatan, sila masukkan 4 digit terakhir no kad pengenalan anda <br>
+        For security, please enter the last 4 digits of your IC number</p>
+       <div id="ic-verification-result" class="hidden mt-2 p-2 rounded-md">
+        <div id="ic-verified" class="hidden text-green-700 bg-green-50 p-2 rounded">
+         ✓ Pengesahan berjaya / Verification successful
+        </div>
+        <div id="ic-failed" class="hidden text-red-700 bg-red-50 p-2 rounded">
+         ✗ 4 digit terakhir IC tidak sepadan. Sila cuba lagi / Last 4 digits of IC do not match. Please try again.
+        </div>
+       </div>
       </div><!-- Tournament Basic Info -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <div><label for="tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Kejohanan / Tournament Name</label> <input type="text" id="tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+       <div><label for="tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Kejohanan / Tournament Name</label> <input type="text" id="tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
        </div>
-       <div><label for="tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tarikh Kejohanan / Tournament Date</label> <input type="date" id="tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+       <div><label for="tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tarikh Kejohanan / Tournament Date</label> <input type="date" id="tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
        </div>
       </div><!-- Tournament Details -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-       <div><label for="time-control" class="block text-sm font-medium text-gray-700 mb-2">Kawalan Masa / Time Control</label> <select id="time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih kawalan masa / Select time control</option> <option value="Blitz">Blitz (≤ 10 minit / minutes)</option> <option value="Rapid">Rapid (10-60 minit / minutes)</option> <option value="Classical">Classical (&gt; 60 minit / minutes)</option> </select>
+       <div><label for="time-control" class="block text-sm font-medium text-gray-700 mb-2">Kawalan Masa / Time Control</label> <select id="time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="">Pilih kawalan masa / Select time control</option> <option value="Blitz">Blitz (≤ 10 minit / minutes)</option> <option value="Rapid">Rapid (10-60 minit / minutes)</option> <option value="Classical">Classical (&gt; 60 minit / minutes)</option> </select>
        </div>
-       <div><label for="tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Kategori Kejohanan / Tournament Category</label> <select id="tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih kategori / Select category</option> <option value="U6">Bawah 6 / Under 6 (U6)</option> <option value="U7">Bawah 7 / Under 7 (U7)</option> <option value="U8">Bawah 8 / Under 8 (U8)</option> <option value="U9">Bawah 9 / Under 9 (U9)</option> <option value="U10">Bawah 10 / Under 10 (U10)</option> <option value="U11">Bawah 11 / Under 11 (U11)</option> <option value="U12">Bawah 12 / Under 12 (U12)</option> <option value="U13">Bawah 13 / Under 13 (U13)</option> <option value="U14">Bawah 14 / Under 14 (U14)</option> <option value="U15">Bawah 15 / Under 15 (U15)</option> <option value="U16">Bawah 16 / Under 16 (U16)</option> <option value="U17">Bawah 17 / Under 17 (U17)</option> <option value="U18">Bawah 18 / Under 18 (U18)</option> <option value="U19">Bawah 19 / Under 19 (U19)</option> <option value="U20">Bawah 20 / Under 20 (U20)</option> <option value="Team">Pasukan / Team</option> <option value="Women">Wanita / Women</option> <option value="Challenger">Pencabar / Challenger</option> <option value="Open">Terbuka / Open</option> </select>
+       <div><label for="tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Kategori Kejohanan / Tournament Category</label> <select id="tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="">Pilih kategori / Select category</option> <option value="U6">Bawah 6 / Under 6 (U6)</option> <option value="U7">Bawah 7 / Under 7 (U7)</option> <option value="U8">Bawah 8 / Under 8 (U8)</option> <option value="U9">Bawah 9 / Under 9 (U9)</option> <option value="U10">Bawah 10 / Under 10 (U10)</option> <option value="U11">Bawah 11 / Under 11 (U11)</option> <option value="U12">Bawah 12 / Under 12 (U12)</option> <option value="U13">Bawah 13 / Under 13 (U13)</option> <option value="U14">Bawah 14 / Under 14 (U14)</option> <option value="U15">Bawah 15 / Under 15 (U15)</option> <option value="U16">Bawah 16 / Under 16 (U16)</option> <option value="U17">Bawah 17 / Under 17 (U17)</option> <option value="U18">Bawah 18 / Under 18 (U18)</option> <option value="U19">Bawah 19 / Under 19 (U19)</option> <option value="U20">Bawah 20 / Under 20 (U20)</option> <option value="Team">Pasukan / Team</option> <option value="Women">Wanita / Women</option> <option value="Challenger">Pencabar / Challenger</option> <option value="Open">Terbuka / Open</option> </select>
        </div>
-       <div><label for="tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tahap Kejohanan / Tournament Level</label> <select id="tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required> <option value="">Pilih tahap / Select level</option> <option value="Sekolah">Sekolah / School (5 mata / points)</option> <option value="Daerah">Daerah / District (8 mata / points)</option> <option value="Negeri">Negeri / State (10 mata / points)</option> <option value="Kebangsaan">Kebangsaan / National (12 mata / points)</option> <option value="Antarabangsa">Antarabangsa / International (15 mata / points)</option> </select>
+       <div><label for="tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tahap Kejohanan / Tournament Level</label> <select id="tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="">Pilih tahap / Select level</option> <option value="Sekolah">Sekolah / School (5 mata / points)</option> <option value="Daerah">Daerah / District (8 mata / points)</option> <option value="Negeri">Negeri / State (10 mata / points)</option> <option value="Kebangsaan">Kebangsaan / National (12 mata / points)</option> <option value="Antarabangsa">Antarabangsa / International (15 mata / points)</option> </select>
        </div>
       </div><!-- Performance Calculation Section -->
       <div class="bg-gray-50 rounded-lg p-4 space-y-4">
        <h3 class="font-semibold text-gray-800">Butiran Prestasi / Performance Details</h3>
        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label for="final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Kedudukan Akhir / Final Ranking</label> <input type="number" id="final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="cth: 5 / e.g., 5" required>
+        <div><label for="final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Kedudukan Akhir / Final Ranking</label> <input type="number" id="final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: 5 / e.g., 5" required>
         </div>
-        <div><label for="total-players" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pemain dalam Kategori / Total Players in Category</label> <input type="number" id="total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="cth: 50 / e.g., 50" required>
+        <div><label for="total-players" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pemain dalam Kategori / Total Players in Category</label> <input type="number" id="total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: 50 / e.g., 50" required>
         </div>
        </div><!-- Special Prize Section -->
        <div class="border-t pt-4">
         <div class="flex items-center mb-3"><input type="checkbox" id="special-prize" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"> <label for="special-prize" class="ml-2 block text-sm font-medium text-gray-700"> Menerima Hadiah Khas / Received Special Prize (automatik dikira sebagai 20% teratas / automatically counts as Top 20%) </label>
         </div>
-        <div id="special-prize-details" class="hidden"><label for="prize-description" class="block text-sm font-medium text-gray-700 mb-2">Keterangan Hadiah Khas / Special Prize Description</label> <input type="text" id="prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="cth: Pemain Wanita Terbaik / e.g., Best Female Player">
+        <div id="special-prize-details" class="hidden"><label for="prize-description" class="block text-sm font-medium text-gray-700 mb-2">Keterangan Hadiah Khas / Special Prize Description</label> <input type="text" id="prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: Pemain Wanita Terbaik / e.g., Best Female Player">
         </div>
        </div><!-- Performance Calculation Display -->
        <div id="performance-calculation" class="bg-white rounded-lg p-3 border hidden">
@@ -224,17 +426,157 @@
         </div>
        </div>
       </div>
-      <div><label for="additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Nota Tambahan (Pilihan) / Additional Notes (Optional)</label> <textarea id="additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Sebarang maklumat tambahan tentang prestasi / Any additional information about the performance"></textarea>
-      </div><button type="submit" id="submit-record-btn" class="w-full bg-green-600 text-white px-4 py-3 rounded-md hover:bg-green-700 transition-colors font-medium"> Hantar untuk Kelulusan / Submit for Approval </button>
+      <div><label for="additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Nota Tambahan (Pilihan) / Additional Notes (Optional)</label> <textarea id="additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Sebarang maklumat tambahan tentang prestasi / Any additional information about the performance"></textarea>
+      </div><button type="submit" id="submit-record-btn" class="w-full bg-orange-600 text-white px-4 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"> Hantar untuk Kelulusan / Submit for Approval </button>
      </form>
     </div>
-   </div><!-- Pending Approval View -->
-   <div id="pending-view" class="hidden">
-    <div class="bg-white rounded-lg shadow-md p-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Pending Approval</h2>
-     <div id="pending-list" class="space-y-4">
-      <div class="text-center text-gray-500 py-8">
-       No pending submissions.
+   </div><!-- Admin View -->
+   <div id="admin-view" class="hidden"><!-- Admin Login Section -->
+    <div id="admin-login" class="bg-white rounded-lg shadow-md p-6 mb-6">
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Admin Access Required</h2>
+     <div class="max-w-md"><label for="admin-password" class="block text-sm font-medium text-gray-700 mb-2">Admin Password</label>
+      <div class="flex space-x-3"><input type="password" id="admin-password" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Enter admin password"> <button id="admin-login-btn" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"> Login </button>
+      </div>
+      <p class="text-xs text-gray-500 mt-1">Default password: kamuscatur</p>
+     </div>
+    </div><!-- Admin Panel (Hidden until login) -->
+    <div id="admin-panel" class="hidden">
+     <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-4">
+       <h2 class="text-2xl font-semibold text-gray-800">Pending Approval - Admin Panel</h2><button id="admin-logout-btn" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"> Logout </button>
+      </div>
+      <div id="pending-list" class="space-y-4">
+       <div class="text-center text-gray-500 py-8">
+        No pending submissions.
+       </div>
+      </div>
+     </div>
+    </div><!-- Edit Record Modal -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+     <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90%] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+       <h3 class="text-xl font-semibold text-gray-800">Edit Tournament Record</h3><button id="close-edit-modal" class="text-gray-500 hover:text-gray-700">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg></button>
+      </div>
+      <form id="edit-record-form" class="space-y-4"><input type="hidden" id="edit-record-id"> <!-- Tournament Basic Info -->
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="edit-tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Tournament Name</label> <input type="text" id="edit-tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+        </div>
+        <div><label for="edit-tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tournament Date</label> <input type="date" id="edit-tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+        </div>
+       </div><!-- Tournament Details -->
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div><label for="edit-time-control" class="block text-sm font-medium text-gray-700 mb-2">Time Control</label> <select id="edit-time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="Blitz">Blitz (≤ 10 minutes)</option> <option value="Rapid">Rapid (10-60 minutes)</option> <option value="Classical">Classical (&gt; 60 minutes)</option> </select>
+        </div>
+        <div><label for="edit-tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Tournament Category</label> <select id="edit-tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="U6">Under 6 (U6)</option> <option value="U7">Under 7 (U7)</option> <option value="U8">Under 8 (U8)</option> <option value="U9">Under 9 (U9)</option> <option value="U10">Under 10 (U10)</option> <option value="U11">Under 11 (U11)</option> <option value="U12">Under 12 (U12)</option> <option value="U13">Under 13 (U13)</option> <option value="U14">Under 14 (U14)</option> <option value="U15">Under 15 (U15)</option> <option value="U16">Under 16 (U16)</option> <option value="U17">Under 17 (U17)</option> <option value="U18">Under 18 (U18)</option> <option value="U19">Under 19 (U19)</option> <option value="U20">Under 20 (U20)</option> <option value="Team">Team</option> <option value="Women">Women</option> <option value="Challenger">Challenger</option> <option value="Open">Open</option> </select>
+        </div>
+        <div><label for="edit-tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tournament Level</label> <select id="edit-tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="Sekolah">Sekolah / School (5 points)</option> <option value="Daerah">Daerah / District (8 points)</option> <option value="Negeri">Negeri / State (10 points)</option> <option value="Kebangsaan">Kebangsaan / National (12 points)</option> <option value="Antarabangsa">Antarabangsa / International (15 points)</option> </select>
+        </div>
+       </div><!-- Performance Details -->
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label for="edit-final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Final Ranking</label> <input type="number" id="edit-final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+        </div>
+        <div><label for="edit-total-players" class="block text-sm font-medium text-gray-700 mb-2">Total Players</label> <input type="number" id="edit-total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+        </div>
+       </div><!-- Special Prize -->
+       <div class="flex items-center mb-3"><input type="checkbox" id="edit-special-prize" class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"> <label for="edit-special-prize" class="ml-2 block text-sm font-medium text-gray-700"> Received Special Prize </label>
+       </div>
+       <div id="edit-special-prize-details" class="hidden"><label for="edit-prize-description" class="block text-sm font-medium text-gray-700 mb-2">Special Prize Description</label> <input type="text" id="edit-prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+       </div><!-- Additional Notes -->
+       <div><label for="edit-additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label> <textarea id="edit-additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+       </div><!-- Performance Calculation Display -->
+       <div id="edit-performance-calculation" class="bg-gray-50 rounded-lg p-3 border">
+        <h4 class="font-medium text-gray-800 mb-2">Updated Performance Calculation</h4>
+        <div class="text-sm space-y-1">
+         <div>
+          Ranking: <span id="edit-calc-ranking">-</span> out of <span id="edit-calc-total">-</span> players
+         </div>
+         <div>
+          Percentile: <span id="edit-calc-percentile">-</span>
+         </div>
+         <div>
+          Base Points: <span id="edit-calc-base">-</span>
+         </div>
+         <div>
+          Performance Bonus: <span id="edit-calc-bonus">-</span>
+         </div>
+         <div class="font-semibold border-t pt-1">
+          Total Points: <span id="edit-calc-total-points">-</span>
+         </div>
+        </div>
+       </div>
+       <div class="flex space-x-3 pt-4"><button type="submit" class="flex-1 bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors"> Save Changes </button> <button type="button" id="cancel-edit" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"> Cancel </button>
+       </div>
+      </form>
+     </div>
+    </div>
+   </div><!-- Dashboard View -->
+   <div id="dashboard-view" class="hidden">
+    <div class="space-y-6"><!-- Statistics Overview -->
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white rounded-lg shadow-md p-6">
+       <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+         </svg>
+        </div>
+        <div class="ml-4">
+         <p class="text-sm font-medium text-gray-600">Total Students</p>
+         <p id="total-students" class="text-2xl font-semibold text-gray-900">0</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6">
+       <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100 text-green-600">
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+         </svg>
+        </div>
+        <div class="ml-4">
+         <p class="text-sm font-medium text-gray-600">Average Rating</p>
+         <p id="average-rating" class="text-2xl font-semibold text-gray-900">0</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6">
+       <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+         </svg>
+        </div>
+        <div class="ml-4">
+         <p class="text-sm font-medium text-gray-600">Pending Records</p>
+         <p id="pending-count" class="text-2xl font-semibold text-gray-900">0</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6">
+       <div class="flex items-center">
+        <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+         </svg>
+        </div>
+        <div class="ml-4">
+         <p class="text-sm font-medium text-gray-600">Highest Rating</p>
+         <p id="highest-rating" class="text-2xl font-semibold text-gray-900">0</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Tier Distribution Chart -->
+     <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Student Distribution by Tier</h2>
+      <div id="tier-distribution" class="space-y-3"><!-- Tier bars will be populated by JavaScript -->
+      </div>
+     </div><!-- Recent Activity -->
+     <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recent Registrations</h2>
+      <div id="recent-activity" class="space-y-3"><!-- Recent activity will be populated by JavaScript -->
+      </div>
+     </div><!-- Top Performers -->
+     <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Top 10 Students</h2>
+      <div id="top-performers" class="space-y-2"><!-- Top performers will be populated by JavaScript -->
       </div>
      </div>
     </div>
@@ -244,12 +586,20 @@
    </div>
   </div>
   <script>
-        // Configuration
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        
         const defaultConfig = {
             academy_name: "Chess Academy Rating System",
             welcome_message: "Track your child's chess tournament progress and rating",
             contact_info: "For questions, contact your chess academy administrator"
         };
+
+        // Google Apps Script Configuration
+        let APPS_SCRIPT_URL = '';
+        let isConnected = false;
+        let connectionStatus = 'disconnected';
 
         // Tournament level points
         const tournamentPoints = {
@@ -272,18 +622,318 @@
         // Global state
         let students = [];
         let pendingRecords = [];
+        let approvedRecords = [];
         let currentView = 'students';
+        let isAdminLoggedIn = false;
+        let currentEditingRecord = null;
 
-        // Data SDK handler
-        const dataHandler = {
-            onDataChanged(data) {
-                students = data.filter(item => item.student_id);
-                updateStudentsList();
-                updateStudentSelect();
+        // Chess tier system
+        const chessTiers = {
+            'Pawn': {
+                range: [1400, 1500],
+                color: '#8B4513',
+                icon: '♟',
+                subTiers: [
+                    { name: 'Pawn 5', min: 1400, max: 1420 },
+                    { name: 'Pawn 4', min: 1421, max: 1440 },
+                    { name: 'Pawn 3', min: 1441, max: 1460 },
+                    { name: 'Pawn 2', min: 1461, max: 1480 },
+                    { name: 'Pawn 1', min: 1481, max: 1500 }
+                ]
+            },
+            'Knight': {
+                range: [1501, 1600],
+                color: '#4A5568',
+                icon: '♞',
+                subTiers: [
+                    { name: 'Knight 5', min: 1501, max: 1520 },
+                    { name: 'Knight 4', min: 1521, max: 1540 },
+                    { name: 'Knight 3', min: 1541, max: 1560 },
+                    { name: 'Knight 2', min: 1561, max: 1580 },
+                    { name: 'Knight 1', min: 1581, max: 1600 }
+                ]
+            },
+            'Bishop': {
+                range: [1601, 1700],
+                color: '#805AD5',
+                icon: '♝',
+                subTiers: [
+                    { name: 'Bishop 5', min: 1601, max: 1620 },
+                    { name: 'Bishop 4', min: 1621, max: 1640 },
+                    { name: 'Bishop 3', min: 1641, max: 1660 },
+                    { name: 'Bishop 2', min: 1661, max: 1680 },
+                    { name: 'Bishop 1', min: 1681, max: 1700 }
+                ]
+            },
+            'Rook': {
+                range: [1701, 1800],
+                color: '#38A169',
+                icon: '♜',
+                subTiers: [
+                    { name: 'Rook 5', min: 1701, max: 1720 },
+                    { name: 'Rook 4', min: 1721, max: 1740 },
+                    { name: 'Rook 3', min: 1741, max: 1760 },
+                    { name: 'Rook 2', min: 1761, max: 1780 },
+                    { name: 'Rook 1', min: 1781, max: 1800 }
+                ]
+            },
+            'Queen': {
+                range: [1801, 1900],
+                color: '#D69E2E',
+                icon: '♛',
+                subTiers: [
+                    { name: 'Queen 5', min: 1801, max: 1820 },
+                    { name: 'Queen 4', min: 1821, max: 1840 },
+                    { name: 'Queen 3', min: 1841, max: 1860 },
+                    { name: 'Queen 2', min: 1861, max: 1880 },
+                    { name: 'Queen 1', min: 1881, max: 1900 }
+                ]
+            },
+            'King': {
+                range: [1901, 2000],
+                color: '#E53E3E',
+                icon: '♚',
+                subTiers: [
+                    { name: 'King 5', min: 1901, max: 1920 },
+                    { name: 'King 4', min: 1921, max: 1940 },
+                    { name: 'King 3', min: 1941, max: 1960 },
+                    { name: 'King 2', min: 1961, max: 1980 },
+                    { name: 'King 1', min: 1981, max: 2000 }
+                ]
             }
         };
 
-        // Element SDK configuration
+        // Malaysian state codes for IC number
+        const stateCodes = {
+            '01': 'Johor', '21': 'Johor', '22': 'Johor', '23': 'Johor', '24': 'Johor',
+            '02': 'Kedah', '25': 'Kedah', '26': 'Kedah', '27': 'Kedah',
+            '03': 'Kelantan', '28': 'Kelantan', '29': 'Kelantan',
+            '04': 'Melaka', '30': 'Melaka',
+            '05': 'Negeri Sembilan', '31': 'Negeri Sembilan', '59': 'Negeri Sembilan',
+            '06': 'Pahang', '32': 'Pahang', '33': 'Pahang',
+            '07': 'Pulau Pinang', '34': 'Pulau Pinang', '35': 'Pulau Pinang',
+            '08': 'Perak', '36': 'Perak', '37': 'Perak', '38': 'Perak', '39': 'Perak',
+            '09': 'Perlis', '40': 'Perlis',
+            '10': 'Selangor', '41': 'Selangor', '42': 'Selangor', '43': 'Selangor', '44': 'Selangor',
+            '11': 'Terengganu', '45': 'Terengganu', '46': 'Terengganu',
+            '12': 'Sabah', '47': 'Sabah', '48': 'Sabah', '49': 'Sabah',
+            '13': 'Sarawak', '50': 'Sarawak', '51': 'Sarawak', '52': 'Sarawak', '53': 'Sarawak',
+            '14': 'Wilayah Persekutuan Kuala Lumpur', '54': 'Wilayah Persekutuan Kuala Lumpur', '55': 'Wilayah Persekutuan Kuala Lumpur', '56': 'Wilayah Persekutuan Kuala Lumpur', '57': 'Wilayah Persekutuan Kuala Lumpur',
+            '15': 'Wilayah Persekutuan Labuan', '58': 'Wilayah Persekutuan Labuan',
+            '16': 'Wilayah Persekutuan Putrajaya'
+        };
+
+        // ============================================
+        // JSONP HELPER FUNCTIONS
+        // ============================================
+
+        function jsonp(url, callback) {
+            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+            window[callbackName] = function(data) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                callback(data);
+            };
+
+            const script = document.createElement('script');
+            script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
+            script.onerror = function() {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                callback({ error: 'Connection failed' });
+            };
+            document.body.appendChild(script);
+        }
+
+        // ============================================
+        // GOOGLE SHEETS INTEGRATION
+        // ============================================
+
+        function updateConnectionStatus(status, message) {
+            connectionStatus = status;
+            const indicator = document.getElementById('connection-indicator');
+            const statusText = document.getElementById('connection-status-text');
+            
+            if (status === 'connected') {
+                indicator.className = 'w-3 h-3 rounded-full bg-green-500';
+                statusText.textContent = 'Connected to Google Sheets';
+                statusText.className = 'text-sm text-green-600';
+                isConnected = true;
+            } else if (status === 'connecting') {
+                indicator.className = 'w-3 h-3 rounded-full bg-yellow-500 animate-pulse';
+                statusText.textContent = 'Connecting...';
+                statusText.className = 'text-sm text-yellow-600';
+            } else {
+                indicator.className = 'w-3 h-3 rounded-full bg-gray-400';
+                statusText.textContent = message || 'Not Connected';
+                statusText.className = 'text-sm text-gray-600';
+                isConnected = false;
+            }
+        }
+
+        function saveAppsScriptUrl() {
+            const url = document.getElementById('apps-script-url').value.trim();
+            if (!url) {
+                showConnectionMessage('Please enter a valid URL', 'error');
+                return;
+            }
+            
+            APPS_SCRIPT_URL = url;
+            localStorage.setItem('apps_script_url', url);
+            showConnectionMessage('URL saved successfully!', 'success');
+        }
+
+        function loadAppsScriptUrl() {
+            const savedUrl = localStorage.getItem('apps_script_url');
+            if (savedUrl) {
+                APPS_SCRIPT_URL = savedUrl;
+                document.getElementById('apps-script-url').value = savedUrl;
+            }
+        }
+
+        function testConnection() {
+            if (!APPS_SCRIPT_URL) {
+                showConnectionMessage('Please save the Apps Script URL first', 'error');
+                return;
+            }
+
+            updateConnectionStatus('connecting');
+            showConnectionMessage('Testing connection...', 'info');
+
+            jsonp(APPS_SCRIPT_URL + '?action=test', function(response) {
+                if (response && response.status === 'success') {
+                    updateConnectionStatus('connected');
+                    showConnectionMessage('Connection successful!', 'success');
+                } else {
+                    updateConnectionStatus('disconnected', 'Connection Failed');
+                    showConnectionMessage('Connection failed: ' + (response.error || 'Unknown error'), 'error');
+                }
+            });
+        }
+
+        function syncDataToSheets() {
+            if (!APPS_SCRIPT_URL) {
+                showConnectionMessage('Please save the Apps Script URL first', 'error');
+                return;
+            }
+
+            if (!isConnected) {
+                showConnectionMessage('Please test connection first', 'error');
+                return;
+            }
+
+            updateConnectionStatus('connecting', 'Syncing...');
+            showConnectionMessage('Syncing data to Google Sheets...', 'info');
+
+            const data = {
+                students: students,
+                pendingRecords: pendingRecords,
+                approvedRecords: approvedRecords
+            };
+
+            const url = APPS_SCRIPT_URL + '?action=sync&data=' + encodeURIComponent(JSON.stringify(data));
+            
+            jsonp(url, function(response) {
+                if (response && response.status === 'success') {
+                    updateConnectionStatus('connected');
+                    showConnectionMessage('Data synced successfully!', 'success');
+                } else {
+                    updateConnectionStatus('disconnected', 'Sync Failed');
+                    showConnectionMessage('Sync failed: ' + (response.error || 'Unknown error'), 'error');
+                }
+            });
+        }
+
+        function loadDataFromSheets() {
+            if (!APPS_SCRIPT_URL) {
+                return;
+            }
+
+            updateConnectionStatus('connecting', 'Loading...');
+
+            jsonp(APPS_SCRIPT_URL + '?action=load', function(response) {
+                if (response && response.status === 'success' && response.data) {
+                    students = response.data.students || [];
+                    pendingRecords = response.data.pendingRecords || [];
+                    approvedRecords = response.data.approvedRecords || [];
+                    
+                    updateConnectionStatus('connected');
+                    updateStudentsList();
+                    updatePendingList();
+                    if (currentView === 'dashboard') {
+                        updateDashboard();
+                    }
+                    showConnectionMessage('Data loaded from Google Sheets!', 'success');
+                } else {
+                    updateConnectionStatus('disconnected', 'Load Failed');
+                    showConnectionMessage('Failed to load data: ' + (response.error || 'Unknown error'), 'error');
+                }
+            });
+        }
+
+        function saveStudentToSheets(studentData) {
+            if (!APPS_SCRIPT_URL || !isConnected) {
+                return Promise.resolve({ status: 'error', error: 'Not connected to Google Sheets' });
+            }
+
+            return new Promise((resolve) => {
+                const url = APPS_SCRIPT_URL + '?action=addStudent&data=' + encodeURIComponent(JSON.stringify(studentData));
+                jsonp(url, function(response) {
+                    resolve(response);
+                });
+            });
+        }
+
+        function saveRecordToSheets(recordData) {
+            if (!APPS_SCRIPT_URL || !isConnected) {
+                return Promise.resolve({ status: 'error', error: 'Not connected to Google Sheets' });
+            }
+
+            return new Promise((resolve) => {
+                const url = APPS_SCRIPT_URL + '?action=addRecord&data=' + encodeURIComponent(JSON.stringify(recordData));
+                jsonp(url, function(response) {
+                    resolve(response);
+                });
+            });
+        }
+
+        function approveRecordInSheets(submissionId) {
+            if (!APPS_SCRIPT_URL || !isConnected) {
+                return Promise.resolve({ status: 'error', error: 'Not connected to Google Sheets' });
+            }
+
+            return new Promise((resolve) => {
+                const url = APPS_SCRIPT_URL + '?action=approveRecord&submissionId=' + encodeURIComponent(submissionId);
+                jsonp(url, function(response) {
+                    resolve(response);
+                });
+            });
+        }
+
+        function showConnectionMessage(message, type) {
+            const messageDiv = document.getElementById('connection-message');
+            messageDiv.className = 'p-3 rounded-md';
+            
+            if (type === 'success') {
+                messageDiv.className += ' bg-green-50 text-green-700 border border-green-200';
+            } else if (type === 'error') {
+                messageDiv.className += ' bg-red-50 text-red-700 border border-red-200';
+            } else {
+                messageDiv.className += ' bg-blue-50 text-blue-700 border border-blue-200';
+            }
+            
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // ============================================
+        // ELEMENT SDK CONFIGURATION
+        // ============================================
+
         async function onConfigChange(config) {
             const academyTitle = document.getElementById('academy-title');
             const welcomeText = document.getElementById('welcome-text');
@@ -298,10 +948,12 @@
             return {
                 recolorables: [
                     {
-                        get: () => config.primary_color || "#4f46e5",
+                        get: () => config.primary_color || "#ea580c",
                         set: (value) => {
                             config.primary_color = value;
-                            window.elementSdk.setConfig({ primary_color: value });
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ primary_color: value });
+                            }
                         }
                     }
                 ],
@@ -319,16 +971,12 @@
             ]);
         }
 
-        // Initialize SDKs
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
         async function initializeApp() {
             try {
-                // Initialize Data SDK
-                const dataResult = await window.dataSdk.init(dataHandler);
-                if (!dataResult.isOk) {
-                    console.error("Failed to initialize data SDK");
-                    return;
-                }
-
                 // Initialize Element SDK
                 if (window.elementSdk) {
                     window.elementSdk.init({
@@ -340,99 +988,279 @@
                 }
 
                 setupEventListeners();
+                
+                // Load Apps Script URL from local storage
+                loadAppsScriptUrl();
+                
+                // Try to load data from Google Sheets if URL is configured
+                if (APPS_SCRIPT_URL) {
+                    loadDataFromSheets();
+                }
+                
             } catch (error) {
                 console.error("Failed to initialize app:", error);
+                showMessage('Failed to initialize application. Please refresh the page.', 'error');
             }
         }
 
-        // Event listeners
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
         function setupEventListeners() {
             // Tab navigation
             document.getElementById('students-tab').addEventListener('click', () => switchView('students'));
             document.getElementById('submit-tab').addEventListener('click', () => switchView('submit'));
-            document.getElementById('pending-tab').addEventListener('click', () => switchView('pending'));
+            document.getElementById('admin-tab').addEventListener('click', () => switchView('admin'));
+            document.getElementById('dashboard-tab').addEventListener('click', () => switchView('dashboard'));
+
+            // Google Sheets connection
+            document.getElementById('save-url-btn').addEventListener('click', saveAppsScriptUrl);
+            document.getElementById('test-connection-btn').addEventListener('click', testConnection);
+            document.getElementById('sync-data-btn').addEventListener('click', syncDataToSheets);
 
             // Student form
             document.getElementById('student-form').addEventListener('submit', handleStudentSubmit);
 
             // Record form
             document.getElementById('record-form').addEventListener('submit', handleRecordSubmit);
+            
+            // KC ID verification
+            document.getElementById('kc-id-input').addEventListener('input', verifyKcId);
+            
+            // IC verification
+            document.getElementById('ic-last-4').addEventListener('input', verifyIcLast4);
+            document.getElementById('copy-kc-id').addEventListener('click', copyKcId);
+            
+            // IC number parsing and formatting
+            document.getElementById('ic-number').addEventListener('input', formatIcNumber);
+            
+            // Phone number formatting
+            document.getElementById('parent-phone').addEventListener('input', formatPhoneNumber);
 
             // Performance calculation listeners
             document.getElementById('final-ranking').addEventListener('input', calculatePerformance);
             document.getElementById('total-players').addEventListener('input', calculatePerformance);
             document.getElementById('tournament-level').addEventListener('change', calculatePerformance);
             document.getElementById('special-prize').addEventListener('change', toggleSpecialPrize);
+
+            // Admin functionality
+            document.getElementById('admin-login-btn').addEventListener('click', handleAdminLogin);
+            document.getElementById('admin-logout-btn').addEventListener('click', handleAdminLogout);
+            document.getElementById('admin-password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleAdminLogin();
+            });
+
+            // Edit modal functionality
+            document.getElementById('close-edit-modal').addEventListener('click', closeEditModal);
+            document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+            document.getElementById('edit-record-form').addEventListener('submit', handleEditSubmit);
+            
+            // Edit form performance calculation
+            document.getElementById('edit-final-ranking').addEventListener('input', calculateEditPerformance);
+            document.getElementById('edit-total-players').addEventListener('input', calculateEditPerformance);
+            document.getElementById('edit-tournament-level').addEventListener('change', calculateEditPerformance);
+            document.getElementById('edit-special-prize').addEventListener('change', toggleEditSpecialPrize);
         }
 
-        // View switching
+        // ============================================
+        // VIEW SWITCHING
+        // ============================================
+
         function switchView(view) {
             // Hide all views
             document.getElementById('students-view').classList.add('hidden');
             document.getElementById('submit-view').classList.add('hidden');
-            document.getElementById('pending-view').classList.add('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.add('hidden');
 
             // Show selected view
             document.getElementById(`${view}-view`).classList.remove('hidden');
 
             // Update tab styles
             document.querySelectorAll('[id$="-tab"]').forEach(tab => {
-                tab.classList.remove('bg-indigo-600', 'text-white');
-                tab.classList.add('text-gray-600', 'hover:text-indigo-600');
+                tab.classList.remove('bg-orange-600', 'text-white');
+                tab.classList.add('text-gray-600', 'hover:text-orange-600');
             });
             
-            document.getElementById(`${view}-tab`).classList.add('bg-indigo-600', 'text-white');
-            document.getElementById(`${view}-tab`).classList.remove('text-gray-600', 'hover:text-indigo-600');
+            document.getElementById(`${view}-tab`).classList.add('bg-orange-600', 'text-white');
+            document.getElementById(`${view}-tab`).classList.remove('text-gray-600', 'hover:text-orange-600');
 
             currentView = view;
+
+            // Load data when switching views
+            if (view === 'admin' && isAdminLoggedIn) {
+                updatePendingList();
+            } else if (view === 'dashboard') {
+                updateDashboard();
+            }
         }
 
-        // Handle student registration
+        // ============================================
+        // IC NUMBER FORMATTING & PARSING
+        // ============================================
+
+        function formatIcNumber() {
+            const icInput = document.getElementById('ic-number');
+            let value = icInput.value.replace(/[-\s]/g, '');
+            
+            if (value.length > 12) {
+                value = value.substring(0, 12);
+            }
+            
+            let formattedValue = value;
+            if (value.length > 6) {
+                formattedValue = value.substring(0, 6) + '-' + value.substring(6);
+            }
+            if (value.length > 8) {
+                formattedValue = value.substring(0, 6) + '-' + value.substring(6, 8) + '-' + value.substring(8);
+            }
+            
+            icInput.value = formattedValue;
+            parseIcNumber(value);
+        }
+
+        function formatPhoneNumber() {
+            const phoneInput = document.getElementById('parent-phone');
+            let value = phoneInput.value.replace(/[-\s]/g, '');
+            
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            let formattedValue = value;
+            if (value.length > 2) {
+                formattedValue = value.substring(0, 2) + '-' + value.substring(2);
+            }
+            
+            phoneInput.value = formattedValue;
+        }
+
+        function parseIcNumber(icNumber) {
+            const icInput = document.getElementById('ic-number');
+            const icDisplay = document.getElementById('ic-info-display');
+            const genderSpan = document.getElementById('detected-gender');
+            const ageSpan = document.getElementById('detected-age');
+            const stateSpan = document.getElementById('detected-state');
+            
+            if (icNumber.length < 12) {
+                icDisplay.classList.add('hidden');
+                return;
+            }
+            
+            const year = icNumber.substring(0, 2);
+            const month = icNumber.substring(2, 4);
+            const day = icNumber.substring(4, 6);
+            const placeCode = icNumber.substring(6, 8);
+            const lastDigit = parseInt(icNumber.substring(11, 12));
+            
+            const currentYear = new Date().getFullYear();
+            const birthYear = parseInt(year) < 30 ? 2000 + parseInt(year) : 1900 + parseInt(year);
+            
+            const birthDate = new Date(birthYear, parseInt(month) - 1, parseInt(day));
+            const age = Math.floor((new Date() - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+            
+            const gender = lastDigit % 2 === 1 ? 'Lelaki / Male' : 'Perempuan / Female';
+            const genderCode = lastDigit % 2 === 1 ? '01' : '02';
+            
+            const state = stateCodes[placeCode] || 'Tidak diketahui / Unknown';
+            
+            genderSpan.textContent = gender;
+            ageSpan.textContent = `${age} tahun / years old`;
+            stateSpan.textContent = state;
+            
+            icInput.dataset.genderCode = genderCode;
+            icInput.dataset.age = age;
+            icInput.dataset.state = state;
+            
+            icDisplay.classList.remove('hidden');
+        }
+
+        // ============================================
+        // STUDENT REGISTRATION
+        // ============================================
+
         async function handleStudentSubmit(e) {
             e.preventDefault();
             
-            const submitBtn = document.getElementById('add-student-btn');
-            const originalText = submitBtn.textContent;
-            
-            if (students.length >= 999) {
-                showMessage('Maximum limit of 999 students reached. Please contact administrator.', 'error');
-                return;
-            }
+            const btn = document.getElementById('add-student-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Registering...';
+            btn.disabled = true;
 
             try {
-                submitBtn.textContent = 'Registering...';
-                submitBtn.disabled = true;
+                const icNumber = document.getElementById('ic-number').value.replace(/[-\s]/g, '');
+                const genderCode = document.getElementById('ic-number').dataset.genderCode;
+                const age = document.getElementById('ic-number').dataset.age;
+                const state = document.getElementById('ic-number').dataset.state;
 
-                const studentName = document.getElementById('student-name').value;
-                const parentName = document.getElementById('parent-name').value;
-                const parentEmail = document.getElementById('parent-email').value;
+                if (!genderCode) {
+                    throw new Error('Please enter a valid IC number');
+                }
 
+                const existingStudent = students.find(s => s.ic_number === icNumber);
+                if (existingStudent) {
+                    throw new Error('Student with this IC number is already registered');
+                }
+
+                const kcId = generateKcId(genderCode);
+                const tierInfo = getTierInfo(1400);
+                
                 const studentData = {
                     student_id: generateId(),
-                    student_name: studentName,
-                    current_rating: 1000,
-                    parent_name: parentName,
-                    parent_email: parentEmail,
-                    created_at: new Date().toISOString()
+                    student_name: document.getElementById('student-name').value.toUpperCase(),
+                    ic_number: icNumber,
+                    kc_id: kcId,
+                    current_rating: 1400,
+                    parent_name: document.getElementById('parent-name').value.toUpperCase(),
+                    parent_phone: '+60' + document.getElementById('parent-phone').value.replace(/[-\s]/g, ''),
+                    parent_email: document.getElementById('parent-email').value.toLowerCase(),
+                    student_gender: genderCode === '01' ? 'Male' : 'Female',
+                    student_age: parseInt(age),
+                    student_state: state,
+                    registration_date: new Date().toISOString(),
+                    last_updated: new Date().toISOString(),
+                    total_tournaments: 0,
+                    total_points_earned: 0,
+                    current_tier: tierInfo.mainTier,
+                    current_sub_tier: tierInfo.subTier
                 };
 
-                const result = await window.dataSdk.create(studentData);
+                students.push(studentData);
                 
-                if (result.isOk) {
-                    document.getElementById('student-form').reset();
-                    showMessage('Student registered successfully!', 'success');
-                } else {
-                    showMessage('Failed to register student. Please try again.', 'error');
+                // Save to Google Sheets if connected
+                if (isConnected) {
+                    const sheetResponse = await saveStudentToSheets(studentData);
+                    if (sheetResponse.status !== 'success') {
+                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally only.', 'error');
+                    }
                 }
+                
+                updateStudentsList();
+                if (currentView === 'dashboard') {
+                    updateDashboard();
+                }
+
+                showKcId(kcId);
+
+                document.getElementById('student-form').reset();
+                document.getElementById('ic-info-display').classList.add('hidden');
+
+                showMessage('Student registered successfully!', 'success');
+
             } catch (error) {
-                showMessage('An error occurred. Please try again.', 'error');
+                console.error('Registration failed:', error);
+                showMessage(error.message || 'Registration failed. Please try again.', 'error');
             } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
         }
 
-        // Calculate performance bonus
+        // ============================================
+        // PERFORMANCE CALCULATION
+        // ============================================
+
         function calculatePerformance() {
             const ranking = parseInt(document.getElementById('final-ranking').value);
             const totalPlayers = parseInt(document.getElementById('total-players').value);
@@ -444,15 +1272,20 @@
                 return;
             }
 
-            // Calculate percentile
             let percentile;
+            let displayPercentile;
+            
             if (hasSpecialPrize) {
-                percentile = 20; // Special prize automatically counts as top 20%
+                percentile = 20;
+                displayPercentile = 'Top 20% (Special Prize)';
+            } else if (ranking >= 1 && ranking <= 10) {
+                percentile = 20;
+                displayPercentile = `Top 20% (Rank ${ranking})`;
             } else {
                 percentile = Math.ceil((ranking / totalPlayers) * 100);
+                displayPercentile = `Top ${percentile}%`;
             }
 
-            // Determine bonus points based on percentile ranges
             let bonusPoints = 0;
             const bonusArray = performanceBonus[tournamentLevel];
             
@@ -462,15 +1295,14 @@
             else if (percentile <= 50) bonusPoints = bonusArray[3];
             else if (percentile <= 60) bonusPoints = bonusArray[4];
             else if (percentile <= 70) bonusPoints = bonusArray[5];
-            else bonusPoints = 0; // No bonus for bottom 30%
+            else bonusPoints = 0;
 
             const basePoints = tournamentPoints[tournamentLevel];
             const totalPoints = basePoints + bonusPoints;
 
-            // Update display
             document.getElementById('calc-ranking').textContent = ranking;
             document.getElementById('calc-total').textContent = totalPlayers;
-            document.getElementById('calc-percentile').textContent = hasSpecialPrize ? 'Top 20% (Special Prize)' : `Top ${percentile}%`;
+            document.getElementById('calc-percentile').textContent = displayPercentile;
             document.getElementById('calc-base').textContent = basePoints;
             document.getElementById('calc-bonus').textContent = bonusPoints >= 0 ? `+${bonusPoints}` : bonusPoints;
             document.getElementById('calc-total-points').textContent = totalPoints;
@@ -478,7 +1310,6 @@
             document.getElementById('performance-calculation').classList.remove('hidden');
         }
 
-        // Toggle special prize details
         function toggleSpecialPrize() {
             const checkbox = document.getElementById('special-prize');
             const details = document.getElementById('special-prize-details');
@@ -493,40 +1324,45 @@
             calculatePerformance();
         }
 
-        // Handle record submission
+        // ============================================
+        // RECORD SUBMISSION
+        // ============================================
+
         async function handleRecordSubmit(e) {
             e.preventDefault();
             
-            const submitBtn = document.getElementById('submit-record-btn');
-            const originalText = submitBtn.textContent;
+            if (!isUserVerified()) {
+                showMessage('Please verify your identity with the correct KC ID and last 4 digits of IC number.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('submit-record-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Submitting...';
+            btn.disabled = true;
 
             try {
-                submitBtn.textContent = 'Submitting...';
-                submitBtn.disabled = true;
-
-                const studentId = document.getElementById('record-student').value;
-                const tournamentLevel = document.getElementById('tournament-level').value;
-                const tournamentCategory = document.getElementById('tournament-category').value;
-                const timeControl = document.getElementById('time-control').value;
-                const tournamentName = document.getElementById('tournament-name').value;
-                const tournamentDate = document.getElementById('tournament-date').value;
-                const finalRanking = parseInt(document.getElementById('final-ranking').value);
-                const totalPlayers = parseInt(document.getElementById('total-players').value);
-                const hasSpecialPrize = document.getElementById('special-prize').checked;
-                const prizeDescription = document.getElementById('prize-description').value;
-                const notes = document.getElementById('additional-notes').value;
-
-                // Calculate performance
-                let percentile;
-                if (hasSpecialPrize) {
-                    percentile = 20;
-                } else {
-                    percentile = Math.ceil((finalRanking / totalPlayers) * 100);
+                const kcId = document.getElementById('kc-id-input').value.trim();
+                const student = students.find(s => s.kc_id === kcId);
+                
+                if (!student) {
+                    throw new Error('Student not found');
                 }
 
-                const bonusArray = performanceBonus[tournamentLevel];
+                const ranking = parseInt(document.getElementById('final-ranking').value);
+                const totalPlayers = parseInt(document.getElementById('total-players').value);
+                const tournamentLevel = document.getElementById('tournament-level').value;
+                const hasSpecialPrize = document.getElementById('special-prize').checked;
+
+                let percentile;
+                if (hasSpecialPrize || (ranking >= 1 && ranking <= 10)) {
+                    percentile = 20;
+                } else {
+                    percentile = Math.ceil((ranking / totalPlayers) * 100);
+                }
+
                 let bonusPoints = 0;
-                
+                const bonusArray = performanceBonus[tournamentLevel];
                 if (percentile <= 20) bonusPoints = bonusArray[0];
                 else if (percentile <= 30) bonusPoints = bonusArray[1];
                 else if (percentile <= 40) bonusPoints = bonusArray[2];
@@ -537,45 +1373,66 @@
                 const basePoints = tournamentPoints[tournamentLevel];
                 const totalPoints = basePoints + bonusPoints;
 
-                const record = {
-                    id: generateId(),
-                    student_id: studentId,
+                const recordData = {
+                    submission_id: generateId(),
+                    kc_id: kcId,
+                    student_name: student.student_name,
+                    tournament_name: document.getElementById('tournament-name').value,
+                    tournament_date: document.getElementById('tournament-date').value,
                     tournament_level: tournamentLevel,
-                    tournament_category: tournamentCategory,
-                    time_control: timeControl,
-                    tournament_name: tournamentName,
-                    tournament_date: tournamentDate,
-                    final_ranking: finalRanking,
+                    tournament_category: document.getElementById('tournament-category').value,
+                    time_control: document.getElementById('time-control').value,
+                    final_ranking: ranking,
                     total_players: totalPlayers,
                     percentile: percentile,
                     has_special_prize: hasSpecialPrize,
-                    prize_description: prizeDescription,
+                    prize_description: document.getElementById('prize-description').value || '',
                     base_points: basePoints,
                     bonus_points: bonusPoints,
                     total_points: totalPoints,
-                    additional_notes: notes,
-                    status: 'pending',
-                    submitted_at: new Date().toISOString()
+                    additional_notes: document.getElementById('additional-notes').value || '',
+                    submitted_date: new Date().toISOString(),
+                    status: 'Pending',
+                    submitted_by: student.parent_name || 'Parent',
+                    parent_contact: student.parent_phone || ''
                 };
 
-                // Add to pending records (in real app, this would go to a separate collection)
-                pendingRecords.push(record);
-                updatePendingList();
+                pendingRecords.push(recordData);
                 
+                // Save to Google Sheets if connected
+                if (isConnected) {
+                    const sheetResponse = await saveRecordToSheets(recordData);
+                    if (sheetResponse.status !== 'success') {
+                        showMessage('Warning: Failed to save to Google Sheets. Data saved locally only.', 'error');
+                    }
+                }
+                
+                updatePendingList();
+                if (currentView === 'dashboard') {
+                    updateDashboard();
+                }
+
                 document.getElementById('record-form').reset();
+                document.getElementById('student-verification').classList.add('hidden');
+                document.getElementById('ic-verification-section').classList.add('hidden');
                 document.getElementById('performance-calculation').classList.add('hidden');
                 document.getElementById('special-prize-details').classList.add('hidden');
-                showMessage('Tournament record submitted for approval!', 'success');
-                
+
+                showMessage('Tournament record submitted successfully! Awaiting admin approval.', 'success');
+
             } catch (error) {
-                showMessage('An error occurred. Please try again.', 'error');
+                console.error('Submission failed:', error);
+                showMessage(error.message || 'Submission failed. Please try again.', 'error');
             } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
         }
 
-        // Update students list
+        // ============================================
+        // STUDENT LIST UPDATE
+        // ============================================
+
         function updateStudentsList() {
             const container = document.getElementById('students-list');
             
@@ -588,40 +1445,164 @@
                 return;
             }
 
-            container.innerHTML = students.map(student => `
+            container.innerHTML = students.map(student => {
+                const rating = student.current_rating || 1400;
+                const tierInfo = getTierInfo(rating);
+                const progress = getProgressToNextTier(rating);
+                
+                return `
                 <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-semibold text-lg text-gray-800">${student.student_name}</h3>
-                            <p class="text-gray-600">Parent: ${student.parent_name}</p>
-                            <p class="text-gray-600">Email: ${student.parent_email}</p>
-                            <p class="text-sm text-gray-500">Registered: ${new Date(student.created_at).toLocaleDateString()}</p>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg text-gray-800">${student.student_name || 'Unknown'}</h3>
+                            <p class="text-gray-600">Parent: ${student.parent_name || 'Unknown'}</p>
+                            <p class="text-sm font-mono text-indigo-600">KC ID: ${student.kc_id || 'Unknown'}</p>
+                            ${student.student_age ? `<p class="text-sm text-gray-500">Age: ${student.student_age} years | ${student.student_state || 'Unknown state'}</p>` : ''}
+                            <p class="text-sm text-gray-500">Tournaments: ${student.total_tournaments || 0} | Total Points: ${student.total_points_earned || 0}</p>
+                            <p class="text-sm text-gray-500">Registered: ${student.registration_date ? new Date(student.registration_date).toLocaleDateString() : 'Unknown'}</p>
                         </div>
                         <div class="text-right">
-                            <div class="text-2xl font-bold text-indigo-600">${student.current_rating}</div>
+                            <div class="text-2xl font-bold text-orange-600">${rating}</div>
                             <div class="text-sm text-gray-500">Current Rating</div>
                         </div>
                     </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-2xl">${tierInfo.icon}</span>
+                                <div>
+                                    <div class="font-semibold" style="color: ${tierInfo.color}">${tierInfo.subTier}</div>
+                                    <div class="text-xs text-gray-500">${tierInfo.subTierRange[0]} - ${tierInfo.subTierRange[1]} points</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium text-gray-700">${Math.round(progress)}% to next tier</div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full transition-all duration-300" 
+                                 style="width: ${progress}%; background-color: ${tierInfo.color}"></div>
+                        </div>
+                    </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // Update student select dropdown
-        function updateStudentSelect() {
-            const select = document.getElementById('record-student');
-            const currentValue = select.value;
+        // ============================================
+        // KC ID VERIFICATION
+        // ============================================
+
+        function verifyKcId() {
+            const kcId = document.getElementById('kc-id-input').value.trim();
+            const verificationDiv = document.getElementById('student-verification');
+            const foundDiv = document.getElementById('student-found');
+            const notFoundDiv = document.getElementById('student-not-found');
+            const studentNameSpan = document.getElementById('verified-student-name');
+            const icVerificationSection = document.getElementById('ic-verification-section');
             
-            select.innerHTML = '<option value="">Pilih pelajar / Choose a student</option>' + 
-                students.map(student => 
-                    `<option value="${student.student_id}">${student.student_name}</option>`
-                ).join('');
+            if (kcId.length === 0) {
+                verificationDiv.classList.add('hidden');
+                icVerificationSection.classList.add('hidden');
+                resetIcVerification();
+                return;
+            }
             
-            if (currentValue) {
-                select.value = currentValue;
+            const student = students.find(s => s.kc_id === kcId);
+            
+            verificationDiv.classList.remove('hidden');
+            
+            if (student) {
+                foundDiv.classList.remove('hidden');
+                notFoundDiv.classList.add('hidden');
+                studentNameSpan.textContent = student.student_name;
+                icVerificationSection.classList.remove('hidden');
+                resetIcVerification();
+            } else {
+                foundDiv.classList.add('hidden');
+                notFoundDiv.classList.remove('hidden');
+                icVerificationSection.classList.add('hidden');
+                resetIcVerification();
             }
         }
 
-        // Update pending list
+        function verifyIcLast4() {
+            const kcId = document.getElementById('kc-id-input').value.trim();
+            const icLast4 = document.getElementById('ic-last-4').value.trim();
+            const resultDiv = document.getElementById('ic-verification-result');
+            const verifiedDiv = document.getElementById('ic-verified');
+            const failedDiv = document.getElementById('ic-failed');
+            
+            if (icLast4.length !== 4) {
+                resultDiv.classList.add('hidden');
+                return;
+            }
+            
+            const student = students.find(s => s.kc_id === kcId);
+            if (!student || !student.ic_number) {
+                resultDiv.classList.add('hidden');
+                return;
+            }
+            
+            const studentIcLast4 = student.ic_number.toString().slice(-4);
+            resultDiv.classList.remove('hidden');
+            
+            if (icLast4 === studentIcLast4) {
+                verifiedDiv.classList.remove('hidden');
+                failedDiv.classList.add('hidden');
+            } else {
+                verifiedDiv.classList.add('hidden');
+                failedDiv.classList.remove('hidden');
+            }
+        }
+
+        function resetIcVerification() {
+            document.getElementById('ic-last-4').value = '';
+            document.getElementById('ic-verification-result').classList.add('hidden');
+            document.getElementById('ic-verified').classList.add('hidden');
+            document.getElementById('ic-failed').classList.add('hidden');
+        }
+
+        function isUserVerified() {
+            const kcId = document.getElementById('kc-id-input').value.trim();
+            const icLast4 = document.getElementById('ic-last-4').value.trim();
+            
+            if (!kcId || icLast4.length !== 4) return false;
+            
+            const student = students.find(s => s.kc_id === kcId);
+            if (!student || !student.ic_number) return false;
+            
+            const studentIcLast4 = student.ic_number.toString().slice(-4);
+            return icLast4 === studentIcLast4;
+        }
+
+        function showKcId(kcId) {
+            document.getElementById('generated-kc-id').textContent = kcId;
+            document.getElementById('kc-id-display').classList.remove('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('kc-id-display').classList.add('hidden');
+            }, 30000);
+        }
+
+        function copyKcId() {
+            const kcId = document.getElementById('generated-kc-id').textContent;
+            navigator.clipboard.writeText(kcId).then(() => {
+                const btn = document.getElementById('copy-kc-id');
+                const originalText = btn.textContent;
+                btn.textContent = 'Disalin! / Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // ============================================
+        // PENDING LIST UPDATE
+        // ============================================
+
         function updatePendingList() {
             const container = document.getElementById('pending-list');
             
@@ -635,48 +1616,68 @@
             }
 
             container.innerHTML = pendingRecords.map(record => {
-                const student = students.find(s => s.student_id === record.student_id);
-                const studentName = student ? student.student_name : 'Unknown Student';
+                const studentName = record.student_name || 'Unknown Student';
+                const kcId = record.kc_id || 'Unknown KC ID';
+                const submissionId = record.submission_id || 'Unknown ID';
+                const submittedBy = record.submitted_by || 'Unknown';
+                const parentContact = record.parent_contact || 'Not provided';
                 
                 return `
                     <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
                         <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-semibold text-lg text-gray-800">${studentName}</h3>
-                            <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium">
-                                Pending (+${record.total_points} pts)
-                            </span>
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-800">${studentName}</h3>
+                                <p class="text-sm text-gray-600 font-mono">KC ID: ${kcId}</p>
+                                <p class="text-sm text-gray-600">Submitted by: ${submittedBy}</p>
+                                <p class="text-sm text-gray-600">Contact: ${parentContact}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium">
+                                    ${record.status || 'Pending'} (+${record.total_points || 0} pts)
+                                </span>
+                                ${isAdminLoggedIn ? `
+                                    <button onclick="editRecord('${submissionId}')" class="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700 transition-colors">
+                                        Edit
+                                    </button>
+                                    <button onclick="approveRecord('${submissionId}')" class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                        Approve
+                                    </button>
+                                    <button onclick="rejectRecord('${submissionId}')" class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">
+                                        Reject
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
-                            <div><strong>Tournament:</strong> ${record.tournament_name}</div>
-                            <div><strong>Level:</strong> ${record.tournament_level}</div>
-                            <div><strong>Category:</strong> ${record.tournament_category}</div>
-                            <div><strong>Time Control:</strong> ${record.time_control}</div>
-                            <div><strong>Date:</strong> ${new Date(record.tournament_date).toLocaleDateString()}</div>
-                            <div><strong>Ranking:</strong> ${record.final_ranking} out of ${record.total_players}</div>
+                            <div><strong>Tournament:</strong> ${record.tournament_name || 'Unknown'}</div>
+                            <div><strong>Level:</strong> ${record.tournament_level || 'Unknown'}</div>
+                            <div><strong>Category:</strong> ${record.tournament_category || 'Unknown'}</div>
+                            <div><strong>Time Control:</strong> ${record.time_control || 'Unknown'}</div>
+                            <div><strong>Date:</strong> ${record.tournament_date ? new Date(record.tournament_date).toLocaleDateString() : 'Unknown'}</div>
+                            <div><strong>Ranking:</strong> ${record.final_ranking || 0} out of ${record.total_players || 0}</div>
                         </div>
 
-                        <!-- Performance Breakdown -->
                         <div class="bg-white rounded-lg p-3 mb-3 border">
                             <h4 class="font-medium text-gray-800 mb-2">Performance Breakdown</h4>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                                 <div>
                                     <div class="text-gray-500">Percentile</div>
-                                    <div class="font-medium">${record.has_special_prize ? 'Top 20% (Special)' : `Top ${record.percentile}%`}</div>
+                                    <div class="font-medium">${record.has_special_prize ? 'Top 20% (Special)' : `Top ${record.percentile || 0}%`}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500">Base Points</div>
-                                    <div class="font-medium">${record.base_points}</div>
+                                    <div class="font-medium">${record.base_points || 0}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500">Bonus Points</div>
-                                    <div class="font-medium ${record.bonus_points >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                        ${record.bonus_points >= 0 ? '+' : ''}${record.bonus_points}
+                                    <div class="font-medium ${(record.bonus_points || 0) >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                        ${(record.bonus_points || 0) >= 0 ? '+' : ''}${record.bonus_points || 0}
                                     </div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500">Total Points</div>
-                                    <div class="font-semibold text-indigo-600">${record.total_points}</div>
+                                    <div class="font-semibold text-orange-600">${record.total_points || 0}</div>
                                 </div>
                             </div>
                         </div>
@@ -688,21 +1689,86 @@
                         ${record.additional_notes ? `<div class="text-sm text-gray-600 mb-2"><strong>Notes:</strong> ${record.additional_notes}</div>` : ''}
                         
                         <div class="text-xs text-gray-500">
-                            Submitted: ${new Date(record.submitted_at).toLocaleString()}
+                            Submitted: ${record.submitted_date ? new Date(record.submitted_date).toLocaleString() : 'Unknown'}
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Utility functions
+        // ============================================
+        // TIER CALCULATION FUNCTIONS
+        // ============================================
+
+        function getTierInfo(rating) {
+            for (const [tierName, tierData] of Object.entries(chessTiers)) {
+                if (rating >= tierData.range[0] && rating <= tierData.range[1]) {
+                    const subTier = tierData.subTiers.find(sub => rating >= sub.min && rating <= sub.max);
+                    return {
+                        mainTier: tierName,
+                        subTier: subTier ? subTier.name : `${tierName} 1`,
+                        color: tierData.color,
+                        icon: tierData.icon,
+                        range: tierData.range,
+                        subTierRange: subTier ? [subTier.min, subTier.max] : [tierData.range[0], tierData.range[0] + 20]
+                    };
+                }
+            }
+            
+            if (rating < 1400) {
+                return {
+                    mainTier: 'Beginner',
+                    subTier: 'Beginner',
+                    color: '#718096',
+                    icon: '🔰',
+                    range: [0, 1399],
+                    subTierRange: [0, 1399]
+                };
+            } else {
+                return {
+                    mainTier: 'Grandmaster',
+                    subTier: 'Grandmaster',
+                    color: '#9F7AEA',
+                    icon: '👑',
+                    range: [2001, 3000],
+                    subTierRange: [2001, 3000]
+                };
+            }
+        }
+
+        function getProgressToNextTier(rating) {
+            const tierInfo = getTierInfo(rating);
+            const currentSubTierMax = tierInfo.subTierRange[1];
+            const progress = ((rating - tierInfo.subTierRange[0]) / (currentSubTierMax - tierInfo.subTierRange[0])) * 100;
+            return Math.min(100, Math.max(0, progress));
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        function generateKcId(genderCode) {
+            const now = new Date();
+            const year = now.getFullYear().toString().slice(-2);
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            
+            const currentYearMonth = year + month;
+            const existingStudentsThisMonth = students.filter(s => 
+                s.kc_id && s.kc_id.startsWith(currentYearMonth + genderCode)
+            ).length;
+            
+            const sequentialNumber = (existingStudentsThisMonth + 1).toString().padStart(3, '0');
+            
+            return `${year}${month}${genderCode}${sequentialNumber}`;
         }
 
         function showMessage(message, type) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+            messageDiv.className = `toast fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
                 type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
             }`;
             messageDiv.textContent = message;
@@ -714,8 +1780,495 @@
             }, 3000);
         }
 
-        // Initialize app when page loads
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        // ============================================
+        // ADMIN FUNCTIONS
+        // ============================================
+
+        function handleAdminLogin() {
+            const password = document.getElementById('admin-password').value;
+            const loginBtn = document.getElementById('admin-login-btn');
+            const originalText = loginBtn.textContent;
+            
+            if (password === 'kamuscatur') {
+                isAdminLoggedIn = true;
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                
+                updatePendingList();
+                showMessage('Admin login successful!', 'success');
+            } else {
+                loginBtn.textContent = 'Invalid Password';
+                loginBtn.classList.add('bg-red-600');
+                setTimeout(() => {
+                    loginBtn.textContent = originalText;
+                    loginBtn.classList.remove('bg-red-600');
+                }, 2000);
+            }
+            
+            document.getElementById('admin-password').value = '';
+        }
+
+        function handleAdminLogout() {
+            isAdminLoggedIn = false;
+            document.getElementById('admin-login').classList.remove('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+            closeEditModal();
+            showMessage('Admin logged out', 'success');
+        }
+
+        async function approveRecord(submissionId) {
+            if (!isAdminLoggedIn) {
+                showMessage('Admin access required', 'error');
+                return;
+            }
+
+            try {
+                const record = pendingRecords.find(r => r.submission_id === submissionId);
+                if (!record) {
+                    throw new Error('Record not found');
+                }
+
+                const student = students.find(s => s.kc_id === record.kc_id);
+                if (!student) {
+                    throw new Error('Student not found');
+                }
+
+                const originalRating = student.current_rating || 1400;
+
+                const newRating = originalRating + record.total_points;
+                student.current_rating = Math.max(0, newRating);
+                student.last_updated = new Date().toISOString();
+                student.total_tournaments = (student.total_tournaments || 0) + 1;
+                student.total_points_earned = (student.total_points_earned || 0) + record.total_points;
+                
+                const tierInfo = getTierInfo(student.current_rating);
+                student.current_tier = tierInfo.mainTier;
+                student.current_sub_tier = tierInfo.subTier;
+
+                record.status = 'Approved';
+                
+                const tournamentRecord = {
+                    ...record,
+                    record_id: generateId(),
+                    approved_date: new Date().toISOString(),
+                    approved_by: 'Admin',
+                    rating_before: originalRating,
+                    rating_after: student.current_rating
+                };
+
+                approvedRecords.push(tournamentRecord);
+
+                const index = pendingRecords.findIndex(r => r.submission_id === submissionId);
+                if (index > -1) {
+                    pendingRecords.splice(index, 1);
+                }
+
+                // Sync to Google Sheets if connected
+                if (isConnected) {
+                    const sheetResponse = await approveRecordInSheets(submissionId);
+                    if (sheetResponse.status !== 'success') {
+                        showMessage('Warning: Failed to sync approval to Google Sheets.', 'error');
+                    }
+                }
+
+                updateStudentsList();
+                updatePendingList();
+                if (currentView === 'dashboard') {
+                    updateDashboard();
+                }
+
+                showMessage(`Record approved! ${student.student_name}'s rating updated to ${student.current_rating}`, 'success');
+
+            } catch (error) {
+                console.error('Approval failed:', error);
+                showMessage(error.message || 'Approval failed. Please try again.', 'error');
+            }
+        }
+
+        async function rejectRecord(submissionId) {
+            if (!isAdminLoggedIn) {
+                showMessage('Admin access required', 'error');
+                return;
+            }
+
+            try {
+                const index = pendingRecords.findIndex(r => r.submission_id === submissionId);
+                if (index > -1) {
+                    pendingRecords.splice(index, 1);
+                }
+
+                // Sync to Google Sheets if connected
+                if (isConnected) {
+                    await syncDataToSheets();
+                }
+
+                updatePendingList();
+                if (currentView === 'dashboard') {
+                    updateDashboard();
+                }
+
+                showMessage('Record rejected successfully', 'success');
+
+            } catch (error) {
+                console.error('Rejection failed:', error);
+                showMessage(error.message || 'Rejection failed. Please try again.', 'error');
+            }
+        }
+
+        function editRecord(submissionId) {
+            if (!isAdminLoggedIn) {
+                showMessage('Admin access required', 'error');
+                return;
+            }
+
+            const record = pendingRecords.find(r => r.submission_id === submissionId);
+            if (!record) {
+                showMessage('Record not found', 'error');
+                return;
+            }
+
+            currentEditingRecord = record;
+
+            document.getElementById('edit-record-id').value = record.submission_id;
+            document.getElementById('edit-tournament-name').value = record.tournament_name || '';
+            document.getElementById('edit-tournament-date').value = record.tournament_date || '';
+            document.getElementById('edit-time-control').value = record.time_control || '';
+            document.getElementById('edit-tournament-category').value = record.tournament_category || '';
+            document.getElementById('edit-tournament-level').value = record.tournament_level || '';
+            document.getElementById('edit-final-ranking').value = record.final_ranking || '';
+            document.getElementById('edit-total-players').value = record.total_players || '';
+            document.getElementById('edit-special-prize').checked = record.has_special_prize || false;
+            document.getElementById('edit-prize-description').value = record.prize_description || '';
+            document.getElementById('edit-additional-notes').value = record.additional_notes || '';
+
+            const specialPrizeDetails = document.getElementById('edit-special-prize-details');
+            if (record.has_special_prize) {
+                specialPrizeDetails.classList.remove('hidden');
+            } else {
+                specialPrizeDetails.classList.add('hidden');
+            }
+
+            calculateEditPerformance();
+
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+            currentEditingRecord = null;
+        }
+
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+            
+            if (!isAdminLoggedIn || !currentEditingRecord) {
+                showMessage('Admin access required', 'error');
+                return;
+            }
+
+            try {
+                const ranking = parseInt(document.getElementById('edit-final-ranking').value);
+                const totalPlayers = parseInt(document.getElementById('edit-total-players').value);
+                const tournamentLevel = document.getElementById('edit-tournament-level').value;
+                const hasSpecialPrize = document.getElementById('edit-special-prize').checked;
+
+                let percentile;
+                if (hasSpecialPrize || (ranking >= 1 && ranking <= 10)) {
+                    percentile = 20;
+                } else {
+                    percentile = Math.ceil((ranking / totalPlayers) * 100);
+                }
+
+                let bonusPoints = 0;
+                const bonusArray = performanceBonus[tournamentLevel];
+                if (percentile <= 20) bonusPoints = bonusArray[0];
+                else if (percentile <= 30) bonusPoints = bonusArray[1];
+                else if (percentile <= 40) bonusPoints = bonusArray[2];
+                else if (percentile <= 50) bonusPoints = bonusArray[3];
+                else if (percentile <= 60) bonusPoints = bonusArray[4];
+                else if (percentile <= 70) bonusPoints = bonusArray[5];
+
+                const basePoints = tournamentPoints[tournamentLevel];
+                const totalPoints = basePoints + bonusPoints;
+
+                currentEditingRecord.tournament_name = document.getElementById('edit-tournament-name').value;
+                currentEditingRecord.tournament_date = document.getElementById('edit-tournament-date').value;
+                currentEditingRecord.tournament_level = tournamentLevel;
+                currentEditingRecord.tournament_category = document.getElementById('edit-tournament-category').value;
+                currentEditingRecord.time_control = document.getElementById('edit-time-control').value;
+                currentEditingRecord.final_ranking = ranking;
+                currentEditingRecord.total_players = totalPlayers;
+                currentEditingRecord.percentile = percentile;
+                currentEditingRecord.has_special_prize = hasSpecialPrize;
+                currentEditingRecord.prize_description = document.getElementById('edit-prize-description').value || '';
+                currentEditingRecord.base_points = basePoints;
+                currentEditingRecord.bonus_points = bonusPoints;
+                currentEditingRecord.total_points = totalPoints;
+                currentEditingRecord.additional_notes = document.getElementById('edit-additional-notes').value || '';
+
+                // Sync to Google Sheets if connected
+                if (isConnected) {
+                    await syncDataToSheets();
+                }
+
+                updatePendingList();
+                if (currentView === 'dashboard') {
+                    updateDashboard();
+                }
+
+                closeEditModal();
+                showMessage('Record updated successfully!', 'success');
+
+            } catch (error) {
+                console.error('Edit failed:', error);
+                showMessage(error.message || 'Update failed. Please try again.', 'error');
+            }
+        }
+
+        function calculateEditPerformance() {
+            const ranking = parseInt(document.getElementById('edit-final-ranking').value);
+            const totalPlayers = parseInt(document.getElementById('edit-total-players').value);
+            const tournamentLevel = document.getElementById('edit-tournament-level').value;
+            const hasSpecialPrize = document.getElementById('edit-special-prize').checked;
+
+            if (!ranking || !totalPlayers || !tournamentLevel || ranking > totalPlayers) {
+                return;
+            }
+
+            let percentile;
+            let displayPercentile;
+            
+            if (hasSpecialPrize) {
+                percentile = 20;
+                displayPercentile = 'Top 20% (Special Prize)';
+            } else if (ranking >= 1 && ranking <= 10) {
+                percentile = 20;
+                displayPercentile = `Top 20% (Rank ${ranking})`;
+            } else {
+                percentile = Math.ceil((ranking / totalPlayers) * 100);
+                displayPercentile = `Top ${percentile}%`;
+            }
+
+            let bonusPoints = 0;
+            const bonusArray = performanceBonus[tournamentLevel];
+            
+            if (percentile <= 20) bonusPoints = bonusArray[0];
+            else if (percentile <= 30) bonusPoints = bonusArray[1];
+            else if (percentile <= 40) bonusPoints = bonusArray[2];
+            else if (percentile <= 50) bonusPoints = bonusArray[3];
+            else if (percentile <= 60) bonusPoints = bonusArray[4];
+            else if (percentile <= 70) bonusPoints = bonusArray[5];
+
+            const basePoints = tournamentPoints[tournamentLevel];
+            const totalPoints = basePoints + bonusPoints;
+
+            document.getElementById('edit-calc-ranking').textContent = ranking;
+            document.getElementById('edit-calc-total').textContent = totalPlayers;
+            document.getElementById('edit-calc-percentile').textContent = displayPercentile;
+            document.getElementById('edit-calc-base').textContent = basePoints;
+            document.getElementById('edit-calc-bonus').textContent = bonusPoints >= 0 ? `+${bonusPoints}` : bonusPoints;
+            document.getElementById('edit-calc-total-points').textContent = totalPoints;
+        }
+
+        function toggleEditSpecialPrize() {
+            const checkbox = document.getElementById('edit-special-prize');
+            const details = document.getElementById('edit-special-prize-details');
+            
+            if (checkbox.checked) {
+                details.classList.remove('hidden');
+            } else {
+                details.classList.add('hidden');
+                document.getElementById('edit-prize-description').value = '';
+            }
+            
+            calculateEditPerformance();
+        }
+
+        // ============================================
+        // DASHBOARD FUNCTIONS
+        // ============================================
+
+        function updateDashboard() {
+            const analytics = calculateAnalytics();
+            updateDashboardStats(analytics);
+            updateTierDistribution(analytics.tierDistribution);
+            updateRecentActivity();
+            updateTopPerformers();
+        }
+
+        function calculateAnalytics() {
+            const totalStudents = students.length;
+            const averageRating = totalStudents > 0 ? Math.round(students.reduce((sum, s) => sum + (s.current_rating || 1400), 0) / totalStudents) : 0;
+            const highestRating = totalStudents > 0 ? Math.max(...students.map(s => s.current_rating || 1400)) : 0;
+            const pendingCount = pendingRecords.length;
+
+            const tierDistribution = {};
+            students.forEach(student => {
+                const tierInfo = getTierInfo(student.current_rating || 1400);
+                const tierName = tierInfo.mainTier;
+                tierDistribution[tierName] = (tierDistribution[tierName] || 0) + 1;
+            });
+
+            return {
+                totalStudents,
+                averageRating,
+                highestRating,
+                pendingCount,
+                tierDistribution
+            };
+        }
+
+        function updateDashboardStats(analytics = {}) {
+            document.getElementById('total-students').textContent = analytics.totalStudents || 0;
+            document.getElementById('average-rating').textContent = analytics.averageRating || 0;
+            document.getElementById('highest-rating').textContent = analytics.highestRating || 0;
+            document.getElementById('pending-count').textContent = analytics.pendingCount || 0;
+        }
+
+        function updateTierDistribution(tierDistribution = {}) {
+            const container = document.getElementById('tier-distribution');
+            
+            const tierCounts = {
+                'Beginner': 0,
+                'Pawn': 0,
+                'Knight': 0,
+                'Bishop': 0,
+                'Rook': 0,
+                'Queen': 0,
+                'King': 0,
+                'Grandmaster': 0,
+                ...tierDistribution
+            };
+
+            const totalStudents = Object.values(tierCounts).reduce((sum, count) => sum + count, 0);
+            const maxCount = Math.max(...Object.values(tierCounts), 1);
+
+            container.innerHTML = Object.entries(tierCounts).map(([tier, count]) => {
+                const percentage = totalStudents > 0 ? (count / totalStudents) * 100 : 0;
+                const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                
+                let tierColor = '#718096';
+                let tierIcon = '🔰';
+                
+                if (chessTiers[tier]) {
+                    tierColor = chessTiers[tier].color;
+                    tierIcon = chessTiers[tier].icon;
+                } else if (tier === 'Grandmaster') {
+                    tierColor = '#9F7AEA';
+                    tierIcon = '👑';
+                }
+
+                return `
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-2 w-24">
+                            <span class="text-lg">${tierIcon}</span>
+                            <span class="text-sm font-medium" style="color: ${tierColor}">${tier}</span>
+                        </div>
+                        <div class="flex-1 bg-gray-200 rounded-full h-4 relative">
+                            <div class="h-4 rounded-full transition-all duration-300" 
+                                 style="width: ${barWidth}%; background-color: ${tierColor}"></div>
+                        </div>
+                        <div class="text-sm text-gray-600 w-16 text-right">
+                            ${count} (${percentage.toFixed(1)}%)
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            
+            if (students.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-4">No students registered yet.</div>';
+                return;
+            }
+
+            const recentStudents = [...students]
+                .sort((a, b) => new Date(b.registration_date || 0) - new Date(a.registration_date || 0))
+                .slice(0, 5);
+
+            container.innerHTML = recentStudents.map(student => {
+                const tierInfo = getTierInfo(student.current_rating || 1400);
+                const registrationDate = student.registration_date ? new Date(student.registration_date) : new Date();
+                const timeAgo = getTimeAgo(registrationDate);
+
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-lg">${tierInfo.icon}</span>
+                            <div>
+                                <div class="font-medium text-gray-800">${student.student_name || 'Unknown'}</div>
+                                <div class="text-sm text-gray-600">KC ID: ${student.kc_id || 'Unknown'}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-medium text-orange-600">${student.current_rating || 1400}</div>
+                            <div class="text-xs text-gray-500">${timeAgo}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateTopPerformers() {
+            const container = document.getElementById('top-performers');
+            
+            if (students.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-4">No students registered yet.</div>';
+                return;
+            }
+
+            const topStudents = [...students]
+                .sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400))
+                .slice(0, 10);
+
+            container.innerHTML = topStudents.map((student, index) => {
+                const tierInfo = getTierInfo(student.current_rating || 1400);
+                const rank = index + 1;
+                
+                let rankBadge = '';
+                if (rank === 1) rankBadge = '🥇';
+                else if (rank === 2) rankBadge = '🥈';
+                else if (rank === 3) rankBadge = '🥉';
+                else rankBadge = `#${rank}`;
+
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-lg font-bold text-gray-600 w-8">${rankBadge}</div>
+                            <span class="text-lg">${tierInfo.icon}</span>
+                            <div>
+                                <div class="font-medium text-gray-800">${student.student_name || 'Unknown'}</div>
+                                <div class="text-sm" style="color: ${tierInfo.color}">${tierInfo.subTier}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-orange-600">${student.current_rating || 1400}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+            if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+            return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+        }
+
+        // ============================================
+        // INITIALIZE APP
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+        });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99fdf19786baa858',t:'MTc2MzM2OTA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a05c28ea07538f8',t:'MTc2MzQ1MTAwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
