@@ -79,7 +79,7 @@
      <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
       </div>
-      <div><label for="ic-number" class="block text-sm font-medium text-gray-700 mb-2">No Kad Pengenalan / IC Number</label> <input type="text" id="ic-number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="YYMMDD-PB-XXXX" maxlength="14" required>
+      <div><label for="ic-number" class="block text-sm font-medium text-gray-700 mb-2">No Kad Pengenalan / IC Number</label> <input type="text" id="ic-number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono text-base" placeholder="YYMMDD-PB-XXXX" maxlength="14" required>
        <p class="text-xs text-gray-500 mt-1">Format: YYMMDD-PB-XXXX (tanpa ruang / without spaces)</p>
       </div>
       <div><label for="parent-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu Bapa / Parent Name</label> <input type="text" id="parent-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
@@ -108,9 +108,11 @@
       <h3 class="font-semibold text-green-800 mb-2">KC ID Berjaya Didaftar! / KC ID Successfully Registered!</h3>
       <div class="bg-white p-3 rounded border">
        <p class="text-sm text-gray-600 mb-2">KC ID (Kamus Catur ID) untuk pelajar ini:</p>
-       <div class="flex items-center justify-between bg-gray-50 p-2 rounded"><span id="generated-kc-id" class="font-mono text-lg font-bold text-orange-600"></span> <button id="copy-kc-id" class="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"> Salin / Copy </button>
-       </div>
-       <p class="text-xs text-gray-500 mt-2">Simpan KC ID ini dengan selamat. Anda memerlukannya untuk menghantar rekod kejohanan. <br>
+       <div class="flex items-center justify-between bg-gray-50 p-2 rounded mb-3"><span id="generated-kc-id" class="font-mono text-lg font-bold text-orange-600"></span> <button id="copy-kc-id" class="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"> Salin / Copy </button>
+       </div><!-- WhatsApp Notification Button --> <button id="notify-whatsapp" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2">
+        <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+        </svg><span>Hantar Notifikasi ke WhatsApp / Send WhatsApp Notification</span> </button>
+       <p class="text-xs text-gray-500 mt-3">Simpan KC ID ini dengan selamat. Anda memerlukannya untuk menghantar rekod kejohanan. <br>
         Keep this KC ID safe. You will need it to submit tournament records. <br><br>
         Format: YYMMGGXXX (YY=Tahun, MM=Bulan, GG=Jantina 01=Lelaki/02=Perempuan, XXX=No Giliran)</p>
       </div>
@@ -235,7 +237,11 @@
      </div>
     </div><!-- Students List -->
     <div class="bg-white rounded-lg shadow-md p-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Registered Students</h2>
+     <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-semibold text-gray-800">Registered Students</h2>
+      <div class="flex items-center space-x-3"><label for="tier-filter" class="text-sm font-medium text-gray-700">Filter by Tier:</label> <select id="tier-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"> <option value="all">All Tiers</option> <option value="Grandmaster">👑 Grandmaster</option> <option value="King">♚ King</option> <option value="Queen">♛ Queen</option> <option value="Rook">♜ Rook</option> <option value="Bishop">♝ Bishop</option> <option value="Knight">♞ Knight</option> <option value="Pawn">♟ Pawn</option> <option value="Beginner">🔰 Beginner</option> </select>
+      </div>
+     </div>
      <div id="students-list" class="space-y-4">
       <div class="text-center text-gray-500 py-8">
        No students registered yet. Add your first student above.
@@ -460,7 +466,7 @@
      <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90%] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
        <h3 class="text-xl font-semibold text-gray-800">Edit Tournament Record</h3><button id="close-edit-modal" class="text-gray-500 hover:text-gray-700">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg></button>
       </div>
       <form id="edit-record-form" class="space-y-4"><input type="hidden" id="edit-record-id"> <!-- Tournament Basic Info -->
@@ -522,7 +528,7 @@
       <div class="bg-white rounded-lg shadow-md p-6">
        <div class="flex items-center">
         <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
          </svg>
         </div>
         <div class="ml-4">
@@ -534,7 +540,7 @@
       <div class="bg-white rounded-lg shadow-md p-6">
        <div class="flex items-center">
         <div class="p-3 rounded-full bg-green-100 text-green-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
          </svg>
         </div>
         <div class="ml-4">
@@ -546,7 +552,7 @@
       <div class="bg-white rounded-lg shadow-md p-6">
        <div class="flex items-center">
         <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
          </svg>
         </div>
         <div class="ml-4">
@@ -558,7 +564,7 @@
       <div class="bg-white rounded-lg shadow-md p-6">
        <div class="flex items-center">
         <div class="p-3 rounded-full bg-purple-100 text-purple-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
          </svg>
         </div>
         <div class="ml-4">
@@ -773,7 +779,6 @@
         }
 
         async function loadAllData() {
-            showLoading();
             try {
                 students = await fetchFromGoogleSheets('getStudents');
                 pendingRecords = await fetchFromGoogleSheets('getPendingRecords');
@@ -787,8 +792,6 @@
             } catch (error) {
                 console.error('Failed to load data:', error);
                 showMessage('Failed to load data from Google Sheets. Please refresh the page.', 'error');
-            } finally {
-                hideLoading();
             }
         }
 
@@ -850,7 +853,9 @@
                 }
 
                 setupEventListeners();
-                await loadAllData();
+                
+                // Load data automatically in the background
+                loadAllData();
                 
             } catch (error) {
                 console.error("Failed to initialize app:", error);
@@ -885,6 +890,7 @@
             // IC verification
             document.getElementById('ic-last-4').addEventListener('input', verifyIcLast4);
             document.getElementById('copy-kc-id').addEventListener('click', copyKcId);
+            document.getElementById('notify-whatsapp').addEventListener('click', sendWhatsAppNotification);
             
             // IC number parsing and formatting
             document.getElementById('ic-number').addEventListener('input', formatIcNumber);
@@ -915,6 +921,9 @@
             document.getElementById('edit-total-players').addEventListener('input', calculateEditPerformance);
             document.getElementById('edit-tournament-level').addEventListener('change', calculateEditPerformance);
             document.getElementById('edit-special-prize').addEventListener('change', toggleEditSpecialPrize);
+            
+            // Tier filter
+            document.getElementById('tier-filter').addEventListener('change', updateStudentsList);
         }
 
         // ============================================
@@ -1077,6 +1086,9 @@
 
                 await postToGoogleSheets('addStudent', studentData);
                 await loadAllData();
+
+                // Store student data for WhatsApp notification
+                lastRegisteredStudent = studentData;
 
                 showKcId(kcId);
 
@@ -1260,6 +1272,7 @@
 
         function updateStudentsList() {
             const container = document.getElementById('students-list');
+            const selectedTier = document.getElementById('tier-filter').value;
             
             if (students.length === 0) {
                 container.innerHTML = `
@@ -1270,50 +1283,114 @@
                 return;
             }
 
-            container.innerHTML = students.map(student => {
+            // Group students by tier
+            const tierOrder = ['Grandmaster', 'King', 'Queen', 'Rook', 'Bishop', 'Knight', 'Pawn', 'Beginner'];
+            const studentsByTier = {};
+            
+            students.forEach(student => {
                 const rating = student.current_rating || 1400;
                 const tierInfo = getTierInfo(rating);
-                const progress = getProgressToNextTier(rating);
+                const tierName = tierInfo.mainTier;
                 
-                return `
-                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-lg text-gray-800">${student.student_name || 'Unknown'}</h3>
-                            <p class="text-gray-600">Parent: ${student.parent_name || 'Unknown'}</p>
-                            <p class="text-sm font-mono text-indigo-600">KC ID: ${student.kc_id || 'Unknown'}</p>
-                            ${student.student_age ? `<p class="text-sm text-gray-500">Age: ${student.student_age} years | ${student.student_state || 'Unknown state'}</p>` : ''}
-                            <p class="text-sm text-gray-500">Tournaments: ${student.total_tournaments || 0} | Total Points: ${student.total_points_earned || 0}</p>
-                            <p class="text-sm text-gray-500">Registered: ${student.registration_date ? new Date(student.registration_date).toLocaleDateString() : 'Unknown'}</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold text-orange-600">${rating}</div>
-                            <div class="text-sm text-gray-500">Current Rating</div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-lg p-3">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-2xl">${tierInfo.icon}</span>
-                                <div>
-                                    <div class="font-semibold" style="color: ${tierInfo.color}">${tierInfo.subTier}</div>
-                                    <div class="text-xs text-gray-500">${tierInfo.subTierRange[0]} - ${tierInfo.subTierRange[1]} points</div>
-                                </div>
+                if (!studentsByTier[tierName]) {
+                    studentsByTier[tierName] = [];
+                }
+                studentsByTier[tierName].push(student);
+            });
+
+            // Sort students within each tier by rating (highest first)
+            Object.keys(studentsByTier).forEach(tier => {
+                studentsByTier[tier].sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400));
+            });
+
+            // Determine which tiers to show
+            let tiersToShow;
+            if (selectedTier === 'all') {
+                tiersToShow = tierOrder;
+            } else {
+                // Show only the selected tier
+                tiersToShow = [selectedTier];
+            }
+
+            // Build HTML grouped by tier
+            let html = '';
+            
+            tiersToShow.forEach(tierName => {
+                if (!studentsByTier[tierName] || studentsByTier[tierName].length === 0) {
+                    // If a specific tier is selected but has no students, show a message
+                    if (selectedTier !== 'all') {
+                        html += `
+                            <div class="text-center text-gray-500 py-8">
+                                No students in ${tierName} tier yet.
                             </div>
-                            <div class="text-right">
-                                <div class="text-sm font-medium text-gray-700">${Math.round(progress)}% to next tier</div>
-                            </div>
+                        `;
+                    }
+                    return;
+                }
+                
+                const tierStudents = studentsByTier[tierName];
+                const firstStudent = tierStudents[0];
+                const tierInfo = getTierInfo(firstStudent.current_rating || 1400);
+                
+                html += `
+                    <div class="mb-6">
+                        <div class="flex items-center space-x-3 mb-3 pb-2 border-b-2" style="border-color: ${tierInfo.color}">
+                            <span class="text-3xl">${tierInfo.icon}</span>
+                            <h3 class="text-xl font-bold" style="color: ${tierInfo.color}">${tierName}</h3>
+                            <span class="text-sm text-gray-500">(${tierStudents.length} student${tierStudents.length > 1 ? 's' : ''})</span>
                         </div>
                         
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="h-2 rounded-full transition-all duration-300" 
-                                 style="width: ${progress}%; background-color: ${tierInfo.color}"></div>
+                        <div class="space-y-3">
+                            ${tierStudents.map(student => {
+                                const rating = student.current_rating || 1400;
+                                const studentTierInfo = getTierInfo(rating);
+                                const progress = getProgressToNextTier(rating);
+                                
+                                return `
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div class="flex-1">
+                                            <h3 class="font-semibold text-lg text-gray-800">${student.student_name || 'Unknown'}</h3>
+                                            <p class="text-gray-600">Parent: ${student.parent_name || 'Unknown'}</p>
+                                            <p class="text-sm font-mono text-indigo-600">KC ID: ${student.kc_id || 'Unknown'}</p>
+                                            ${student.student_age ? `<p class="text-sm text-gray-500">Age: ${student.student_age} years | ${student.student_state || 'Unknown state'}</p>` : ''}
+                                            <p class="text-sm text-gray-500">Tournaments: ${student.total_tournaments || 0} | Total Points: ${student.total_points_earned || 0}</p>
+                                            <p class="text-sm text-gray-500">Registered: ${student.registration_date ? new Date(student.registration_date).toLocaleDateString() : 'Unknown'}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-2xl font-bold text-orange-600">${rating}</div>
+                                            <div class="text-sm text-gray-500">Current Rating</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-2xl">${studentTierInfo.icon}</span>
+                                                <div>
+                                                    <div class="font-semibold" style="color: ${studentTierInfo.color}">${studentTierInfo.subTier}</div>
+                                                    <div class="text-xs text-gray-500">${studentTierInfo.subTierRange[0]} - ${studentTierInfo.subTierRange[1]} points</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-sm font-medium text-gray-700">${Math.round(progress)}% to next tier</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="h-2 rounded-full transition-all duration-300" 
+                                                 style="width: ${progress}%; background-color: ${studentTierInfo.color}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
-                </div>
                 `;
-            }).join('');
+            });
+
+            container.innerHTML = html;
         }
 
         // ============================================
@@ -1412,6 +1489,9 @@
             return icLast4 === studentIcLast4;
         }
 
+        // Store last registered student data for WhatsApp notification
+        let lastRegisteredStudent = null;
+
         function showKcId(kcId) {
             document.getElementById('generated-kc-id').textContent = kcId;
             document.getElementById('kc-id-display').classList.remove('hidden');
@@ -1431,6 +1511,56 @@
                     btn.textContent = originalText;
                 }, 2000);
             });
+        }
+
+        function sendWhatsAppNotification() {
+            if (!lastRegisteredStudent) {
+                showMessage('No student data available. Please register a student first.', 'error');
+                return;
+            }
+
+            const student = lastRegisteredStudent;
+            
+            // Format the message with all required information
+            const message = `*PENDAFTARAN KC ID BARU / NEW KC ID REGISTRATION*
+
+*Maklumat Pelajar / Student Information:*
+Nama Pelajar / Student Name: ${student.student_name}
+No Kad Pengenalan / IC Number: ${student.ic_number}
+KC ID: ${student.kc_id}
+Jantina / Gender: ${student.student_gender}
+Umur / Age: ${student.student_age} tahun / years
+Negeri / State: ${student.student_state}
+
+*Maklumat Ibu Bapa / Parent Information:*
+Nama Ibu Bapa / Parent Name: ${student.parent_name}
+No Telefon / Phone Number: ${student.parent_phone}
+Email: ${student.parent_email}
+
+*Tarikh Pendaftaran / Registration Date:*
+${new Date(student.registration_date).toLocaleString('ms-MY', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+})}
+
+Rating Permulaan / Starting Rating: ${student.current_rating}
+Tier: ${student.current_tier} - ${student.current_sub_tier}
+
+---
+Sistem Rating Catur Kamus Catur
+Chess Rating System by Kamus Catur`;
+
+            // Encode the message for WhatsApp URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Open WhatsApp with the pre-filled message
+            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            
+            showMessage('WhatsApp opened with registration details!', 'success');
         }
 
         // ============================================
@@ -1591,9 +1721,11 @@
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
             
             const currentYearMonth = year + month;
-            const existingStudentsThisMonth = students.filter(s => 
-                s.kc_id && s.kc_id.startsWith(currentYearMonth + genderCode)
-            ).length;
+            const existingStudentsThisMonth = students.filter(s => {
+                if (!s.kc_id) return false;
+                const kcIdStr = s.kc_id.toString();
+                return kcIdStr.startsWith(currentYearMonth + genderCode);
+            }).length;
             
             const sequentialNumber = (existingStudentsThisMonth + 1).toString().padStart(3, '0');
             
@@ -2078,5 +2210,5 @@
             initializeApp();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a08f990535ca856',t:'MTc2MzQ4NDcxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1ee9d51638a853',t:'MTc2MzcxNDc1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
