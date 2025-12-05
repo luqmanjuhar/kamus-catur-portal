@@ -1,20 +1,20 @@
 <!doctype html>
 <html lang="en">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess Academy Rating System</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Academy Rating System</title>
+    <script src="/_sdk/element_sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
         body {
             box-sizing: border-box;
         }
         .chess-pattern {
-            background-image: 
-                linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
-                linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
+            background-image:
+                linear-gradient(45deg, #f8f9fa 25%, transparent 25%),
+                linear-gradient(-45deg, #f8f9fa 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f8f9fa 75%),
                 linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
@@ -49,559 +49,584 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="min-h-full bg-gradient-to-br from-orange-50 to-red-100"><!-- Loading Overlay -->
-  <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-   <div class="bg-white rounded-lg p-6 flex flex-col items-center">
-    <div class="spinner mb-4"></div>
-    <p class="text-gray-700 font-medium">Loading data from Google Sheets...</p>
-   </div>
-  </div>
-  <div class="container mx-auto px-4 py-8 max-w-6xl"><!-- Header -->
-   <div class="text-center mb-8">
-    <div class="inline-flex items-center justify-center w-20 h-20 mb-4"><img src="https://github.com/luqmanjuhar/kamus-catur-portal/blob/2fcbf8eed6119fca7f52430b5074fb9a67b7fabc/Asset%2028.png?raw=true" alt="Kamus Catur Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-     <div class="w-16 h-16 bg-orange-600 rounded-full items-center justify-center text-2xl text-white hidden">
-      ♔
-     </div>
+    <style>@view-transition { navigation: auto; }</style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+</head>
+<body class="min-h-full bg-gradient-to-br from-orange-50 to-red-100">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 flex flex-col items-center">
+            <div class="spinner mb-4"></div>
+            <p class="text-gray-700 font-medium">Loading data from Google Sheets...</p>
+        </div>
     </div>
-    <h1 id="academy-title" class="text-4xl font-bold text-gray-800 mb-2">Chess Academy Rating System</h1>
-    <p id="welcome-text" class="text-lg text-gray-600">Track your child's chess tournament progress and rating</p>
-   </div><!-- Navigation -->
-   <div class="flex justify-center mb-8">
-    <div class="bg-white rounded-lg shadow-md p-1 flex flex-wrap gap-1"><button id="students-tab" class="px-6 py-2 rounded-md font-medium transition-colors bg-orange-600 text-white">Students</button> <button id="submit-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Submit Record</button> <button id="admin-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Admin</button> <button id="dashboard-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Dashboard</button>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 mb-4">
+                <img src="https://github.com/luqmanjuhar/kamus-catur-portal/blob/2fcbf8eed6119fca7f52430b5074fb9a67b7fabc/Asset%2028.png?raw=true" alt="Kamus Catur Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-16 h-16 bg-orange-600 rounded-full items-center justify-center text-2xl text-white hidden">
+                    ♔
+                </div>
+            </div>
+            <h1 id="academy-title" class="text-4xl font-bold text-gray-800 mb-2">Chess Academy Rating System</h1>
+            <p id="welcome-text" class="text-lg text-gray-600">Track your child's chess tournament progress and rating</p>
+        </div>
+        <!-- Navigation -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-white rounded-lg shadow-md p-1 flex flex-wrap gap-1">
+                <button id="students-tab" class="px-6 py-2 rounded-md font-medium transition-colors bg-orange-600 text-white">Students</button>
+                <button id="submit-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Submit Record</button>
+                <button id="admin-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Admin</button>
+                <button id="dashboard-tab" class="px-6 py-2 rounded-md font-medium transition-colors text-gray-600 hover:text-orange-600">Dashboard</button>
+            </div>
+        </div>
+        <!-- Students View -->
+        <div id="students-view" class="space-y-6">
+            <!-- Add Student Form -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Daftar KC ID / Register KC ID</h2>
+                <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required> </div>
+                    <div>
+                        <label for="ic-number" class="block text-sm font-medium text-gray-700 mb-2">No Kad Pengenalan / IC Number</label> <input type="text" id="ic-number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono text-base" placeholder="YYMMDD-PB-XXXX" maxlength="14" required>
+                        <p class="text-xs text-gray-500 mt-1">Format: YYMMDD-PB-XXXX (tanpa ruang / without spaces)</p>
+                    </div>
+                    <div><label for="parent-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu Bapa / Parent Name</label> <input type="text" id="parent-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required> </div>
+                    <div>
+                        <label for="parent-phone" class="block text-sm font-medium text-gray-700 mb-2">No Telefon Ibu Bapa / Parent Phone</label>
+                        <div class="flex"><span class="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l-md">+60</span> <input type="tel" id="parent-phone" class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="12-3456789" required> </div>
+                    </div>
+                    <div><label for="parent-email" class="block text-sm font-medium text-gray-700 mb-2">Emel Ibu Bapa / Parent Email</label> <input type="email" id="parent-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> </div>
+                    <!-- IC Information Display -->
+                    <div id="ic-info-display" class="hidden col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-medium text-blue-800 mb-2">Maklumat dari No Kad Pengenalan / Information from IC Number:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                            <div><span class="text-gray-600">Jantina / Gender:</span> <span id="detected-gender" class="font-medium ml-2"></span> </div>
+                            <div><span class="text-gray-600">Umur / Age:</span> <span id="detected-age" class="font-medium ml-2"></span> </div>
+                            <div><span class="text-gray-600">Negeri / State:</span> <span id="detected-state" class="font-medium ml-2"></span> </div>
+                        </div>
+                    </div>
+                    <div class="flex items-end"><button type="submit" id="add-student-btn" class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors font-medium"> Daftar KC ID / Register KC ID </button> </div>
+                </form>
+                <!-- KC ID Display -->
+                <div id="kc-id-display" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-2">KC ID Berjaya Didaftar! / KC ID Successfully Registered!</h3>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600 mb-2">KC ID (Kamus Catur ID) untuk pelajar ini:</p>
+                        <div class="flex items-center justify-between bg-gray-50 p-2 rounded mb-3"><span id="generated-kc-id" class="font-mono text-lg font-bold text-orange-600"></span> <button id="copy-kc-id" class="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"> Salin / Copy </button> </div>
+                        <!-- WhatsApp Notification Button --> <button id="notify-whatsapp" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                            </svg><span>Hantar Notifikasi ke WhatsApp / Send WhatsApp Notification</span> </button>
+                        <p class="text-xs text-gray-500 mt-3">Simpan KC ID ini dengan selamat. Anda memerlukannya untuk menghantar rekod kejohanan. <br> Keep this KC ID safe. You will need it to submit tournament records. <br><br> Format: YYMMGGXXX (YY=Tahun, MM=Bulan, GG=Jantina 01=Lelaki/02=Perempuan, XXX=No Giliran)</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Tier System Overview -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Chess Rating Tier System</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div class="text-center p-3 bg-gray-50 rounded-lg border-2 border-gray-200">
+                        <div class="text-2xl mb-2"> 🔰 </div>
+                        <div class="font-semibold text-gray-600"> Beginner </div>
+                        <div class="text-xs text-gray-500"> &lt; 1400 </div>
+                    </div>
+                    <div class="text-center p-3 bg-yellow-50 rounded-lg border-2" style="border-color: #8B4513">
+                        <div class="text-2xl mb-2"> ♟ </div>
+                        <div class="font-semibold" style="color: #8B4513"> Pawn </div>
+                        <div class="text-xs text-gray-500"> 1400-1500 </div>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 rounded-lg border-2" style="border-color: #4A5568">
+                        <div class="text-2xl mb-2"> ♞ </div>
+                        <div class="font-semibold" style="color: #4A5568"> Knight </div>
+                        <div class="text-xs text-gray-500"> 1501-1600 </div>
+                    </div>
+                    <div class="text-center p-3 bg-purple-50 rounded-lg border-2" style="border-color: #805AD5">
+                        <div class="text-2xl mb-2"> ♝ </div>
+                        <div class="font-semibold" style="color: #805AD5"> Bishop </div>
+                        <div class="text-xs text-gray-500"> 1601-1700 </div>
+                    </div>
+                    <div class="text-center p-3 bg-green-50 rounded-lg border-2" style="border-color: #38A169">
+                        <div class="text-2xl mb-2"> ♜ </div>
+                        <div class="font-semibold" style="color: #38A169"> Rook </div>
+                        <div class="text-xs text-gray-500"> 1701-1800 </div>
+                    </div>
+                    <div class="text-center p-3 bg-yellow-50 rounded-lg border-2" style="border-color: #D69E2E">
+                        <div class="text-2xl mb-2"> ♛ </div>
+                        <div class="font-semibold" style="color: #D69E2E"> Queen </div>
+                        <div class="text-xs text-gray-500"> 1801-1900 </div>
+                    </div>
+                    <div class="text-center p-3 bg-red-50 rounded-lg border-2" style="border-color: #E53E3E">
+                        <div class="text-2xl mb-2"> ♚ </div>
+                        <div class="font-semibold" style="color: #E53E3E"> King </div>
+                        <div class="text-xs text-gray-500"> 1901-2000 </div>
+                    </div>
+                    <div class="text-center p-3 bg-purple-50 rounded-lg border-2" style="border-color: #9F7AEA">
+                        <div class="text-2xl mb-2"> 👑 </div>
+                        <div class="font-semibold" style="color: #9F7AEA"> Grandmaster </div>
+                        <div class="text-xs text-gray-500"> &gt; 2000 </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg"><strong>Note:</strong> Each tier has 5 sub-levels with 20-point ranges (progression from 5 to 1):
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2 text-xs">
+                        <div> <strong>Pawn:</strong> 5 (1400-1420), 4 (1421-1440), 3 (1441-1460), 2 (1461-1480), 1 (1481-1500) </div>
+                        <div> <strong>Knight:</strong> 5 (1501-1520), 4 (1521-1540), 3 (1541-1560), 2 (1561-1580), 1 (1581-1600) </div>
+                        <div> <strong>Bishop:</strong> 5 (1601-1620), 4 (1621-1640), 3 (1641-1660), 2 (1661-1680), 1 (1681-1700) </div>
+                        <div> <strong>Rook:</strong> 5 (1701-1720), 4 (1721-1740), 3 (1741-1760), 2 (1761-1780), 1 (1781-1800) </div>
+                        <div> <strong>Queen:</strong> 5 (1801-1820), 4 (1821-1840), 3 (1841-1860), 2 (1861-1880), 1 (1881-1900) </div>
+                        <div> <strong>King:</strong> 5 (1901-1920), 4 (1921-1940), 3 (1941-1960), 2 (1961-1980), 1 (1981-2000) </div>
+                    </div>
+                    <div class="mt-2"> <strong>Starting Point:</strong> All students begin at 1400 rating (Pawn 5) </div>
+                </div>
+            </div>
+            <!-- Students List -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-800">Registered Students</h2>
+                    <div class="flex items-center space-x-3"><label for="tier-filter" class="text-sm font-medium text-gray-700">Filter by Tier:</label> <select id="tier-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="all">All Tiers</option>
+                            <option value="Grandmaster">👑 Grandmaster</option>
+                            <option value="King">♚ King</option>
+                            <option value="Queen">♛ Queen</option>
+                            <option value="Rook">♜ Rook</option>
+                            <option value="Bishop">♝ Bishop</option>
+                            <option value="Knight">♞ Knight</option>
+                            <option value="Pawn">♟ Pawn</option>
+                            <option value="Beginner">🔰 Beginner</option>
+                        </select> </div>
+                </div>
+                <div id="students-list" class="space-y-4">
+                    <div class="text-center text-gray-500 py-8"> No students registered yet. Add your first student above. </div>
+                </div>
+            </div>
+        </div>
+        <!-- Submit Record View -->
+        <div id="submit-view" class="hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Hantar Rekod Kejohanan / Submit Tournament Record</h2>
+                <!-- Tournament Level Points -->
+                <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                    <h3 class="font-semibold text-gray-800 mb-3">Tournament Level Base Points</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
+                        <div class="text-center">
+                            <div class="font-medium text-blue-600"> Sekolah </div>
+                            <div class="text-gray-600"> 5 points </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-medium text-green-600"> Daerah </div>
+                            <div class="text-gray-600"> 8 points </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-medium text-yellow-600"> Negeri </div>
+                            <div class="text-gray-600"> 10 points </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-medium text-orange-600"> Kebangsaan </div>
+                            <div class="text-gray-600"> 12 points </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-medium text-red-600"> Antarabangsa </div>
+                            <div class="text-gray-600"> 15 points </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Performance Bonus Points -->
+                <div class="bg-green-50 rounded-lg p-4 mb-6">
+                    <h3 class="font-semibold text-gray-800 mb-3">Performance Bonus Points</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-2">Level</th>
+                                    <th class="text-center py-2">Top 20%/Special</th>
+                                    <th class="text-center py-2">Top 30%</th>
+                                    <th class="text-center py-2">Top 40%</th>
+                                    <th class="text-center py-2">Top 50%</th>
+                                    <th class="text-center py-2">Top 60%</th>
+                                    <th class="text-center py-2">Top 70%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="py-1 font-medium text-blue-600">Sekolah</td>
+                                    <td class="text-center text-green-600">+3</td>
+                                    <td class="text-center text-green-600">+2</td>
+                                    <td class="text-center text-green-600">+1</td>
+                                    <td class="text-center text-gray-600">0</td>
+                                    <td class="text-center text-red-600">-2</td>
+                                    <td class="text-center text-red-600">-4</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-1 font-medium text-green-600">Daerah</td>
+                                    <td class="text-center text-green-600">+4</td>
+                                    <td class="text-center text-green-600">+3</td>
+                                    <td class="text-center text-green-600">+2</td>
+                                    <td class="text-center text-gray-600">0</td>
+                                    <td class="text-center text-red-600">-2</td>
+                                    <td class="text-center text-red-600">-4</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-1 font-medium text-yellow-600">Negeri</td>
+                                    <td class="text-center text-green-600">+5</td>
+                                    <td class="text-center text-green-600">+4</td>
+                                    <td class="text-center text-green-600">+3</td>
+                                    <td class="text-center text-gray-600">0</td>
+                                    <td class="text-center text-red-600">-2</td>
+                                    <td class="text-center text-red-600">-4</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-1 font-medium text-orange-600">Kebangsaan</td>
+                                    <td class="text-center text-green-600">+6</td>
+                                    <td class="text-center text-green-600">+5</td>
+                                    <td class="text-center text-green-600">+4</td>
+                                    <td class="text-center text-gray-600">0</td>
+                                    <td class="text-center text-red-600">-3</td>
+                                    <td class="text-center text-red-600">-5</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-medium text-red-600">Antarabangsa</td>
+                                    <td class="text-center text-green-600">+7</td>
+                                    <td class="text-center text-green-600">+6</td>
+                                    <td class="text-center text-green-600">+5</td>
+                                    <td class="text-center text-gray-600">0</td>
+                                    <td class="text-center text-red-600">-3</td>
+                                    <td class="text-center text-red-600">-5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-2">*Special prizes and Top 10 finishers (rank 1-10) automatically count as Top 20% performance</p>
+                </div>
+                <form id="record-form" class="space-y-4">
+                    <!-- KC ID Input -->
+                    <div>
+                        <label for="kc-id-input" class="block text-sm font-medium text-gray-700 mb-2">KC ID (Kamus Catur ID)</label> <input type="text" id="kc-id-input" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="Masukkan KC ID / Enter KC ID" required>
+                        <p class="text-xs text-gray-500 mt-1">Masukkan KC ID yang diterima semasa pendaftaran / Enter the KC ID received during registration</p>
+                        <div id="student-verification" class="hidden mt-2 p-2 rounded-md">
+                            <div id="student-found" class="hidden text-green-700 bg-green-50 p-2 rounded"> ✓ Pelajar dijumpai: <span id="verified-student-name" class="font-semibold"></span> </div>
+                            <div id="student-not-found" class="hidden text-red-700 bg-red-50 p-2 rounded"> ✗ KC ID tidak dijumpai. Sila semak KC ID anda. </div>
+                        </div>
+                    </div>
+                    <!-- IC Verification (shown only when student is found) -->
+                    <div id="ic-verification-section" class="hidden">
+                        <label for="ic-last-4" class="block text-sm font-medium text-gray-700 mb-2"> Pengesahan Identiti / Identity Verification </label> <input type="text" id="ic-last-4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="Masukkan 4 digit terakhir IC / Enter last 4 digits of IC" maxlength="4" pattern="[0-9]{4}">
+                        <p class="text-xs text-gray-500 mt-1">Untuk keselamatan, sila masukkan 4 digit terakhir no kad pengenalan anda <br> For security, please enter the last 4 digits of your IC number</p>
+                        <div id="ic-verification-result" class="hidden mt-2 p-2 rounded-md">
+                            <div id="ic-verified" class="hidden text-green-700 bg-green-50 p-2 rounded"> ✓ Pengesahan berjaya / Verification successful </div>
+                            <div id="ic-failed" class="hidden text-red-700 bg-red-50 p-2 rounded"> ✗ 4 digit terakhir IC tidak sepadan. Sila cuba lagi / Last 4 digits of IC do not match. Please try again. </div>
+                        </div>
+                    </div>
+                    <!-- Tournament Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label for="tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Kejohanan / Tournament Name</label> <input type="text" id="tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required> </div>
+                        <div><label for="tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tarikh Kejohanan / Tournament Date</label> <input type="date" id="tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> </div>
+                    </div>
+                    <!-- Tournament Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="time-control" class="block text-sm font-medium text-gray-700 mb-2">Kawalan Masa / Time Control</label> <select id="time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                                <option value="">Pilih kawalan masa / Select time control</option>
+                                <option value="Blitz">Blitz (≤ 10 minit / minutes)</option>
+                                <option value="Rapid">Rapid (10-60 minit / minutes)</option>
+                                <option value="Classical">Classical (&gt; 60 minit / minutes)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Kategori Kejohanan / Tournament Category</label> <select id="tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                                <option value="">Pilih kategori / Select category</option>
+                                <option value="U6">Bawah 6 / Under 6 (U6)</option>
+                                <option value="U7">Bawah 7 / Under 7 (U7)</option>
+                                <option value="U8">Bawah 8 / Under 8 (U8)</option>
+                                <option value="U9">Bawah 9 / Under 9 (U9)</option>
+                                <option value="U10">Bawah 10 / Under 10 (U10)</option>
+                                <option value="U11">Bawah 11 / Under 11 (U11)</option>
+                                <option value="U12">Bawah 12 / Under 12 (U12)</option>
+                                <option value="U13">Bawah 13 / Under 13 (U13)</option>
+                                <option value="U14">Bawah 14 / Under 14 (U14)</option>
+                                <option value="U15">Bawah 15 / Under 15 (U15)</option>
+                                <option value="U16">Bawah 16 / Under 16 (U16)</option>
+                                <option value="U17">Bawah 17 / Under 17 (U17)</option>
+                                <option value="U18">Bawah 18 / Under 18 (U18)</option>
+                                <option value="U19">Bawah 19 / Under 19 (U19)</option>
+                                <option value="U20">Bawah 20 / Under 20 (U20)</option>
+                                <option value="Team">Pasukan / Team</option>
+                                <option value="Women">Wanita / Women</option>
+                                <option value="Challenger">Pencabar / Challenger</option>
+                                <option value="Open">Terbuka / Open</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tahap Kejohanan / Tournament Level</label> <select id="tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                                <option value="">Pilih tahap / Select level</option>
+                                <option value="Sekolah">Sekolah / School (5 mata / points)</option>
+                                <option value="Daerah">Daerah / District (8 mata / points)</option>
+                                <option value="Negeri">Negeri / State (10 mata / points)</option>
+                                <option value="Kebangsaan">Kebangsaan / National (12 mata / points)</option>
+                                <option value="Antarabangsa">Antarabangsa / International (15 mata / points)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Performance Calculation Section -->
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+                        <h3 class="font-semibold text-gray-800">Butiran Prestasi / Performance Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Kedudukan Akhir / Final Ranking</label> <input type="number" id="final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: 5 / e.g., 5" required> </div>
+                            <div><label for="total-players" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pemain dalam Kategori / Total Players in Category</label> <input type="number" id="total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: 50 / e.g., 50" required> </div>
+                        </div>
+                        <!-- Special Prize Section -->
+                        <div class="border-t pt-4">
+                            <div class="flex items-center mb-3"><input type="checkbox" id="special-prize" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"> <label for="special-prize" class="ml-2 block text-sm font-medium text-gray-700"> Menerima Hadiah Khas / Received Special Prize (automatik dikira sebagai 20% teratas / automatically counts as Top 20%) </label> </div>
+                            <div id="special-prize-details" class="hidden"><label for="prize-description" class="block text-sm font-medium text-gray-700 mb-2">Keterangan Hadiah Khas / Special Prize Description</label> <input type="text" id="prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: Pemain Wanita Terbaik / e.g., Best Female Player"> </div>
+                        </div>
+                        <!-- Performance Calculation Display -->
+                        <div id="performance-calculation" class="bg-white rounded-lg p-3 border hidden">
+                            <h4 class="font-medium text-gray-800 mb-2">Calculated Performance</h4>
+                            <div class="text-sm space-y-1">
+                                <div> Ranking: <span id="calc-ranking">-</span> out of <span id="calc-total">-</span> players </div>
+                                <div> Percentile: <span id="calc-percentile">-</span> </div>
+                                <div> Base Points: <span id="calc-base">-</span> </div>
+                                <div> Performance Bonus: <span id="calc-bonus">-</span> </div>
+                                <div class="font-semibold border-t pt-1"> Total Points: <span id="calc-total-points">-</span> </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div><label for="additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Nota Tambahan (Pilihan) / Additional Notes (Optional)</label> <textarea id="additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Sebarang maklumat tambahan tentang prestasi / Any additional information about the performance"></textarea> </div><button type="submit" id="submit-record-btn" class="w-full bg-orange-600 text-white px-4 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"> Hantar untuk Kelulusan / Submit for Approval </button>
+                </form>
+            </div>
+        </div>
+        <!-- Admin View -->
+        <div id="admin-view" class="hidden">
+            <!-- Admin Login Section -->
+            <div id="admin-login" class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Admin Access Required</h2>
+                <div class="max-w-md">
+                    <label for="admin-password" class="block text-sm font-medium text-gray-700 mb-2">Admin Password</label>
+                    <div class="flex space-x-3"><input type="password" id="admin-password" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Enter admin password"> <button id="admin-login-btn" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"> Login </button> </div>
+                    <p class="text-xs text-gray-500 mt-1">Default password: kamuscatur</p>
+                </div>
+            </div>
+            <!-- Admin Panel (Hidden until login) -->
+            <div id="admin-panel" class="hidden space-y-6">
+                <!-- Pending Approvals -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">Pending Approval</h2><button id="admin-logout-btn" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"> Logout </button>
+                    </div>
+                    <div id="pending-list" class="space-y-4">
+                        <div class="text-center text-gray-500 py-8"> No pending submissions. </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Edit Record Modal -->
+            <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90%] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Edit Tournament Record</h3><button id="close-edit-modal" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg></button>
+                    </div>
+                    <form id="edit-record-form" class="space-y-4"><input type="hidden" id="edit-record-id"> <!-- Tournament Basic Info -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="edit-tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Tournament Name</label> <input type="text" id="edit-tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> </div>
+                            <div><label for="edit-tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tournament Date</label> <input type="date" id="edit-tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> </div>
+                        </div>
+                        <!-- Tournament Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="edit-time-control" class="block text-sm font-medium text-gray-700 mb-2">Time Control</label> <select id="edit-time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                                    <option value="Blitz">Blitz (≤ 10 minutes)</option>
+                                    <option value="Rapid">Rapid (10-60 minutes)</option>
+                                    <option value="Classical">Classical (&gt; 60 minutes)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="edit-tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Tournament Category</label> <select id="edit-tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                                    <option value="U6">Under 6 (U6)</option>
+                                    <option value="U7">Under 7 (U7)</option>
+                                    <option value="U8">Under 8 (U8)</option>
+                                    <option value="U9">Under 9 (U9)</option>
+                                    <option value="U10">Under 10 (U10)</option>
+                                    <option value="U11">Under 11 (U11)</option>
+                                    <option value="U12">Under 12 (U12)</option>
+                                    <option value="U13">Under 13 (U13)</option>
+                                    <option value="U14">Under 14 (U14)</option>
+                                    <option value="U15">Under 15 (U15)</option>
+                                    <option value="U16">Under 16 (U16)</option>
+                                    <option value="U17">Under 17 (U17)</option>
+                                    <option value="U18">Under 18 (U18)</option>
+                                    <option value="U19">Under 19 (U19)</option>
+                                    <option value="U20">Under 20 (U20)</option>
+                                    <option value="Team">Team</option>
+                                    <option value="Women">Women</option>
+                                    <option value="Challenger">Challenger</option>
+                                    <option value="Open">Open</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="edit-tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tournament Level</label> <select id="edit-tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                                    <option value="Sekolah">Sekolah / School (5 points)</option>
+                                    <option value="Daerah">Daerah / District (8 points)</option>
+                                    <option value="Negeri">Negeri / State (10 points)</option>
+                                    <option value="Kebangsaan">Kebangsaan / National (12 points)</option>
+                                    <option value="Antarabangsa">Antarabangsa / International (15 points)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Performance Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="edit-final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Final Ranking</label> <input type="number" id="edit-final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> </div>
+                            <div><label for="edit-total-players" class="block text-sm font-medium text-gray-700 mb-2">Total Players</label> <input type="number" id="edit-total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> </div>
+                        </div>
+                        <!-- Special Prize -->
+                        <div class="flex items-center mb-3"><input type="checkbox" id="edit-special-prize" class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"> <label for="edit-special-prize" class="ml-2 block text-sm font-medium text-gray-700"> Received Special Prize </label> </div>
+                        <div id="edit-special-prize-details" class="hidden"><label for="edit-prize-description" class="block text-sm font-medium text-gray-700 mb-2">Special Prize Description</label> <input type="text" id="edit-prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"> </div>
+                        <!-- Additional Notes -->
+                        <div><label for="edit-additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label> <textarea id="edit-additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea> </div>
+                        <!-- Performance Calculation Display -->
+                        <div id="edit-performance-calculation" class="bg-gray-50 rounded-lg p-3 border">
+                            <h4 class="font-medium text-gray-800 mb-2">Updated Performance Calculation</h4>
+                            <div class="text-sm space-y-1">
+                                <div> Ranking: <span id="edit-calc-ranking">-</span> out of <span id="edit-calc-total">-</span> players </div>
+                                <div> Percentile: <span id="edit-calc-percentile">-</span> </div>
+                                <div> Base Points: <span id="edit-calc-base">-</span> </div>
+                                <div> Performance Bonus: <span id="edit-calc-bonus">-</span> </div>
+                                <div class="font-semibold border-t pt-1"> Total Points: <span id="edit-calc-total-points">-</span> </div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-3 pt-4"><button type="submit" class="flex-1 bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors"> Save Changes </button> <button type="button" id="cancel-edit" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"> Cancel </button> </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+            <div class="space-y-6">
+                <!-- Statistics Overview (Keep this) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Students</p>
+                                <p id="total-students" class="text-2xl font-semibold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Average Rating</p>
+                                <p id="average-rating" class="text-2xl font-semibold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Pending Records</p>
+                                <p id="pending-count" class="text-2xl font-semibold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Highest Rating</p>
+                                <p id="highest-rating" class="text-2xl font-semibold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Top 10 Overall -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">🏆 Top 10 Overall Ranking</h2>
+                    <div id="top-10-overall" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- NEW: Top 5 by Gender -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold text-blue-800 mb-4">👦 Top 5 Male</h2>
+                        <div id="top-5-male" class="space-y-2"></div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold text-pink-800 mb-4">👧 Top 5 Female</h2>
+                        <div id="top-5-female" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- NEW: Monthly Leaders Title with Filter -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-200">
+                    <h2 class="text-2xl font-bold text-gray-800">📅 Leaders of the Month</h2>
+                    <div class="flex items-center space-x-2">
+                        <label for="month-filter" class="text-sm font-medium text-gray-600">Select Month:</label>
+                        <select id="month-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white min-w-[200px]">
+                            <!-- Options populated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- NEW: Monthly Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Top Scorers (Total Points) -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-orange-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">🔥 Top Scorers</h3>
+                        <p class="text-xs text-gray-500 mb-4">Based on Total Points earned</p>
+                        <div id="top-scorers-month" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Most Active (Base Points) -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">⚡ Most Active</h3>
+                        <p class="text-xs text-gray-500 mb-4">Based on Base Points (Participation)</p>
+                        <div id="top-active-month" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Best Performance (Bonus Points) -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-green-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">⭐ Best Performance</h3>
+                        <p class="text-xs text-gray-500 mb-4">Based on Bonus Points</p>
+                        <div id="top-performance-month" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Contact Info -->
+        <div class="mt-8 text-center">
+            <p id="contact-text" class="text-gray-600">For questions, contact your chess academy administrator</p>
+        </div>
     </div>
-   </div><!-- Students View -->
-   <div id="students-view" class="space-y-6"><!-- Add Student Form -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Daftar KC ID / Register KC ID</h2>
-     <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div><label for="student-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar / Student Name</label> <input type="text" id="student-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
-      </div>
-      <div><label for="ic-number" class="block text-sm font-medium text-gray-700 mb-2">No Kad Pengenalan / IC Number</label> <input type="text" id="ic-number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono text-base" placeholder="YYMMDD-PB-XXXX" maxlength="14" required>
-       <p class="text-xs text-gray-500 mt-1">Format: YYMMDD-PB-XXXX (tanpa ruang / without spaces)</p>
-      </div>
-      <div><label for="parent-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu Bapa / Parent Name</label> <input type="text" id="parent-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
-      </div>
-      <div><label for="parent-phone" class="block text-sm font-medium text-gray-700 mb-2">No Telefon Ibu Bapa / Parent Phone</label>
-       <div class="flex"><span class="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l-md">+60</span> <input type="tel" id="parent-phone" class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="12-3456789" required>
-       </div>
-      </div>
-      <div><label for="parent-email" class="block text-sm font-medium text-gray-700 mb-2">Emel Ibu Bapa / Parent Email</label> <input type="email" id="parent-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-      </div><!-- IC Information Display -->
-      <div id="ic-info-display" class="hidden col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
-       <h4 class="font-medium text-blue-800 mb-2">Maklumat dari No Kad Pengenalan / Information from IC Number:</h4>
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-        <div><span class="text-gray-600">Jantina / Gender:</span> <span id="detected-gender" class="font-medium ml-2"></span>
-        </div>
-        <div><span class="text-gray-600">Umur / Age:</span> <span id="detected-age" class="font-medium ml-2"></span>
-        </div>
-        <div><span class="text-gray-600">Negeri / State:</span> <span id="detected-state" class="font-medium ml-2"></span>
-        </div>
-       </div>
-      </div>
-      <div class="flex items-end"><button type="submit" id="add-student-btn" class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors font-medium"> Daftar KC ID / Register KC ID </button>
-      </div>
-     </form><!-- KC ID Display -->
-     <div id="kc-id-display" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-      <h3 class="font-semibold text-green-800 mb-2">KC ID Berjaya Didaftar! / KC ID Successfully Registered!</h3>
-      <div class="bg-white p-3 rounded border">
-       <p class="text-sm text-gray-600 mb-2">KC ID (Kamus Catur ID) untuk pelajar ini:</p>
-       <div class="flex items-center justify-between bg-gray-50 p-2 rounded mb-3"><span id="generated-kc-id" class="font-mono text-lg font-bold text-orange-600"></span> <button id="copy-kc-id" class="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"> Salin / Copy </button>
-       </div><!-- WhatsApp Notification Button --> <button id="notify-whatsapp" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2">
-        <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-        </svg><span>Hantar Notifikasi ke WhatsApp / Send WhatsApp Notification</span> </button>
-       <p class="text-xs text-gray-500 mt-3">Simpan KC ID ini dengan selamat. Anda memerlukannya untuk menghantar rekod kejohanan. <br>
-        Keep this KC ID safe. You will need it to submit tournament records. <br><br>
-        Format: YYMMGGXXX (YY=Tahun, MM=Bulan, GG=Jantina 01=Lelaki/02=Perempuan, XXX=No Giliran)</p>
-      </div>
-     </div>
-    </div><!-- Tier System Overview -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Chess Rating Tier System</h2>
-     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <div class="text-center p-3 bg-gray-50 rounded-lg border-2 border-gray-200">
-       <div class="text-2xl mb-2">
-        🔰
-       </div>
-       <div class="font-semibold text-gray-600">
-        Beginner
-       </div>
-       <div class="text-xs text-gray-500">
-        &lt; 1400
-       </div>
-      </div>
-      <div class="text-center p-3 bg-yellow-50 rounded-lg border-2" style="border-color: #8B4513">
-       <div class="text-2xl mb-2">
-        ♟
-       </div>
-       <div class="font-semibold" style="color: #8B4513">
-        Pawn
-       </div>
-       <div class="text-xs text-gray-500">
-        1400-1500
-       </div>
-      </div>
-      <div class="text-center p-3 bg-gray-50 rounded-lg border-2" style="border-color: #4A5568">
-       <div class="text-2xl mb-2">
-        ♞
-       </div>
-       <div class="font-semibold" style="color: #4A5568">
-        Knight
-       </div>
-       <div class="text-xs text-gray-500">
-        1501-1600
-       </div>
-      </div>
-      <div class="text-center p-3 bg-purple-50 rounded-lg border-2" style="border-color: #805AD5">
-       <div class="text-2xl mb-2">
-        ♝
-       </div>
-       <div class="font-semibold" style="color: #805AD5">
-        Bishop
-       </div>
-       <div class="text-xs text-gray-500">
-        1601-1700
-       </div>
-      </div>
-      <div class="text-center p-3 bg-green-50 rounded-lg border-2" style="border-color: #38A169">
-       <div class="text-2xl mb-2">
-        ♜
-       </div>
-       <div class="font-semibold" style="color: #38A169">
-        Rook
-       </div>
-       <div class="text-xs text-gray-500">
-        1701-1800
-       </div>
-      </div>
-      <div class="text-center p-3 bg-yellow-50 rounded-lg border-2" style="border-color: #D69E2E">
-       <div class="text-2xl mb-2">
-        ♛
-       </div>
-       <div class="font-semibold" style="color: #D69E2E">
-        Queen
-       </div>
-       <div class="text-xs text-gray-500">
-        1801-1900
-       </div>
-      </div>
-      <div class="text-center p-3 bg-red-50 rounded-lg border-2" style="border-color: #E53E3E">
-       <div class="text-2xl mb-2">
-        ♚
-       </div>
-       <div class="font-semibold" style="color: #E53E3E">
-        King
-       </div>
-       <div class="text-xs text-gray-500">
-        1901-2000
-       </div>
-      </div>
-      <div class="text-center p-3 bg-purple-50 rounded-lg border-2" style="border-color: #9F7AEA">
-       <div class="text-2xl mb-2">
-        👑
-       </div>
-       <div class="font-semibold" style="color: #9F7AEA">
-        Grandmaster
-       </div>
-       <div class="text-xs text-gray-500">
-        &gt; 2000
-       </div>
-      </div>
-     </div>
-     <div class="mt-4 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg"><strong>Note:</strong> Each tier has 5 sub-levels with 20-point ranges (progression from 5 to 1): 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2 text-xs">
-       <div>
-        <strong>Pawn:</strong> 5 (1400-1420), 4 (1421-1440), 3 (1441-1460), 2 (1461-1480), 1 (1481-1500)
-       </div>
-       <div>
-        <strong>Knight:</strong> 5 (1501-1520), 4 (1521-1540), 3 (1541-1560), 2 (1561-1580), 1 (1581-1600)
-       </div>
-       <div>
-        <strong>Bishop:</strong> 5 (1601-1620), 4 (1621-1640), 3 (1641-1660), 2 (1661-1680), 1 (1681-1700)
-       </div>
-       <div>
-        <strong>Rook:</strong> 5 (1701-1720), 4 (1721-1740), 3 (1741-1760), 2 (1761-1780), 1 (1781-1800)
-       </div>
-       <div>
-        <strong>Queen:</strong> 5 (1801-1820), 4 (1821-1840), 3 (1841-1860), 2 (1861-1880), 1 (1881-1900)
-       </div>
-       <div>
-        <strong>King:</strong> 5 (1901-1920), 4 (1921-1940), 3 (1941-1960), 2 (1961-1980), 1 (1981-2000)
-       </div>
-      </div>
-      <div class="mt-2">
-       <strong>Starting Point:</strong> All students begin at 1400 rating (Pawn 5)
-      </div>
-     </div>
-    </div><!-- Students List -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-semibold text-gray-800">Registered Students</h2>
-      <div class="flex items-center space-x-3"><label for="tier-filter" class="text-sm font-medium text-gray-700">Filter by Tier:</label> <select id="tier-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"> <option value="all">All Tiers</option> <option value="Grandmaster">👑 Grandmaster</option> <option value="King">♚ King</option> <option value="Queen">♛ Queen</option> <option value="Rook">♜ Rook</option> <option value="Bishop">♝ Bishop</option> <option value="Knight">♞ Knight</option> <option value="Pawn">♟ Pawn</option> <option value="Beginner">🔰 Beginner</option> </select>
-      </div>
-     </div>
-     <div id="students-list" class="space-y-4">
-      <div class="text-center text-gray-500 py-8">
-       No students registered yet. Add your first student above.
-      </div>
-     </div>
-    </div>
-   </div><!-- Submit Record View -->
-   <div id="submit-view" class="hidden">
-    <div class="bg-white rounded-lg shadow-md p-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Hantar Rekod Kejohanan / Submit Tournament Record</h2><!-- Tournament Level Points -->
-     <div class="bg-blue-50 rounded-lg p-4 mb-6">
-      <h3 class="font-semibold text-gray-800 mb-3">Tournament Level Base Points</h3>
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
-       <div class="text-center">
-        <div class="font-medium text-blue-600">
-         Sekolah
-        </div>
-        <div class="text-gray-600">
-         5 points
-        </div>
-       </div>
-       <div class="text-center">
-        <div class="font-medium text-green-600">
-         Daerah
-        </div>
-        <div class="text-gray-600">
-         8 points
-        </div>
-       </div>
-       <div class="text-center">
-        <div class="font-medium text-yellow-600">
-         Negeri
-        </div>
-        <div class="text-gray-600">
-         10 points
-        </div>
-       </div>
-       <div class="text-center">
-        <div class="font-medium text-orange-600">
-         Kebangsaan
-        </div>
-        <div class="text-gray-600">
-         12 points
-        </div>
-       </div>
-       <div class="text-center">
-        <div class="font-medium text-red-600">
-         Antarabangsa
-        </div>
-        <div class="text-gray-600">
-         15 points
-        </div>
-       </div>
-      </div>
-     </div><!-- Performance Bonus Points -->
-     <div class="bg-green-50 rounded-lg p-4 mb-6">
-      <h3 class="font-semibold text-gray-800 mb-3">Performance Bonus Points</h3>
-      <div class="overflow-x-auto">
-       <table class="w-full text-xs">
-        <thead>
-         <tr class="border-b">
-          <th class="text-left py-2">Level</th>
-          <th class="text-center py-2">Top 20%/Special</th>
-          <th class="text-center py-2">Top 30%</th>
-          <th class="text-center py-2">Top 40%</th>
-          <th class="text-center py-2">Top 50%</th>
-          <th class="text-center py-2">Top 60%</th>
-          <th class="text-center py-2">Top 70%</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="border-b">
-          <td class="py-1 font-medium text-blue-600">Sekolah</td>
-          <td class="text-center text-green-600">+3</td>
-          <td class="text-center text-green-600">+2</td>
-          <td class="text-center text-green-600">+1</td>
-          <td class="text-center text-gray-600">0</td>
-          <td class="text-center text-red-600">-2</td>
-          <td class="text-center text-red-600">-4</td>
-         </tr>
-         <tr class="border-b">
-          <td class="py-1 font-medium text-green-600">Daerah</td>
-          <td class="text-center text-green-600">+4</td>
-          <td class="text-center text-green-600">+3</td>
-          <td class="text-center text-green-600">+2</td>
-          <td class="text-center text-gray-600">0</td>
-          <td class="text-center text-red-600">-2</td>
-          <td class="text-center text-red-600">-4</td>
-         </tr>
-         <tr class="border-b">
-          <td class="py-1 font-medium text-yellow-600">Negeri</td>
-          <td class="text-center text-green-600">+5</td>
-          <td class="text-center text-green-600">+4</td>
-          <td class="text-center text-green-600">+3</td>
-          <td class="text-center text-gray-600">0</td>
-          <td class="text-center text-red-600">-2</td>
-          <td class="text-center text-red-600">-4</td>
-         </tr>
-         <tr class="border-b">
-          <td class="py-1 font-medium text-orange-600">Kebangsaan</td>
-          <td class="text-center text-green-600">+6</td>
-          <td class="text-center text-green-600">+5</td>
-          <td class="text-center text-green-600">+4</td>
-          <td class="text-center text-gray-600">0</td>
-          <td class="text-center text-red-600">-3</td>
-          <td class="text-center text-red-600">-5</td>
-         </tr>
-         <tr>
-          <td class="py-1 font-medium text-red-600">Antarabangsa</td>
-          <td class="text-center text-green-600">+7</td>
-          <td class="text-center text-green-600">+6</td>
-          <td class="text-center text-green-600">+5</td>
-          <td class="text-center text-gray-600">0</td>
-          <td class="text-center text-red-600">-3</td>
-          <td class="text-center text-red-600">-5</td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-      <p class="text-xs text-gray-600 mt-2">*Special prizes and Top 10 finishers (rank 1-10) automatically count as Top 20% performance</p>
-     </div>
-     <form id="record-form" class="space-y-4"><!-- KC ID Input -->
-      <div><label for="kc-id-input" class="block text-sm font-medium text-gray-700 mb-2">KC ID (Kamus Catur ID)</label> <input type="text" id="kc-id-input" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="Masukkan KC ID / Enter KC ID" required>
-       <p class="text-xs text-gray-500 mt-1">Masukkan KC ID yang diterima semasa pendaftaran / Enter the KC ID received during registration</p>
-       <div id="student-verification" class="hidden mt-2 p-2 rounded-md">
-        <div id="student-found" class="hidden text-green-700 bg-green-50 p-2 rounded">
-         ✓ Pelajar dijumpai: <span id="verified-student-name" class="font-semibold"></span>
-        </div>
-        <div id="student-not-found" class="hidden text-red-700 bg-red-50 p-2 rounded">
-         ✗ KC ID tidak dijumpai. Sila semak KC ID anda.
-        </div>
-       </div>
-      </div><!-- IC Verification (shown only when student is found) -->
-      <div id="ic-verification-section" class="hidden"><label for="ic-last-4" class="block text-sm font-medium text-gray-700 mb-2"> Pengesahan Identiti / Identity Verification </label> <input type="text" id="ic-last-4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="Masukkan 4 digit terakhir IC / Enter last 4 digits of IC" maxlength="4" pattern="[0-9]{4}">
-       <p class="text-xs text-gray-500 mt-1">Untuk keselamatan, sila masukkan 4 digit terakhir no kad pengenalan anda <br>
-        For security, please enter the last 4 digits of your IC number</p>
-       <div id="ic-verification-result" class="hidden mt-2 p-2 rounded-md">
-        <div id="ic-verified" class="hidden text-green-700 bg-green-50 p-2 rounded">
-         ✓ Pengesahan berjaya / Verification successful
-        </div>
-        <div id="ic-failed" class="hidden text-red-700 bg-red-50 p-2 rounded">
-         ✗ 4 digit terakhir IC tidak sepadan. Sila cuba lagi / Last 4 digits of IC do not match. Please try again.
-        </div>
-       </div>
-      </div><!-- Tournament Basic Info -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <div><label for="tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Kejohanan / Tournament Name</label> <input type="text" id="tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" style="text-transform: uppercase;" required>
-       </div>
-       <div><label for="tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tarikh Kejohanan / Tournament Date</label> <input type="date" id="tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-       </div>
-      </div><!-- Tournament Details -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-       <div><label for="time-control" class="block text-sm font-medium text-gray-700 mb-2">Kawalan Masa / Time Control</label> <select id="time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="">Pilih kawalan masa / Select time control</option> <option value="Blitz">Blitz (≤ 10 minit / minutes)</option> <option value="Rapid">Rapid (10-60 minit / minutes)</option> <option value="Classical">Classical (&gt; 60 minit / minutes)</option> </select>
-       </div>
-       <div><label for="tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Kategori Kejohanan / Tournament Category</label> <select id="tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="">Pilih kategori / Select category</option> <option value="U6">Bawah 6 / Under 6 (U6)</option> <option value="U7">Bawah 7 / Under 7 (U7)</option> <option value="U8">Bawah 8 / Under 8 (U8)</option> <option value="U9">Bawah 9 / Under 9 (U9)</option> <option value="U10">Bawah 10 / Under 10 (U10)</option> <option value="U11">Bawah 11 / Under 11 (U11)</option> <option value="U12">Bawah 12 / Under 12 (U12)</option> <option value="U13">Bawah 13 / Under 13 (U13)</option> <option value="U14">Bawah 14 / Under 14 (U14)</option> <option value="U15">Bawah 15 / Under 15 (U15)</option> <option value="U16">Bawah 16 / Under 16 (U16)</option> <option value="U17">Bawah 17 / Under 17 (U17)</option> <option value="U18">Bawah 18 / Under 18 (U18)</option> <option value="U19">Bawah 19 / Under 19 (U19)</option> <option value="U20">Bawah 20 / Under 20 (U20)</option> <option value="Team">Pasukan / Team</option> <option value="Women">Wanita / Women</option> <option value="Challenger">Pencabar / Challenger</option> <option value="Open">Terbuka / Open</option> </select>
-       </div>
-       <div><label for="tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tahap Kejohanan / Tournament Level</label> <select id="tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="">Pilih tahap / Select level</option> <option value="Sekolah">Sekolah / School (5 mata / points)</option> <option value="Daerah">Daerah / District (8 mata / points)</option> <option value="Negeri">Negeri / State (10 mata / points)</option> <option value="Kebangsaan">Kebangsaan / National (12 mata / points)</option> <option value="Antarabangsa">Antarabangsa / International (15 mata / points)</option> </select>
-       </div>
-      </div><!-- Performance Calculation Section -->
-      <div class="bg-gray-50 rounded-lg p-4 space-y-4">
-       <h3 class="font-semibold text-gray-800">Butiran Prestasi / Performance Details</h3>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label for="final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Kedudukan Akhir / Final Ranking</label> <input type="number" id="final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: 5 / e.g., 5" required>
-        </div>
-        <div><label for="total-players" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pemain dalam Kategori / Total Players in Category</label> <input type="number" id="total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: 50 / e.g., 50" required>
-        </div>
-       </div><!-- Special Prize Section -->
-       <div class="border-t pt-4">
-        <div class="flex items-center mb-3"><input type="checkbox" id="special-prize" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"> <label for="special-prize" class="ml-2 block text-sm font-medium text-gray-700"> Menerima Hadiah Khas / Received Special Prize (automatik dikira sebagai 20% teratas / automatically counts as Top 20%) </label>
-        </div>
-        <div id="special-prize-details" class="hidden"><label for="prize-description" class="block text-sm font-medium text-gray-700 mb-2">Keterangan Hadiah Khas / Special Prize Description</label> <input type="text" id="prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="cth: Pemain Wanita Terbaik / e.g., Best Female Player">
-        </div>
-       </div><!-- Performance Calculation Display -->
-       <div id="performance-calculation" class="bg-white rounded-lg p-3 border hidden">
-        <h4 class="font-medium text-gray-800 mb-2">Calculated Performance</h4>
-        <div class="text-sm space-y-1">
-         <div>
-          Ranking: <span id="calc-ranking">-</span> out of <span id="calc-total">-</span> players
-         </div>
-         <div>
-          Percentile: <span id="calc-percentile">-</span>
-         </div>
-         <div>
-          Base Points: <span id="calc-base">-</span>
-         </div>
-         <div>
-          Performance Bonus: <span id="calc-bonus">-</span>
-         </div>
-         <div class="font-semibold border-t pt-1">
-          Total Points: <span id="calc-total-points">-</span>
-         </div>
-        </div>
-       </div>
-      </div>
-      <div><label for="additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Nota Tambahan (Pilihan) / Additional Notes (Optional)</label> <textarea id="additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Sebarang maklumat tambahan tentang prestasi / Any additional information about the performance"></textarea>
-      </div><button type="submit" id="submit-record-btn" class="w-full bg-orange-600 text-white px-4 py-3 rounded-md hover:bg-orange-700 transition-colors font-medium"> Hantar untuk Kelulusan / Submit for Approval </button>
-     </form>
-    </div>
-   </div><!-- Admin View -->
-   <div id="admin-view" class="hidden"><!-- Admin Login Section -->
-    <div id="admin-login" class="bg-white rounded-lg shadow-md p-6 mb-6">
-     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Admin Access Required</h2>
-     <div class="max-w-md"><label for="admin-password" class="block text-sm font-medium text-gray-700 mb-2">Admin Password</label>
-      <div class="flex space-x-3"><input type="password" id="admin-password" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Enter admin password"> <button id="admin-login-btn" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"> Login </button>
-      </div>
-      <p class="text-xs text-gray-500 mt-1">Default password: kamuscatur</p>
-     </div>
-    </div><!-- Admin Panel (Hidden until login) -->
-    <div id="admin-panel" class="hidden space-y-6"><!-- Pending Approvals -->
-     <div class="bg-white rounded-lg shadow-md p-6">
-      <div class="flex justify-between items-center mb-4">
-       <h2 class="text-2xl font-semibold text-gray-800">Pending Approval</h2><button id="admin-logout-btn" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"> Logout </button>
-      </div>
-      <div id="pending-list" class="space-y-4">
-       <div class="text-center text-gray-500 py-8">
-        No pending submissions.
-       </div>
-      </div>
-     </div>
-    </div><!-- Edit Record Modal -->
-    <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-     <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90%] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-       <h3 class="text-xl font-semibold text-gray-800">Edit Tournament Record</h3><button id="close-edit-modal" class="text-gray-500 hover:text-gray-700">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg></button>
-      </div>
-      <form id="edit-record-form" class="space-y-4"><input type="hidden" id="edit-record-id"> <!-- Tournament Basic Info -->
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label for="edit-tournament-name" class="block text-sm font-medium text-gray-700 mb-2">Tournament Name</label> <input type="text" id="edit-tournament-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-        </div>
-        <div><label for="edit-tournament-date" class="block text-sm font-medium text-gray-700 mb-2">Tournament Date</label> <input type="date" id="edit-tournament-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-        </div>
-       </div><!-- Tournament Details -->
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div><label for="edit-time-control" class="block text-sm font-medium text-gray-700 mb-2">Time Control</label> <select id="edit-time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="Blitz">Blitz (≤ 10 minutes)</option> <option value="Rapid">Rapid (10-60 minutes)</option> <option value="Classical">Classical (&gt; 60 minutes)</option> </select>
-        </div>
-        <div><label for="edit-tournament-category" class="block text-sm font-medium text-gray-700 mb-2">Tournament Category</label> <select id="edit-tournament-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="U6">Under 6 (U6)</option> <option value="U7">Under 7 (U7)</option> <option value="U8">Under 8 (U8)</option> <option value="U9">Under 9 (U9)</option> <option value="U10">Under 10 (U10)</option> <option value="U11">Under 11 (U11)</option> <option value="U12">Under 12 (U12)</option> <option value="U13">Under 13 (U13)</option> <option value="U14">Under 14 (U14)</option> <option value="U15">Under 15 (U15)</option> <option value="U16">Under 16 (U16)</option> <option value="U17">Under 17 (U17)</option> <option value="U18">Under 18 (U18)</option> <option value="U19">Under 19 (U19)</option> <option value="U20">Under 20 (U20)</option> <option value="Team">Team</option> <option value="Women">Women</option> <option value="Challenger">Challenger</option> <option value="Open">Open</option> </select>
-        </div>
-        <div><label for="edit-tournament-level" class="block text-sm font-medium text-gray-700 mb-2">Tournament Level</label> <select id="edit-tournament-level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required> <option value="Sekolah">Sekolah / School (5 points)</option> <option value="Daerah">Daerah / District (8 points)</option> <option value="Negeri">Negeri / State (10 points)</option> <option value="Kebangsaan">Kebangsaan / National (12 points)</option> <option value="Antarabangsa">Antarabangsa / International (15 points)</option> </select>
-        </div>
-       </div><!-- Performance Details -->
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label for="edit-final-ranking" class="block text-sm font-medium text-gray-700 mb-2">Final Ranking</label> <input type="number" id="edit-final-ranking" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-        </div>
-        <div><label for="edit-total-players" class="block text-sm font-medium text-gray-700 mb-2">Total Players</label> <input type="number" id="edit-total-players" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-        </div>
-       </div><!-- Special Prize -->
-       <div class="flex items-center mb-3"><input type="checkbox" id="edit-special-prize" class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"> <label for="edit-special-prize" class="ml-2 block text-sm font-medium text-gray-700"> Received Special Prize </label>
-       </div>
-       <div id="edit-special-prize-details" class="hidden"><label for="edit-prize-description" class="block text-sm font-medium text-gray-700 mb-2">Special Prize Description</label> <input type="text" id="edit-prize-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-       </div><!-- Additional Notes -->
-       <div><label for="edit-additional-notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label> <textarea id="edit-additional-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
-       </div><!-- Performance Calculation Display -->
-       <div id="edit-performance-calculation" class="bg-gray-50 rounded-lg p-3 border">
-        <h4 class="font-medium text-gray-800 mb-2">Updated Performance Calculation</h4>
-        <div class="text-sm space-y-1">
-         <div>
-          Ranking: <span id="edit-calc-ranking">-</span> out of <span id="edit-calc-total">-</span> players
-         </div>
-         <div>
-          Percentile: <span id="edit-calc-percentile">-</span>
-         </div>
-         <div>
-          Base Points: <span id="edit-calc-base">-</span>
-         </div>
-         <div>
-          Performance Bonus: <span id="edit-calc-bonus">-</span>
-         </div>
-         <div class="font-semibold border-t pt-1">
-          Total Points: <span id="edit-calc-total-points">-</span>
-         </div>
-        </div>
-       </div>
-       <div class="flex space-x-3 pt-4"><button type="submit" class="flex-1 bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors"> Save Changes </button> <button type="button" id="cancel-edit" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"> Cancel </button>
-       </div>
-      </form>
-     </div>
-    </div>
-   </div><!-- Dashboard View -->
-   <div id="dashboard-view" class="hidden">
-    <div class="space-y-6"><!-- Statistics Overview -->
-     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-white rounded-lg shadow-md p-6">
-       <div class="flex items-center">
-        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-         </svg>
-        </div>
-        <div class="ml-4">
-         <p class="text-sm font-medium text-gray-600">Total Students</p>
-         <p id="total-students" class="text-2xl font-semibold text-gray-900">0</p>
-        </div>
-       </div>
-      </div>
-      <div class="bg-white rounded-lg shadow-md p-6">
-       <div class="flex items-center">
-        <div class="p-3 rounded-full bg-green-100 text-green-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-         </svg>
-        </div>
-        <div class="ml-4">
-         <p class="text-sm font-medium text-gray-600">Average Rating</p>
-         <p id="average-rating" class="text-2xl font-semibold text-gray-900">0</p>
-        </div>
-       </div>
-      </div>
-      <div class="bg-white rounded-lg shadow-md p-6">
-       <div class="flex items-center">
-        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-         </svg>
-        </div>
-        <div class="ml-4">
-         <p class="text-sm font-medium text-gray-600">Pending Records</p>
-         <p id="pending-count" class="text-2xl font-semibold text-gray-900">0</p>
-        </div>
-       </div>
-      </div>
-      <div class="bg-white rounded-lg shadow-md p-6">
-       <div class="flex items-center">
-        <div class="p-3 rounded-full bg-purple-100 text-purple-600">
-         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-         </svg>
-        </div>
-        <div class="ml-4">
-         <p class="text-sm font-medium text-gray-600">Highest Rating</p>
-         <p id="highest-rating" class="text-2xl font-semibold text-gray-900">0</p>
-        </div>
-       </div>
-      </div>
-     </div><!-- Tier Distribution Chart -->
-     <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Student Distribution by Tier</h2>
-      <div id="tier-distribution" class="space-y-3"><!-- Tier bars will be populated by JavaScript -->
-      </div>
-     </div><!-- Recent Activity -->
-     <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recent Registrations</h2>
-      <div id="recent-activity" class="space-y-3"><!-- Recent activity will be populated by JavaScript -->
-      </div>
-     </div><!-- Top Performers -->
-     <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Top 10 Students</h2>
-      <div id="top-performers" class="space-y-2"><!-- Top performers will be populated by JavaScript -->
-      </div>
-     </div>
-    </div>
-   </div><!-- Contact Info -->
-   <div class="mt-8 text-center">
-    <p id="contact-text" class="text-gray-600">For questions, contact your chess academy administrator</p>
-   </div>
-  </div>
-  <script>
+    <script>
         // ============================================
         // CONFIGURATION
         // ============================================
-        
+
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxE2guZ6zCcWXYnGeJv7XfQB8CyTehYncheyp4wM9u2GkphJczCiaMAuEOESxVbvpfv/exec';
-        
+
         const defaultConfig = {
             academy_name: "Chess Academy Rating System",
             welcome_message: "Track your child's chess tournament progress and rating",
@@ -640,93 +665,216 @@
                 range: [1400, 1500],
                 color: '#8B4513',
                 icon: '♟',
-                subTiers: [
-                    { name: 'Pawn 5', min: 1400, max: 1420 },
-                    { name: 'Pawn 4', min: 1421, max: 1440 },
-                    { name: 'Pawn 3', min: 1441, max: 1460 },
-                    { name: 'Pawn 2', min: 1461, max: 1480 },
-                    { name: 'Pawn 1', min: 1481, max: 1500 }
-                ]
+                subTiers: [{
+                    name: 'Pawn 5',
+                    min: 1400,
+                    max: 1420
+                }, {
+                    name: 'Pawn 4',
+                    min: 1421,
+                    max: 1440
+                }, {
+                    name: 'Pawn 3',
+                    min: 1441,
+                    max: 1460
+                }, {
+                    name: 'Pawn 2',
+                    min: 1461,
+                    max: 1480
+                }, {
+                    name: 'Pawn 1',
+                    min: 1481,
+                    max: 1500
+                }]
             },
             'Knight': {
                 range: [1501, 1600],
                 color: '#4A5568',
                 icon: '♞',
-                subTiers: [
-                    { name: 'Knight 5', min: 1501, max: 1520 },
-                    { name: 'Knight 4', min: 1521, max: 1540 },
-                    { name: 'Knight 3', min: 1541, max: 1560 },
-                    { name: 'Knight 2', min: 1561, max: 1580 },
-                    { name: 'Knight 1', min: 1581, max: 1600 }
-                ]
+                subTiers: [{
+                    name: 'Knight 5',
+                    min: 1501,
+                    max: 1520
+                }, {
+                    name: 'Knight 4',
+                    min: 1521,
+                    max: 1540
+                }, {
+                    name: 'Knight 3',
+                    min: 1541,
+                    max: 1560
+                }, {
+                    name: 'Knight 2',
+                    min: 1561,
+                    max: 1580
+                }, {
+                    name: 'Knight 1',
+                    min: 1581,
+                    max: 1600
+                }]
             },
             'Bishop': {
                 range: [1601, 1700],
                 color: '#805AD5',
                 icon: '♝',
-                subTiers: [
-                    { name: 'Bishop 5', min: 1601, max: 1620 },
-                    { name: 'Bishop 4', min: 1621, max: 1640 },
-                    { name: 'Bishop 3', min: 1641, max: 1660 },
-                    { name: 'Bishop 2', min: 1661, max: 1680 },
-                    { name: 'Bishop 1', min: 1681, max: 1700 }
-                ]
+                subTiers: [{
+                    name: 'Bishop 5',
+                    min: 1601,
+                    max: 1620
+                }, {
+                    name: 'Bishop 4',
+                    min: 1621,
+                    max: 1640
+                }, {
+                    name: 'Bishop 3',
+                    min: 1641,
+                    max: 1660
+                }, {
+                    name: 'Bishop 2',
+                    min: 1661,
+                    max: 1680
+                }, {
+                    name: 'Bishop 1',
+                    min: 1681,
+                    max: 1700
+                }]
             },
             'Rook': {
                 range: [1701, 1800],
                 color: '#38A169',
                 icon: '♜',
-                subTiers: [
-                    { name: 'Rook 5', min: 1701, max: 1720 },
-                    { name: 'Rook 4', min: 1721, max: 1740 },
-                    { name: 'Rook 3', min: 1741, max: 1760 },
-                    { name: 'Rook 2', min: 1761, max: 1780 },
-                    { name: 'Rook 1', min: 1781, max: 1800 }
-                ]
+                subTiers: [{
+                    name: 'Rook 5',
+                    min: 1701,
+                    max: 1720
+                }, {
+                    name: 'Rook 4',
+                    min: 1721,
+                    max: 1740
+                }, {
+                    name: 'Rook 3',
+                    min: 1741,
+                    max: 1760
+                }, {
+                    name: 'Rook 2',
+                    min: 1761,
+                    max: 1780
+                }, {
+                    name: 'Rook 1',
+                    min: 1781,
+                    max: 1800
+                }]
             },
             'Queen': {
                 range: [1801, 1900],
                 color: '#D69E2E',
                 icon: '♛',
-                subTiers: [
-                    { name: 'Queen 5', min: 1801, max: 1820 },
-                    { name: 'Queen 4', min: 1821, max: 1840 },
-                    { name: 'Queen 3', min: 1841, max: 1860 },
-                    { name: 'Queen 2', min: 1861, max: 1880 },
-                    { name: 'Queen 1', min: 1881, max: 1900 }
-                ]
+                subTiers: [{
+                    name: 'Queen 5',
+                    min: 1801,
+                    max: 1820
+                }, {
+                    name: 'Queen 4',
+                    min: 1821,
+                    max: 1840
+                }, {
+                    name: 'Queen 3',
+                    min: 1841,
+                    max: 1860
+                }, {
+                    name: 'Queen 2',
+                    min: 1861,
+                    max: 1880
+                }, {
+                    name: 'Queen 1',
+                    min: 1881,
+                    max: 1900
+                }]
             },
             'King': {
                 range: [1901, 2000],
                 color: '#E53E3E',
                 icon: '♚',
-                subTiers: [
-                    { name: 'King 5', min: 1901, max: 1920 },
-                    { name: 'King 4', min: 1921, max: 1940 },
-                    { name: 'King 3', min: 1941, max: 1960 },
-                    { name: 'King 2', min: 1961, max: 1980 },
-                    { name: 'King 1', min: 1981, max: 2000 }
-                ]
+                subTiers: [{
+                    name: 'King 5',
+                    min: 1901,
+                    max: 1920
+                }, {
+                    name: 'King 4',
+                    min: 1921,
+                    max: 1940
+                }, {
+                    name: 'King 3',
+                    min: 1941,
+                    max: 1960
+                }, {
+                    name: 'King 2',
+                    min: 1961,
+                    max: 1980
+                }, {
+                    name: 'King 1',
+                    min: 1981,
+                    max: 2000
+                }]
             }
         };
 
         // Malaysian state codes for IC number
         const stateCodes = {
-            '01': 'Johor', '21': 'Johor', '22': 'Johor', '23': 'Johor', '24': 'Johor',
-            '02': 'Kedah', '25': 'Kedah', '26': 'Kedah', '27': 'Kedah',
-            '03': 'Kelantan', '28': 'Kelantan', '29': 'Kelantan',
-            '04': 'Melaka', '30': 'Melaka',
-            '05': 'Negeri Sembilan', '31': 'Negeri Sembilan', '59': 'Negeri Sembilan',
-            '06': 'Pahang', '32': 'Pahang', '33': 'Pahang',
-            '07': 'Pulau Pinang', '34': 'Pulau Pinang', '35': 'Pulau Pinang',
-            '08': 'Perak', '36': 'Perak', '37': 'Perak', '38': 'Perak', '39': 'Perak',
-            '09': 'Perlis', '40': 'Perlis',
-            '10': 'Selangor', '41': 'Selangor', '42': 'Selangor', '43': 'Selangor', '44': 'Selangor',
-            '11': 'Terengganu', '45': 'Terengganu', '46': 'Terengganu',
-            '12': 'Sabah', '47': 'Sabah', '48': 'Sabah', '49': 'Sabah',
-            '13': 'Sarawak', '50': 'Sarawak', '51': 'Sarawak', '52': 'Sarawak', '53': 'Sarawak',
-            '14': 'Wilayah Persekutuan Kuala Lumpur', '54': 'Wilayah Persekutuan Kuala Lumpur', '55': 'Wilayah Persekutuan Kuala Lumpur', '56': 'Wilayah Persekutuan Kuala Lumpur', '57': 'Wilayah Persekutuan Kuala Lumpur',
-            '15': 'Wilayah Persekutuan Labuan', '58': 'Wilayah Persekutuan Labuan',
+            '01': 'Johor',
+            '21': 'Johor',
+            '22': 'Johor',
+            '23': 'Johor',
+            '24': 'Johor',
+            '02': 'Kedah',
+            '25': 'Kedah',
+            '26': 'Kedah',
+            '27': 'Kedah',
+            '03': 'Kelantan',
+            '28': 'Kelantan',
+            '29': 'Kelantan',
+            '04': 'Melaka',
+            '30': 'Melaka',
+            '05': 'Negeri Sembilan',
+            '31': 'Negeri Sembilan',
+            '59': 'Negeri Sembilan',
+            '06': 'Pahang',
+            '32': 'Pahang',
+            '33': 'Pahang',
+            '07': 'Pulau Pinang',
+            '34': 'Pulau Pinang',
+            '35': 'Pulau Pinang',
+            '08': 'Perak',
+            '36': 'Perak',
+            '37': 'Perak',
+            '38': 'Perak',
+            '39': 'Perak',
+            '09': 'Perlis',
+            '40': 'Perlis',
+            '10': 'Selangor',
+            '41': 'Selangor',
+            '42': 'Selangor',
+            '43': 'Selangor',
+            '44': 'Selangor',
+            '11': 'Terengganu',
+            '45': 'Terengganu',
+            '46': 'Terengganu',
+            '12': 'Sabah',
+            '47': 'Sabah',
+            '48': 'Sabah',
+            '49': 'Sabah',
+            '13': 'Sarawak',
+            '50': 'Sarawak',
+            '51': 'Sarawak',
+            '52': 'Sarawak',
+            '53': 'Sarawak',
+            '14': 'Wilayah Persekutuan Kuala Lumpur',
+            '54': 'Wilayah Persekutuan Kuala Lumpur',
+            '55': 'Wilayah Persekutuan Kuala Lumpur',
+            '56': 'Wilayah Persekutuan Kuala Lumpur',
+            '57': 'Wilayah Persekutuan Kuala Lumpur',
+            '15': 'Wilayah Persekutuan Labuan',
+            '58': 'Wilayah Persekutuan Labuan',
             '16': 'Wilayah Persekutuan Putrajaya'
         };
 
@@ -746,7 +894,6 @@
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=${action}`);
                 const result = await response.json();
-                
                 if (result.success) {
                     return result.data;
                 } else {
@@ -764,9 +911,7 @@
                     method: 'POST',
                     body: JSON.stringify(data)
                 });
-                
                 const result = await response.json();
-                
                 if (result.success) {
                     return result.data;
                 } else {
@@ -783,7 +928,6 @@
                 students = await fetchFromGoogleSheets('getStudents');
                 pendingRecords = await fetchFromGoogleSheets('getPendingRecords');
                 approvedRecords = await fetchFromGoogleSheets('getApprovedRecords');
-                
                 updateStudentsList();
                 updatePendingList();
                 if (currentView === 'dashboard') {
@@ -803,7 +947,6 @@
             const academyTitle = document.getElementById('academy-title');
             const welcomeText = document.getElementById('welcome-text');
             const contactText = document.getElementById('contact-text');
-            
             if (academyTitle) academyTitle.textContent = config.academy_name || defaultConfig.academy_name;
             if (welcomeText) welcomeText.textContent = config.welcome_message || defaultConfig.welcome_message;
             if (contactText) contactText.textContent = config.contact_info || defaultConfig.contact_info;
@@ -811,17 +954,17 @@
 
         function mapToCapabilities(config) {
             return {
-                recolorables: [
-                    {
-                        get: () => config.primary_color || "#ea580c",
-                        set: (value) => {
-                            config.primary_color = value;
-                            if (window.elementSdk) {
-                                window.elementSdk.setConfig({ primary_color: value });
-                            }
+                recolorables: [{
+                    get: () => config.primary_color || "#ea580c",
+                    set: (value) => {
+                        config.primary_color = value;
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({
+                                primary_color: value
+                            });
                         }
                     }
-                ],
+                }],
                 borderables: [],
                 fontEditable: undefined,
                 fontSizeable: undefined
@@ -853,10 +996,8 @@
                 }
 
                 setupEventListeners();
-                
                 // Load data automatically in the background
                 loadAllData();
-                
             } catch (error) {
                 console.error("Failed to initialize app:", error);
                 showMessage('Failed to initialize application. Please refresh the page.', 'error');
@@ -879,22 +1020,18 @@
 
             // Record form
             document.getElementById('record-form').addEventListener('submit', handleRecordSubmit);
-            
             // KC ID verification - use debounced version
             let kcIdTimeout;
             document.getElementById('kc-id-input').addEventListener('input', (e) => {
                 clearTimeout(kcIdTimeout);
                 kcIdTimeout = setTimeout(() => verifyKcId(), 500);
             });
-            
             // IC verification
             document.getElementById('ic-last-4').addEventListener('input', verifyIcLast4);
             document.getElementById('copy-kc-id').addEventListener('click', copyKcId);
             document.getElementById('notify-whatsapp').addEventListener('click', sendWhatsAppNotification);
-            
             // IC number parsing and formatting
             document.getElementById('ic-number').addEventListener('input', formatIcNumber);
-            
             // Phone number formatting
             document.getElementById('parent-phone').addEventListener('input', formatPhoneNumber);
 
@@ -915,15 +1052,16 @@
             document.getElementById('close-edit-modal').addEventListener('click', closeEditModal);
             document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
             document.getElementById('edit-record-form').addEventListener('submit', handleEditSubmit);
-            
             // Edit form performance calculation
             document.getElementById('edit-final-ranking').addEventListener('input', calculateEditPerformance);
             document.getElementById('edit-total-players').addEventListener('input', calculateEditPerformance);
             document.getElementById('edit-tournament-level').addEventListener('change', calculateEditPerformance);
             document.getElementById('edit-special-prize').addEventListener('change', toggleEditSpecialPrize);
-            
             // Tier filter
             document.getElementById('tier-filter').addEventListener('change', updateStudentsList);
+            
+            // Month filter
+            document.getElementById('month-filter').addEventListener('change', updateMonthlyStats);
         }
 
         // ============================================
@@ -945,7 +1083,6 @@
                 tab.classList.remove('bg-orange-600', 'text-white');
                 tab.classList.add('text-gray-600', 'hover:text-orange-600');
             });
-            
             document.getElementById(`${view}-tab`).classList.add('bg-orange-600', 'text-white');
             document.getElementById(`${view}-tab`).classList.remove('text-gray-600', 'hover:text-orange-600');
 
@@ -966,11 +1103,9 @@
         function formatIcNumber() {
             const icInput = document.getElementById('ic-number');
             let value = icInput.value.replace(/[-\s]/g, '');
-            
             if (value.length > 12) {
                 value = value.substring(0, 12);
             }
-            
             let formattedValue = value;
             if (value.length > 6) {
                 formattedValue = value.substring(0, 6) + '-' + value.substring(6);
@@ -978,7 +1113,6 @@
             if (value.length > 8) {
                 formattedValue = value.substring(0, 6) + '-' + value.substring(6, 8) + '-' + value.substring(8);
             }
-            
             icInput.value = formattedValue;
             parseIcNumber(value);
         }
@@ -986,16 +1120,13 @@
         function formatPhoneNumber() {
             const phoneInput = document.getElementById('parent-phone');
             let value = phoneInput.value.replace(/[-\s]/g, '');
-            
             if (value.length > 10) {
                 value = value.substring(0, 10);
             }
-            
             let formattedValue = value;
             if (value.length > 2) {
                 formattedValue = value.substring(0, 2) + '-' + value.substring(2);
             }
-            
             phoneInput.value = formattedValue;
         }
 
@@ -1005,37 +1136,28 @@
             const genderSpan = document.getElementById('detected-gender');
             const ageSpan = document.getElementById('detected-age');
             const stateSpan = document.getElementById('detected-state');
-            
             if (icNumber.length < 12) {
                 icDisplay.classList.add('hidden');
                 return;
             }
-            
             const year = icNumber.substring(0, 2);
             const month = icNumber.substring(2, 4);
             const day = icNumber.substring(4, 6);
             const placeCode = icNumber.substring(6, 8);
             const lastDigit = parseInt(icNumber.substring(11, 12));
-            
             const currentYear = new Date().getFullYear();
             const birthYear = parseInt(year) < 30 ? 2000 + parseInt(year) : 1900 + parseInt(year);
-            
             const birthDate = new Date(birthYear, parseInt(month) - 1, parseInt(day));
             const age = Math.floor((new Date() - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
-            
             const gender = lastDigit % 2 === 1 ? 'Lelaki / Male' : 'Perempuan / Female';
             const genderCode = lastDigit % 2 === 1 ? '01' : '02';
-            
             const state = stateCodes[placeCode] || 'Tidak diketahui / Unknown';
-            
             genderSpan.textContent = gender;
             ageSpan.textContent = `${age} tahun / years old`;
             stateSpan.textContent = state;
-            
             icInput.dataset.genderCode = genderCode;
             icInput.dataset.age = age;
             icInput.dataset.state = state;
-            
             icDisplay.classList.remove('hidden');
         }
 
@@ -1045,7 +1167,6 @@
 
         async function handleStudentSubmit(e) {
             e.preventDefault();
-            
             const btn = document.getElementById('add-student-btn');
             const originalText = btn.textContent;
             btn.textContent = 'Registering...';
@@ -1063,7 +1184,6 @@
 
                 const kcId = generateKcId(genderCode);
                 const tierInfo = getTierInfo(1400);
-                
                 const studentData = {
                     student_id: generateId(),
                     student_name: document.getElementById('student-name').value.toUpperCase(),
@@ -1123,7 +1243,6 @@
 
             let percentile;
             let displayPercentile;
-            
             if (hasSpecialPrize) {
                 percentile = 20;
                 displayPercentile = 'Top 20% (Special Prize)';
@@ -1137,7 +1256,6 @@
 
             let bonusPoints = 0;
             const bonusArray = performanceBonus[tournamentLevel];
-            
             if (percentile <= 20) bonusPoints = bonusArray[0];
             else if (percentile <= 30) bonusPoints = bonusArray[1];
             else if (percentile <= 40) bonusPoints = bonusArray[2];
@@ -1162,14 +1280,12 @@
         function toggleSpecialPrize() {
             const checkbox = document.getElementById('special-prize');
             const details = document.getElementById('special-prize-details');
-            
             if (checkbox.checked) {
                 details.classList.remove('hidden');
             } else {
                 details.classList.add('hidden');
                 document.getElementById('prize-description').value = '';
             }
-            
             calculatePerformance();
         }
 
@@ -1179,7 +1295,6 @@
 
         async function handleRecordSubmit(e) {
             e.preventDefault();
-            
             if (!isUserVerified()) {
                 showMessage('Please verify your identity with the correct KC ID and last 4 digits of IC number.', 'error');
                 return;
@@ -1193,7 +1308,6 @@
             try {
                 const kcId = document.getElementById('kc-id-input').value.trim().toUpperCase();
                 const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
-                
                 if (!student) {
                     throw new Error('Student not found');
                 }
@@ -1273,7 +1387,6 @@
         function updateStudentsList() {
             const container = document.getElementById('students-list');
             const selectedTier = document.getElementById('tier-filter').value;
-            
             if (students.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
@@ -1286,12 +1399,10 @@
             // Group students by tier
             const tierOrder = ['Grandmaster', 'King', 'Queen', 'Rook', 'Bishop', 'Knight', 'Pawn', 'Beginner'];
             const studentsByTier = {};
-            
             students.forEach(student => {
                 const rating = student.current_rating || 1400;
                 const tierInfo = getTierInfo(rating);
                 const tierName = tierInfo.mainTier;
-                
                 if (!studentsByTier[tierName]) {
                     studentsByTier[tierName] = [];
                 }
@@ -1314,7 +1425,6 @@
 
             // Build HTML grouped by tier
             let html = '';
-            
             tiersToShow.forEach(tierName => {
                 if (!studentsByTier[tierName] || studentsByTier[tierName].length === 0) {
                     // If a specific tier is selected but has no students, show a message
@@ -1327,11 +1437,9 @@
                     }
                     return;
                 }
-                
                 const tierStudents = studentsByTier[tierName];
                 const firstStudent = tierStudents[0];
                 const tierInfo = getTierInfo(firstStudent.current_rating || 1400);
-                
                 html += `
                     <div class="mb-6">
                         <div class="flex items-center space-x-3 mb-3 pb-2 border-b-2" style="border-color: ${tierInfo.color}">
@@ -1378,8 +1486,8 @@
                                         </div>
                                         
                                         <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="h-2 rounded-full transition-all duration-300" 
-                                                 style="width: ${progress}%; background-color: ${studentTierInfo.color}"></div>
+                                            <div class="h-2 rounded-full transition-all duration-300"
+                                                  style="width: ${progress}%; background-color: ${studentTierInfo.color}"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1404,14 +1512,12 @@
             const notFoundDiv = document.getElementById('student-not-found');
             const studentNameSpan = document.getElementById('verified-student-name');
             const icVerificationSection = document.getElementById('ic-verification-section');
-            
             if (kcId.length === 0) {
                 verificationDiv.classList.add('hidden');
                 icVerificationSection.classList.add('hidden');
                 resetIcVerification();
                 return;
             }
-            
             // Reload students data when KC ID is complete (9 digits)
             if (kcId.length >= 9) {
                 try {
@@ -1420,11 +1526,8 @@
                     console.error('Failed to fetch students:', error);
                 }
             }
-            
             const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
-            
             verificationDiv.classList.remove('hidden');
-            
             if (student) {
                 foundDiv.classList.remove('hidden');
                 notFoundDiv.classList.add('hidden');
@@ -1445,21 +1548,17 @@
             const resultDiv = document.getElementById('ic-verification-result');
             const verifiedDiv = document.getElementById('ic-verified');
             const failedDiv = document.getElementById('ic-failed');
-            
             if (icLast4.length !== 4) {
                 resultDiv.classList.add('hidden');
                 return;
             }
-            
             const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
             if (!student || !student.ic_number) {
                 resultDiv.classList.add('hidden');
                 return;
             }
-            
             const studentIcLast4 = student.ic_number.toString().slice(-4);
             resultDiv.classList.remove('hidden');
-            
             if (icLast4 === studentIcLast4) {
                 verifiedDiv.classList.remove('hidden');
                 failedDiv.classList.add('hidden');
@@ -1479,12 +1578,9 @@
         function isUserVerified() {
             const kcId = document.getElementById('kc-id-input').value.trim().toUpperCase();
             const icLast4 = document.getElementById('ic-last-4').value.trim();
-            
             if (!kcId || icLast4.length !== 4) return false;
-            
             const student = students.find(s => s.kc_id && s.kc_id.toString().trim() === kcId);
             if (!student || !student.ic_number) return false;
-            
             const studentIcLast4 = student.ic_number.toString().slice(-4);
             return icLast4 === studentIcLast4;
         }
@@ -1495,7 +1591,6 @@
         function showKcId(kcId) {
             document.getElementById('generated-kc-id').textContent = kcId;
             document.getElementById('kc-id-display').classList.remove('hidden');
-            
             setTimeout(() => {
                 document.getElementById('kc-id-display').classList.add('hidden');
             }, 30000);
@@ -1520,10 +1615,8 @@
             }
 
             const student = lastRegisteredStudent;
-            
             // Format the message with all required information
             const message = `*PENDAFTARAN KC ID BARU / NEW KC ID REGISTRATION*
-
 *Maklumat Pelajar / Student Information:*
 Nama Pelajar / Student Name: ${student.student_name}
 No Kad Pengenalan / IC Number: ${student.ic_number}
@@ -1538,13 +1631,7 @@ No Telefon / Phone Number: ${student.parent_phone}
 Email: ${student.parent_email}
 
 *Tarikh Pendaftaran / Registration Date:*
-${new Date(student.registration_date).toLocaleString('ms-MY', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-})}
+${new Date(student.registration_date).toLocaleString('ms-MY', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}
 
 Rating Permulaan / Starting Rating: ${student.current_rating}
 Tier: ${student.current_tier} - ${student.current_sub_tier}
@@ -1555,11 +1642,9 @@ Chess Rating System by Kamus Catur`;
 
             // Encode the message for WhatsApp URL
             const encodedMessage = encodeURIComponent(message);
-            
             // Open WhatsApp with the pre-filled message
             const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-            
             showMessage('WhatsApp opened with registration details!', 'success');
         }
 
@@ -1569,7 +1654,6 @@ Chess Rating System by Kamus Catur`;
 
         function updatePendingList() {
             const container = document.getElementById('pending-list');
-            
             if (pendingRecords.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
@@ -1585,7 +1669,6 @@ Chess Rating System by Kamus Catur`;
                 const submissionId = record.submission_id || 'Unknown ID';
                 const submittedBy = record.submitted_by || 'Unknown';
                 const parentContact = record.parent_contact || 'Not provided';
-                
                 return `
                     <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
                         <div class="flex justify-between items-start mb-3">
@@ -1678,7 +1761,6 @@ Chess Rating System by Kamus Catur`;
                     };
                 }
             }
-            
             if (rating < 1400) {
                 return {
                     mainTier: 'Beginner',
@@ -1714,33 +1796,26 @@ Chess Rating System by Kamus Catur`;
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
-        
+
         function generateKcId(genderCode) {
             const now = new Date();
             const year = now.getFullYear().toString().slice(-2);
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            
             const currentYearMonth = year + month;
             const existingStudentsThisMonth = students.filter(s => {
                 if (!s.kc_id) return false;
                 const kcIdStr = s.kc_id.toString();
                 return kcIdStr.startsWith(currentYearMonth + genderCode);
             }).length;
-            
             const sequentialNumber = (existingStudentsThisMonth + 1).toString().padStart(3, '0');
-            
             return `${year}${month}${genderCode}${sequentialNumber}`;
         }
 
         function showMessage(message, type) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `toast fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
-                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-            }`;
+            messageDiv.className = `toast fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${ type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white' }`;
             messageDiv.textContent = message;
-            
             document.body.appendChild(messageDiv);
-            
             setTimeout(() => {
                 messageDiv.remove();
             }, 5000);
@@ -1754,12 +1829,10 @@ Chess Rating System by Kamus Catur`;
             const password = document.getElementById('admin-password').value;
             const loginBtn = document.getElementById('admin-login-btn');
             const originalText = loginBtn.textContent;
-            
             if (password === 'kamuscatur') {
                 isAdminLoggedIn = true;
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
-                
                 updatePendingList();
                 showMessage('Admin login successful!', 'success');
             } else {
@@ -1770,7 +1843,6 @@ Chess Rating System by Kamus Catur`;
                     loginBtn.classList.remove('bg-red-600');
                 }, 2000);
             }
-            
             document.getElementById('admin-password').value = '';
         }
 
@@ -1802,12 +1874,10 @@ Chess Rating System by Kamus Catur`;
 
                 const originalRating = student.current_rating || 1400;
                 const newRating = originalRating + record.total_points;
-                
                 student.current_rating = Math.max(0, newRating);
                 student.last_updated = new Date().toISOString();
                 student.total_tournaments = (student.total_tournaments || 0) + 1;
                 student.total_points_earned = (student.total_points_earned || 0) + record.total_points;
-                
                 const tierInfo = getTierInfo(student.current_rating);
                 student.current_tier = tierInfo.mainTier;
                 student.current_sub_tier = tierInfo.subTier;
@@ -1843,7 +1913,9 @@ Chess Rating System by Kamus Catur`;
 
             showLoading();
             try {
-                await postToGoogleSheets('rejectRecord', { submission_id: submissionId });
+                await postToGoogleSheets('rejectRecord', {
+                    submission_id: submissionId
+                });
                 await loadAllData();
 
                 showMessage('Record rejected successfully', 'success');
@@ -1901,7 +1973,6 @@ Chess Rating System by Kamus Catur`;
 
         async function handleEditSubmit(e) {
             e.preventDefault();
-            
             if (!isAdminLoggedIn || !currentEditingRecord) {
                 showMessage('Admin access required', 'error');
                 return;
@@ -1977,7 +2048,6 @@ Chess Rating System by Kamus Catur`;
 
             let percentile;
             let displayPercentile;
-            
             if (hasSpecialPrize) {
                 percentile = 20;
                 displayPercentile = 'Top 20% (Special Prize)';
@@ -1991,7 +2061,6 @@ Chess Rating System by Kamus Catur`;
 
             let bonusPoints = 0;
             const bonusArray = performanceBonus[tournamentLevel];
-            
             if (percentile <= 20) bonusPoints = bonusArray[0];
             else if (percentile <= 30) bonusPoints = bonusArray[1];
             else if (percentile <= 40) bonusPoints = bonusArray[2];
@@ -2013,14 +2082,12 @@ Chess Rating System by Kamus Catur`;
         function toggleEditSpecialPrize() {
             const checkbox = document.getElementById('edit-special-prize');
             const details = document.getElementById('edit-special-prize-details');
-            
             if (checkbox.checked) {
                 details.classList.remove('hidden');
             } else {
                 details.classList.add('hidden');
                 document.getElementById('edit-prize-description').value = '';
             }
-            
             calculateEditPerformance();
         }
 
@@ -2029,35 +2096,46 @@ Chess Rating System by Kamus Catur`;
         // ============================================
 
         function updateDashboard() {
+            // Populate month filter if empty
+            if (document.getElementById('month-filter').options.length === 0) {
+                populateMonthFilter();
+            }
+
             const analytics = calculateAnalytics();
             updateDashboardStats(analytics);
-            updateTierDistribution(analytics.tierDistribution);
-            updateRecentActivity();
-            updateTopPerformers();
+            
+            // New functions
+            updateTop10Overall();
+            updateTop5ByGender();
+            updateMonthlyStats();
+        }
+
+        function populateMonthFilter() {
+            const select = document.getElementById('month-filter');
+            const now = new Date();
+            select.innerHTML = ''; // Clear existing
+
+            // Generate options for the last 12 months
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const value = `${d.getFullYear()}-${d.getMonth()}`; 
+                const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = label;
+                select.appendChild(option);
+            }
         }
 
         function calculateAnalytics() {
-            const totalStudents = students.length;
-            const averageRating = totalStudents > 0 ? Math.round(students.reduce((sum, s) => sum + (s.current_rating || 1400), 0) / totalStudents) : 0;
-            const highestRating = totalStudents > 0 ? Math.max(...students.map(s => s.current_rating || 1400)) : 0;
-            const pendingCount = pendingRecords.length;
-
-            const tierDistribution = {};
-            students.forEach(student => {
-                const tierInfo = getTierInfo(student.current_rating || 1400);
-                const tierName = tierInfo.mainTier;
-                tierDistribution[tierName] = (tierDistribution[tierName] || 0) + 1;
-            });
-
-            return {
-                totalStudents,
-                averageRating,
-                highestRating,
-                pendingCount,
-                tierDistribution
-            };
+             const totalStudents = students.length;
+             const averageRating = totalStudents > 0 ? Math.round(students.reduce((sum, s) => sum + (s.current_rating || 1400), 0) / totalStudents) : 0;
+             const highestRating = totalStudents > 0 ? Math.max(...students.map(s => s.current_rating || 1400)) : 0;
+             const pendingCount = pendingRecords.length;
+             
+             return { totalStudents, averageRating, highestRating, pendingCount };
         }
-
+        
         function updateDashboardStats(analytics = {}) {
             document.getElementById('total-students').textContent = analytics.totalStudents || 0;
             document.getElementById('average-rating').textContent = analytics.averageRating || 0;
@@ -2065,136 +2143,151 @@ Chess Rating System by Kamus Catur`;
             document.getElementById('pending-count').textContent = analytics.pendingCount || 0;
         }
 
-        function updateTierDistribution(tierDistribution = {}) {
-            const container = document.getElementById('tier-distribution');
-            
-            const tierCounts = {
-                'Beginner': 0,
-                'Pawn': 0,
-                'Knight': 0,
-                'Bishop': 0,
-                'Rook': 0,
-                'Queen': 0,
-                'King': 0,
-                'Grandmaster': 0,
-                ...tierDistribution
-            };
-
-            const totalStudents = Object.values(tierCounts).reduce((sum, count) => sum + count, 0);
-            const maxCount = Math.max(...Object.values(tierCounts), 1);
-
-            container.innerHTML = Object.entries(tierCounts).map(([tier, count]) => {
-                const percentage = totalStudents > 0 ? (count / totalStudents) * 100 : 0;
-                const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                
-                let tierColor = '#718096';
-                let tierIcon = '🔰';
-                
-                if (chessTiers[tier]) {
-                    tierColor = chessTiers[tier].color;
-                    tierIcon = chessTiers[tier].icon;
-                } else if (tier === 'Grandmaster') {
-                    tierColor = '#9F7AEA';
-                    tierIcon = '👑';
-                }
-
-                return `
-                    <div class="flex items-center space-x-3">
-                        <div class="flex items-center space-x-2 w-24">
-                            <span class="text-lg">${tierIcon}</span>
-                            <span class="text-sm font-medium" style="color: ${tierColor}">${tier}</span>
-                        </div>
-                        <div class="flex-1 bg-gray-200 rounded-full h-4 relative">
-                            <div class="h-4 rounded-full transition-all duration-300" 
-                                 style="width: ${barWidth}%; background-color: ${tierColor}"></div>
-                        </div>
-                        <div class="text-sm text-gray-600 w-16 text-right">
-                            ${count} (${percentage.toFixed(1)}%)
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateRecentActivity() {
-            const container = document.getElementById('recent-activity');
-            
+        function updateTop10Overall() {
+            const container = document.getElementById('top-10-overall');
             if (students.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 py-4">No students registered yet.</div>';
+                container.innerHTML = '<div class="col-span-2 text-center text-gray-500">No students registered.</div>';
                 return;
             }
 
-            const recentStudents = [...students]
-                .sort((a, b) => new Date(b.registration_date || 0) - new Date(a.registration_date || 0))
-                .slice(0, 5);
-
-            container.innerHTML = recentStudents.map(student => {
-                const tierInfo = getTierInfo(student.current_rating || 1400);
-                const registrationDate = student.registration_date ? new Date(student.registration_date) : new Date();
-                const timeAgo = getTimeAgo(registrationDate);
-
-                return `
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <span class="text-lg">${tierInfo.icon}</span>
-                            <div>
-                                <div class="font-medium text-gray-800">${student.student_name || 'Unknown'}</div>
-                                <div class="text-sm text-gray-600">KC ID: ${student.kc_id || 'Unknown'}</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm font-medium text-orange-600">${student.current_rating || 1400}</div>
-                            <div class="text-xs text-gray-500">${timeAgo}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateTopPerformers() {
-            const container = document.getElementById('top-performers');
-            
-            if (students.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 py-4">No students registered yet.</div>';
-                return;
-            }
-
-            const topStudents = [...students]
+            const top10 = [...students]
                 .sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400))
                 .slice(0, 10);
 
-            container.innerHTML = topStudents.map((student, index) => {
-                const tierInfo = getTierInfo(student.current_rating || 1400);
-                const rank = index + 1;
+            container.innerHTML = top10.map((student, index) => renderRankItem(student, index + 1)).join('');
+        }
+        
+        function updateTop5ByGender() {
+            const maleContainer = document.getElementById('top-5-male');
+            const femaleContainer = document.getElementById('top-5-female');
+            
+            // Fix: Ensure ic_number is converted to string before slicing
+            const males = students.filter(s => s.student_gender === 'Male' || s.student_gender === 'Lelaki / Male' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 !== 0))
+                .sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400))
+                .slice(0, 5);
                 
-                let rankBadge = '';
-                if (rank === 1) rankBadge = '🥇';
-                else if (rank === 2) rankBadge = '🥈';
-                else if (rank === 3) rankBadge = '🥉';
-                else rankBadge = `#${rank}`;
+            const females = students.filter(s => s.student_gender === 'Female' || s.student_gender === 'Perempuan / Female' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 === 0))
+                .sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400))
+                .slice(0, 5);
 
-                return `
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="text-lg font-bold text-gray-600 w-8">${rankBadge}</div>
-                            <span class="text-lg">${tierInfo.icon}</span>
-                            <div>
-                                <div class="font-medium text-gray-800">${student.student_name || 'Unknown'}</div>
-                                <div class="text-sm" style="color: ${tierInfo.color}">${tierInfo.subTier}</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold text-orange-600">${student.current_rating || 1400}</div>
-                        </div>
+            maleContainer.innerHTML = males.length ? males.map((s, i) => renderSimpleRankItem(s, i + 1)).join('') : '<div class="text-gray-500 text-sm">No male students.</div>';
+            femaleContainer.innerHTML = females.length ? females.map((s, i) => renderSimpleRankItem(s, i + 1)).join('') : '<div class="text-gray-500 text-sm">No female students.</div>';
+        }
+
+        function updateMonthlyStats() {
+            const select = document.getElementById('month-filter');
+            // Default to current month/year if selector is empty (e.g. before data load)
+            let selectedYear, selectedMonth;
+            
+            if (select.value) {
+                [selectedYear, selectedMonth] = select.value.split('-').map(Number);
+            } else {
+                const now = new Date();
+                selectedYear = now.getFullYear();
+                selectedMonth = now.getMonth();
+            }
+
+            // Aggregate data from approvedRecords
+            const stats = {};
+            
+            approvedRecords.forEach(record => {
+                const rDate = new Date(record.tournament_date);
+                if (rDate.getMonth() === selectedMonth && rDate.getFullYear() === selectedYear) {
+                    const kcId = record.kc_id;
+                    if (!stats[kcId]) {
+                        // Find student name if not in record, fallback to KC ID
+                        let studentName = record.student_name;
+                        if(!studentName) {
+                            const student = students.find(s => s.kc_id === kcId);
+                            studentName = student ? student.student_name : kcId;
+                        }
+
+                        stats[kcId] = {
+                            name: studentName,
+                            total: 0,
+                            base: 0,
+                            bonus: 0,
+                            kc_id: kcId
+                        };
+                    }
+                    stats[kcId].total += (parseInt(record.total_points) || 0);
+                    stats[kcId].base += (parseInt(record.base_points) || 0);
+                    stats[kcId].bonus += (parseInt(record.bonus_points) || 0);
+                }
+            });
+            
+            const statsArray = Object.values(stats);
+            
+            // 1. Top Scorers (Total Points)
+            const topScorers = [...statsArray].sort((a, b) => b.total - a.total).slice(0, 5);
+            document.getElementById('top-scorers-month').innerHTML = topScorers.length ? 
+                topScorers.map((s, i) => renderMonthlyItem(s, i + 1, s.total, 'pts')).join('') : 
+                '<div class="text-gray-500 text-sm">No records for this month.</div>';
+                
+            // 2. Most Active (Base Points)
+            const mostActive = [...statsArray].sort((a, b) => b.base - a.base).slice(0, 5);
+            document.getElementById('top-active-month').innerHTML = mostActive.length ? 
+                mostActive.map((s, i) => renderMonthlyItem(s, i + 1, s.base, 'base pts')).join('') : 
+                '<div class="text-gray-500 text-sm">No records for this month.</div>';
+
+            // 3. Best Performance (Bonus Points)
+            const bestPerf = [...statsArray].sort((a, b) => b.bonus - a.bonus).slice(0, 5);
+            document.getElementById('top-performance-month').innerHTML = bestPerf.length ? 
+                bestPerf.map((s, i) => renderMonthlyItem(s, i + 1, s.bonus, 'bonus pts')).join('') : 
+                '<div class="text-gray-500 text-sm">No records for this month.</div>';
+        }
+
+        // Helper render functions
+        function renderRankItem(student, rank) {
+            const tierInfo = getTierInfo(student.current_rating || 1400);
+            let rankColor = 'bg-gray-100 text-gray-700';
+            if (rank === 1) rankColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            if (rank === 2) rankColor = 'bg-gray-200 text-gray-800 border-gray-400';
+            if (rank === 3) rankColor = 'bg-orange-100 text-orange-800 border-orange-300';
+            
+            return `
+                <div class="flex items-center p-3 rounded-lg border ${rankColor} mb-2">
+                    <div class="font-bold text-xl w-8 text-center">${rank}</div>
+                    <div class="text-2xl mr-3">${tierInfo.icon}</div>
+                    <div class="flex-1">
+                        <div class="font-bold">${student.student_name}</div>
+                        <div class="text-xs opacity-75">${tierInfo.mainTier} • ${tierInfo.subTier}</div>
                     </div>
-                `;
-            }).join('');
+                    <div class="font-bold text-xl">${student.current_rating || 1400}</div>
+                </div>
+            `;
+        }
+
+        function renderSimpleRankItem(student, rank) {
+            return `
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border-b border-gray-100 last:border-0">
+                    <div class="flex items-center">
+                        <span class="text-gray-500 font-medium w-6">${rank}.</span>
+                        <span class="font-medium text-gray-800 truncate max-w-[150px]">${student.student_name}</span>
+                    </div>
+                    <span class="font-bold text-gray-600">${student.current_rating || 1400}</span>
+                </div>
+            `;
+        }
+        
+        function renderMonthlyItem(stat, rank, score, label) {
+             return `
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border-b border-gray-100 last:border-0">
+                    <div class="flex items-center">
+                        <span class="text-gray-500 font-medium w-6">${rank}.</span>
+                        <span class="font-medium text-gray-800 truncate max-w-[140px]">${stat.name}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-gray-800 block">${score}</span>
+                        <span class="text-[10px] text-gray-500 uppercase">${label}</span>
+                    </div>
+                </div>
+            `;
         }
 
         function getTimeAgo(date) {
             const now = new Date();
             const diffInSeconds = Math.floor((now - date) / 1000);
-            
             if (diffInSeconds < 60) return 'Just now';
             if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
             if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
@@ -2210,5 +2303,5 @@ Chess Rating System by Kamus Catur`;
             initializeApp();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1ee9d51638a853',t:'MTc2MzcxNDc1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
