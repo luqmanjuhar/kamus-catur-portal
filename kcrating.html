@@ -2219,18 +2219,21 @@ Chess Rating System by Kamus Catur`;
             const statsArray = Object.values(stats);
             
             // 1. Top Scorers (Total Points)
+            // Ensure strictly 5 items shown
             const topScorers = [...statsArray].sort((a, b) => b.total - a.total).slice(0, 5);
             document.getElementById('top-scorers-month').innerHTML = topScorers.length ? 
                 topScorers.map((s, i) => renderMonthlyItem(s, i + 1, s.total, 'pts')).join('') : 
                 '<div class="text-gray-500 text-sm">No records for this month.</div>';
                 
             // 2. Most Active (Base Points)
+            // Ensure strictly 5 items shown
             const mostActive = [...statsArray].sort((a, b) => b.base - a.base).slice(0, 5);
             document.getElementById('top-active-month').innerHTML = mostActive.length ? 
                 mostActive.map((s, i) => renderMonthlyItem(s, i + 1, s.base, 'base pts')).join('') : 
                 '<div class="text-gray-500 text-sm">No records for this month.</div>';
 
             // 3. Best Performance (Bonus Points)
+            // Ensure strictly 5 items shown
             const bestPerf = [...statsArray].sort((a, b) => b.bonus - a.bonus).slice(0, 5);
             document.getElementById('top-performance-month').innerHTML = bestPerf.length ? 
                 bestPerf.map((s, i) => renderMonthlyItem(s, i + 1, s.bonus, 'bonus pts')).join('') : 
