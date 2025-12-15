@@ -503,6 +503,22 @@
         <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden">
             <div class="space-y-6">
+                <!-- NEW: Search Student Stats -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🔍 Find Student Ranking & Stats</h2>
+                    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                        <select id="student-search-month" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white min-w-[150px]">
+                            <option value="all">All Time</option>
+                            <!-- Options populated by JS -->
+                        </select>
+                        <input type="text" id="dashboard-search-input" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono uppercase" placeholder="Enter KC ID (e.g., 231001001)">
+                        <button id="dashboard-search-btn" class="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors font-medium">Search</button>
+                    </div>
+                    <div id="dashboard-search-result" class="hidden animate-fade-in">
+                        <!-- Result populated by JS -->
+                    </div>
+                </div>
+
                 <!-- Statistics Overview (Keep this) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-white rounded-lg shadow-md p-6">
@@ -1060,8 +1076,17 @@
             // Tier filter
             document.getElementById('tier-filter').addEventListener('change', updateStudentsList);
             
-            // Month filter
-            document.getElementById('month-filter').addEventListener('change', updateMonthlyStats);
+            // Month filter - Updates BOTH Top 5 Gender and Leaders of Month
+            document.getElementById('month-filter').addEventListener('change', () => {
+                updateTop5ByGender();
+                updateMonthlyStats();
+            });
+
+            // Dashboard Search
+            document.getElementById('dashboard-search-btn').addEventListener('click', handleDashboardSearch);
+            document.getElementById('dashboard-search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleDashboardSearch();
+            });
         }
 
         // ============================================
@@ -2095,8 +2120,244 @@ Chess Rating System by Kamus Catur`;
         // DASHBOARD FUNCTIONS
         // ============================================
 
+        // Helper: Get sorted leaderboard based on period
+        function getLeaderboard(period) {
+            // Normalization helper
+            const norm = (id) => String(id).trim().toUpperCase();
+
+            if (period === 'all') {
+                // All Time: Sort by Current Rating
+                return [...students].map(s => ({
+                    ...s, 
+                    score: s.current_rating || 1400,
+                    scoreLabel: 'Rating'
+                })).sort((a, b) => b.score - a.score);
+            } else {
+                // Specific Month: Sort by Total Points earned in that month
+                const [year, month] = period.split('-').map(Number);
+                const scores = {};
+                
+                // Initialize all students with 0
+                students.forEach(s => scores[norm(s.kc_id)] = 0);
+
+                approvedRecords.forEach(r => {
+                    if (!r.tournament_date || !r.kc_id) return;
+                    const rDate = new Date(r.tournament_date);
+                    if (rDate.getFullYear() === year && rDate.getMonth() === month) {
+                        const key = norm(r.kc_id);
+                        if (scores[key] !== undefined) {
+                            scores[key] += (parseInt(r.total_points) || 0);
+                        }
+                    }
+                });
+
+                return Object.entries(scores).map(([kcId, score]) => {
+                    const student = students.find(s => norm(s.kc_id) === kcId);
+                    return student ? { 
+                        ...student, 
+                        score,
+                        scoreLabel: 'Pts' 
+                    } : null;
+                }).filter(s => s) // remove nulls
+                .sort((a, b) => b.score - a.score);
+            }
+        }
+
+        function handleDashboardSearch() {
+            const input = document.getElementById('dashboard-search-input');
+            const monthFilter = document.getElementById('student-search-month').value;
+            const resultContainer = document.getElementById('dashboard-search-result');
+            const kcId = input.value.trim().toUpperCase();
+
+            if (!kcId) {
+                showMessage('Please enter a KC ID', 'error');
+                return;
+            }
+
+            // Find the student object first to get name/current rating
+            const student = students.find(s => s.kc_id && s.kc_id.toString() === kcId);
+
+            if (!student) {
+                resultContainer.innerHTML = `
+                    <div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Student with KC ID "<strong>${kcId}</strong>" not found.
+                    </div>`;
+                resultContainer.classList.remove('hidden');
+                return;
+            }
+
+            // 1. Get Leaderboard for selected period
+            const leaderboard = getLeaderboard(monthFilter);
+            
+            // 2. Determine Overall Rank
+            // Since leaderboard is already sorted, find index
+            const rank = leaderboard.findIndex(s => String(s.kc_id).trim().toUpperCase() === kcId) + 1;
+
+            // 3. Determine Gender Rank
+            // Filter leaderboard by student's gender first
+            const isMale = student.student_gender === 'Male' || student.student_gender === 'Lelaki / Male' || (student.ic_number && parseInt(String(student.ic_number).slice(-1)) % 2 !== 0);
+            const genderLeaderboard = leaderboard.filter(s => {
+                const sIsMale = s.student_gender === 'Male' || s.student_gender === 'Lelaki / Male' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 !== 0);
+                return isMale === sIsMale;
+            });
+            const genderRank = genderLeaderboard.findIndex(s => String(s.kc_id).trim().toUpperCase() === kcId) + 1;
+
+            // 4. Calculate Stats Details
+            let totalBase = 0, totalBonus = 0, tournamentsCount = 0, totalPoints = 0;
+            let rankLabel = monthFilter === 'all' ? "Current Rank" : "Monthly Rank";
+            let pointsLabel = monthFilter === 'all' ? "Total Points" : "Points (Month)";
+            let studentRecords = [];
+
+            // Helper for date filtering logic
+            const checkDate = (r) => {
+                if (monthFilter === 'all') return true;
+                const [year, month] = monthFilter.split('-').map(Number);
+                const rDate = new Date(r.tournament_date);
+                return rDate.getFullYear() === year && rDate.getMonth() === month;
+            };
+
+            approvedRecords.forEach(r => {
+                if (r.kc_id && String(r.kc_id).trim().toUpperCase() === kcId && checkDate(r)) {
+                    totalBase += (parseInt(r.base_points) || 0);
+                    totalBonus += (parseInt(r.bonus_points) || 0);
+                    tournamentsCount++;
+                    studentRecords.push(r);
+                }
+            });
+            totalPoints = totalBase + totalBonus;
+
+            const tierInfo = getTierInfo(student.current_rating || 1400);
+
+            // Sort records by date descending
+            studentRecords.sort((a, b) => new Date(b.tournament_date) - new Date(a.tournament_date));
+
+            // Generate Tournament List HTML (same as before)
+            let recordsHtml = '';
+            if (studentRecords.length > 0) {
+                recordsHtml = `
+                    <div class="mt-6 border-t border-gray-100 pt-4">
+                        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-xl">♟️</span> Tournament History (${monthFilter === 'all' ? 'All Time' : document.getElementById('student-search-month').options[document.getElementById('student-search-month').selectedIndex].text})
+                        </h4>
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead class="bg-gray-50 text-gray-500">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left font-medium uppercase tracking-wider">Date</th>
+                                            <th class="px-4 py-3 text-left font-medium uppercase tracking-wider">Tournament</th>
+                                            <th class="px-4 py-3 text-left font-medium uppercase tracking-wider">Level</th>
+                                            <th class="px-4 py-3 text-center font-medium uppercase tracking-wider">Result</th>
+                                            <th class="px-4 py-3 text-right font-medium uppercase tracking-wider">Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${studentRecords.map(r => {
+                                            const total = (parseInt(r.base_points) || 0) + (parseInt(r.bonus_points) || 0);
+                                            const bonus = parseInt(r.bonus_points) || 0;
+                                            const isBonusPositive = bonus >= 0;
+                                            return `
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600">${new Date(r.tournament_date).toLocaleDateString()}</td>
+                                                <td class="px-4 py-3 font-medium text-gray-800">
+                                                    <div>${r.tournament_name}</div>
+                                                    <div class="text-xs text-gray-500 md:hidden">${r.tournament_level}</div>
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600 hidden md:table-cell">
+                                                    <span class="px-2 py-1 rounded text-xs bg-gray-100 border border-gray-200">${r.tournament_level}</span>
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap text-center text-gray-600">
+                                                    ${r.final_ranking}/${r.total_players}
+                                                    ${r.has_special_prize ? '<span class="ml-1 text-purple-600" title="Special Prize">🏅</span>' : ''}
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap text-right font-bold">
+                                                    <div class="text-orange-600">+${total}</div>
+                                                    <div class="text-[10px] font-normal text-gray-400">
+                                                        (Base: ${r.base_points} <span class="${isBonusPositive ? 'text-green-600' : 'text-red-500'}">Bonus: ${isBonusPositive ? '+' : ''}${bonus}</span>)
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                recordsHtml = `
+                    <div class="mt-6 border-t border-gray-100 pt-6 text-center text-gray-500 italic">
+                        No tournament records found for this period.
+                    </div>
+                `;
+            }
+
+            // Render Result with Gender Rank
+            resultContainer.innerHTML = `
+                <div class="border border-orange-200 bg-orange-50 rounded-lg p-4 md:p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-4 -mr-4 text-9xl opacity-5 select-none pointer-events-none">
+                        ${tierInfo.icon}
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">${student.student_name}</h3>
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-1 text-sm text-gray-600">
+                                <span class="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">KC ID: ${student.kc_id}</span>
+                                <span>${student.student_gender || 'Unknown'}</span>
+                                ${student.student_age ? `<span>${student.student_age} years old</span>` : ''}
+                            </div>
+                            
+                            <div class="flex items-center gap-2 mt-3">
+                                <span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-700 shadow-sm" title="Overall Rank">
+                                    Overall: #${rank}
+                                </span>
+                                <span class="px-3 py-1 bg-white border border-${isMale ? 'blue' : 'pink'}-200 rounded-full text-sm font-bold text-${isMale ? 'blue' : 'pink'}-700 shadow-sm" title="Gender Rank">
+                                    ${isMale ? 'Male' : 'Female'} Rank: #${genderRank}
+                                </span>
+                                <span class="px-3 py-1 rounded-full text-sm font-bold text-white shadow-sm flex items-center gap-1" style="background-color: ${tierInfo.color}">
+                                    ${tierInfo.icon} ${tierInfo.subTier}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 text-center w-full md:w-auto">
+                            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex-1 md:flex-none md:min-w-[100px]">
+                                <div class="text-xs text-gray-500 uppercase font-semibold">Current Rating</div>
+                                <div class="text-2xl font-bold text-orange-600">${student.current_rating || 1400}</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex-1 md:flex-none md:min-w-[100px]">
+                                <div class="text-xs text-gray-500 uppercase font-semibold">${pointsLabel}</div>
+                                <div class="text-2xl font-bold text-blue-600">${totalPoints}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm border-t border-orange-200 pt-4 relative z-10">
+                        <div class="bg-white/50 p-2 rounded">
+                            <span class="block text-gray-500 text-xs">Tournaments Played</span>
+                            <span class="font-semibold text-gray-800">${tournamentsCount}</span>
+                        </div>
+                        <div class="bg-white/50 p-2 rounded">
+                            <span class="block text-gray-500 text-xs">Base Points (Participation)</span>
+                            <span class="font-semibold text-blue-700">${totalBase}</span>
+                        </div>
+                        <div class="bg-white/50 p-2 rounded">
+                            <span class="block text-gray-500 text-xs">Bonus Points (Performance)</span>
+                            <span class="font-semibold text-green-700">${totalBonus > 0 ? '+' : ''}${totalBonus}</span>
+                        </div>
+                    </div>
+
+                    ${recordsHtml}
+                </div>
+            `;
+            resultContainer.classList.remove('hidden');
+        }
+
         function updateDashboard() {
-            // Populate month filter if empty
+            // Populate month filters if empty
             if (document.getElementById('month-filter').options.length === 0) {
                 populateMonthFilter();
             }
@@ -2104,27 +2365,41 @@ Chess Rating System by Kamus Catur`;
             const analytics = calculateAnalytics();
             updateDashboardStats(analytics);
             
-            // New functions
+            // Update all sections
             updateTop10Overall();
             updateTop5ByGender();
             updateMonthlyStats();
         }
 
         function populateMonthFilter() {
-            const select = document.getElementById('month-filter');
+            const dashboardSelect = document.getElementById('month-filter');
+            const searchSelect = document.getElementById('student-search-month');
             const now = new Date();
-            select.innerHTML = ''; // Clear existing
+            
+            dashboardSelect.innerHTML = '<option value="all">All Time</option>';
+            searchSelect.innerHTML = '<option value="all">All Time</option>';
 
             // Generate options for the last 12 months
             for (let i = 0; i < 12; i++) {
                 const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
                 const value = `${d.getFullYear()}-${d.getMonth()}`; 
                 const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = label;
-                select.appendChild(option);
+                
+                // Append to Leaders Filter
+                const option1 = document.createElement('option');
+                option1.value = value;
+                option1.textContent = label;
+                dashboardSelect.appendChild(option1);
+
+                // Append to Student Search Filter
+                const option2 = document.createElement('option');
+                option2.value = value;
+                option2.textContent = label;
+                searchSelect.appendChild(option2);
             }
+            
+            // Set default to current month for dashboard filter if you prefer, or keep "All Time"
+            // For now "All Time" is index 0
         }
 
         function calculateAnalytics() {
@@ -2160,39 +2435,48 @@ Chess Rating System by Kamus Catur`;
         function updateTop5ByGender() {
             const maleContainer = document.getElementById('top-5-male');
             const femaleContainer = document.getElementById('top-5-female');
+            const monthFilter = document.getElementById('month-filter').value;
             
-            // Fix: Ensure ic_number is converted to string before slicing
-            const males = students.filter(s => s.student_gender === 'Male' || s.student_gender === 'Lelaki / Male' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 !== 0))
-                .sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400))
-                .slice(0, 5);
-                
-            const females = students.filter(s => s.student_gender === 'Female' || s.student_gender === 'Perempuan / Female' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 === 0))
-                .sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400))
-                .slice(0, 5);
+            // Use the centralized leaderboard helper
+            const leaderboard = getLeaderboard(monthFilter);
+            
+            // Filter by Gender
+            // Gender check helper
+            const isMale = (s) => s.student_gender === 'Male' || s.student_gender === 'Lelaki / Male' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 !== 0);
+            
+            const males = leaderboard.filter(s => isMale(s)).slice(0, 5);
+            const females = leaderboard.filter(s => !isMale(s)).slice(0, 5);
 
-            maleContainer.innerHTML = males.length ? males.map((s, i) => renderSimpleRankItem(s, i + 1)).join('') : '<div class="text-gray-500 text-sm">No male students.</div>';
-            femaleContainer.innerHTML = females.length ? females.map((s, i) => renderSimpleRankItem(s, i + 1)).join('') : '<div class="text-gray-500 text-sm">No female students.</div>';
+            // Updated render function to show Score or Rating based on context
+            const renderItem = (s, i) => `
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border-b border-gray-100 last:border-0">
+                    <div class="flex items-center flex-1 mr-2">
+                        <span class="text-gray-500 font-medium w-6 flex-shrink-0">${i + 1}.</span>
+                        <span class="font-medium text-gray-800 break-words leading-tight">${s.student_name}</span>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="font-bold text-gray-600 block">${s.score}</span>
+                        <span class="text-[10px] text-gray-400 uppercase">${s.scoreLabel || 'Rating'}</span>
+                    </div>
+                </div>
+            `;
+
+            maleContainer.innerHTML = males.length ? males.map((s, i) => renderItem(s, i)).join('') : '<div class="text-gray-500 text-sm">No male students found for this period.</div>';
+            femaleContainer.innerHTML = females.length ? females.map((s, i) => renderItem(s, i)).join('') : '<div class="text-gray-500 text-sm">No female students found for this period.</div>';
         }
 
         function updateMonthlyStats() {
             const select = document.getElementById('month-filter');
-            // Default to current month/year if selector is empty (e.g. before data load)
-            let selectedYear, selectedMonth;
+            // If "All Time" selected, hide monthly specific stats or show empty? 
+            // The request was specific about "Leaders of the Month", so if "All Time" is selected, 
+            // we can either show all-time leaders (by points?) or just clear it.
+            // Let's assume All Time means "Total Points Earned All Time" for these categories.
             
-            if (select.value) {
-                [selectedYear, selectedMonth] = select.value.split('-').map(Number);
-            } else {
-                const now = new Date();
-                selectedYear = now.getFullYear();
-                selectedMonth = now.getMonth();
-            }
-
-            // Aggregate data from approvedRecords
-            const stats = {};
+            let stats = {};
             
-            approvedRecords.forEach(record => {
-                const rDate = new Date(record.tournament_date);
-                if (rDate.getMonth() === selectedMonth && rDate.getFullYear() === selectedYear) {
+            if (select.value === 'all') {
+                // Aggregate ALL records
+                approvedRecords.forEach(record => {
                     const kcId = record.kc_id;
                     if (!stats[kcId]) {
                         // Find student name if not in record, fallback to KC ID
@@ -2201,43 +2485,52 @@ Chess Rating System by Kamus Catur`;
                             const student = students.find(s => s.kc_id === kcId);
                             studentName = student ? student.student_name : kcId;
                         }
-
-                        stats[kcId] = {
-                            name: studentName,
-                            total: 0,
-                            base: 0,
-                            bonus: 0,
-                            kc_id: kcId
-                        };
+                        stats[kcId] = { name: studentName, total: 0, base: 0, bonus: 0, kc_id: kcId };
                     }
                     stats[kcId].total += (parseInt(record.total_points) || 0);
                     stats[kcId].base += (parseInt(record.base_points) || 0);
                     stats[kcId].bonus += (parseInt(record.bonus_points) || 0);
-                }
-            });
+                });
+            } else {
+                const [selectedYear, selectedMonth] = select.value.split('-').map(Number);
+                approvedRecords.forEach(record => {
+                    const rDate = new Date(record.tournament_date);
+                    if (rDate.getMonth() === selectedMonth && rDate.getFullYear() === selectedYear) {
+                        const kcId = record.kc_id;
+                        if (!stats[kcId]) {
+                            let studentName = record.student_name;
+                            if(!studentName) {
+                                const student = students.find(s => s.kc_id === kcId);
+                                studentName = student ? student.student_name : kcId;
+                            }
+                            stats[kcId] = { name: studentName, total: 0, base: 0, bonus: 0, kc_id: kcId };
+                        }
+                        stats[kcId].total += (parseInt(record.total_points) || 0);
+                        stats[kcId].base += (parseInt(record.base_points) || 0);
+                        stats[kcId].bonus += (parseInt(record.bonus_points) || 0);
+                    }
+                });
+            }
             
             const statsArray = Object.values(stats);
             
             // 1. Top Scorers (Total Points)
-            // Ensure strictly 5 items shown
             const topScorers = [...statsArray].sort((a, b) => b.total - a.total).slice(0, 5);
             document.getElementById('top-scorers-month').innerHTML = topScorers.length ? 
                 topScorers.map((s, i) => renderMonthlyItem(s, i + 1, s.total, 'pts')).join('') : 
-                '<div class="text-gray-500 text-sm">No records for this month.</div>';
+                '<div class="text-gray-500 text-sm">No records for this period.</div>';
                 
             // 2. Most Active (Base Points)
-            // Ensure strictly 5 items shown
             const mostActive = [...statsArray].sort((a, b) => b.base - a.base).slice(0, 5);
             document.getElementById('top-active-month').innerHTML = mostActive.length ? 
                 mostActive.map((s, i) => renderMonthlyItem(s, i + 1, s.base, 'base pts')).join('') : 
-                '<div class="text-gray-500 text-sm">No records for this month.</div>';
+                '<div class="text-gray-500 text-sm">No records for this period.</div>';
 
             // 3. Best Performance (Bonus Points)
-            // Ensure strictly 5 items shown
             const bestPerf = [...statsArray].sort((a, b) => b.bonus - a.bonus).slice(0, 5);
             document.getElementById('top-performance-month').innerHTML = bestPerf.length ? 
                 bestPerf.map((s, i) => renderMonthlyItem(s, i + 1, s.bonus, 'bonus pts')).join('') : 
-                '<div class="text-gray-500 text-sm">No records for this month.</div>';
+                '<div class="text-gray-500 text-sm">No records for this period.</div>';
         }
 
         // Helper render functions
