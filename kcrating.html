@@ -182,19 +182,32 @@
             </div>
             <!-- Students List -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <h2 class="text-2xl font-semibold text-gray-800">Registered Students</h2>
-                    <div class="flex items-center space-x-3"><label for="tier-filter" class="text-sm font-medium text-gray-700">Filter by Tier:</label> <select id="tier-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option value="all">All Tiers</option>
-                            <option value="Grandmaster">👑 Grandmaster</option>
-                            <option value="King">♚ King</option>
-                            <option value="Queen">♛ Queen</option>
-                            <option value="Rook">♜ Rook</option>
-                            <option value="Bishop">♝ Bishop</option>
-                            <option value="Knight">♞ Knight</option>
-                            <option value="Pawn">♟ Pawn</option>
-                            <option value="Beginner">🔰 Beginner</option>
-                        </select> </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <!-- NEW: Search Input -->
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" id="student-search-name" placeholder="Search student name..." class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm" style="text-transform: uppercase;">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <label for="tier-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">Tier:</label> 
+                            <select id="tier-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto">
+                                <option value="all">All Tiers</option>
+                                <option value="Grandmaster">👑 Grandmaster</option>
+                                <option value="King">♚ King</option>
+                                <option value="Queen">♛ Queen</option>
+                                <option value="Rook">♜ Rook</option>
+                                <option value="Bishop">♝ Bishop</option>
+                                <option value="Knight">♞ Knight</option>
+                                <option value="Pawn">♟ Pawn</option>
+                                <option value="Beginner">🔰 Beginner</option>
+                            </select> 
+                        </div>
+                    </div>
                 </div>
                 <div id="students-list" class="space-y-4">
                     <div class="text-center text-gray-500 py-8"> No students registered yet. Add your first student above. </div>
@@ -507,10 +520,6 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">🔍 Find Student Ranking & Stats</h2>
                     <div class="flex flex-col sm:flex-row gap-2 mb-4">
-                        <select id="student-search-month" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white min-w-[150px]">
-                            <option value="all">All Time</option>
-                            <!-- Options populated by JS -->
-                        </select>
                         <input type="text" id="dashboard-search-input" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono uppercase" placeholder="Enter KC ID (e.g., 231001001)">
                         <button id="dashboard-search-btn" class="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors font-medium">Search</button>
                     </div>
@@ -519,14 +528,69 @@
                     </div>
                 </div>
 
-                <!-- Statistics Overview (Keep this) -->
+                <!-- NEW: Advanced Dashboard Filters -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <span class="mr-2">⚙️</span> Dashboard Filters
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <!-- Period (Updated to Calendar Input) -->
+                        <div>
+                            <label for="filter-period-input" class="block text-xs font-medium text-gray-500 uppercase mb-1">Period</label>
+                            <div class="flex gap-1">
+                                <input type="month" id="filter-period-input" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm">
+                                <button id="filter-period-reset" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-xs font-medium whitespace-nowrap" title="Reset to All Time">All Time</button>
+                            </div>
+                        </div>
+                        <!-- Time Control -->
+                        <div>
+                            <label for="filter-time-control" class="block text-xs font-medium text-gray-500 uppercase mb-1">Time Control</label>
+                            <select id="filter-time-control" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                                <option value="all">All Formats</option>
+                                <option value="Classical">Classical</option>
+                                <option value="Rapid">Rapid</option>
+                                <option value="Blitz">Blitz</option>
+                            </select>
+                        </div>
+                        <!-- Gender -->
+                        <div>
+                            <label for="filter-gender" class="block text-xs font-medium text-gray-500 uppercase mb-1">Gender</label>
+                            <select id="filter-gender" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                                <option value="all">All Genders</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <!-- State -->
+                        <div>
+                            <label for="filter-state" class="block text-xs font-medium text-gray-500 uppercase mb-1">State</label>
+                            <select id="filter-state" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                                <option value="all">All States</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <!-- Age Group -->
+                        <div>
+                            <label for="filter-age-group" class="block text-xs font-medium text-gray-500 uppercase mb-1">Age Group</label>
+                            <select id="filter-age-group" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                                <option value="all">All Ages</option>
+                                <option value="U8">Under 8 (≤8)</option>
+                                <option value="U10">Under 10 (9-10)</option>
+                                <option value="U12">Under 12 (11-12)</option>
+                                <option value="U15">Under 15 (13-15)</option>
+                                <option value="U18">Under 18 (16-18)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Overview -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- ... existing stats cards ... -->
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                                </svg>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Total Students</p>
@@ -537,9 +601,7 @@
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-green-100 text-green-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Average Rating</p>
@@ -550,9 +612,7 @@
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Pending Records</p>
@@ -563,9 +623,7 @@
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-purple-100 text-purple-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Highest Rating</p>
@@ -575,15 +633,45 @@
                     </div>
                 </div>
 
-                <!-- NEW: Top 10 Overall -->
+                <!-- Top 10 Overall -->
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">🏆 Top 10 Overall Ranking</h2>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">🏆 Top 10 Ranking</h2>
+                        <span id="ranking-subtitle" class="text-sm text-gray-500 font-medium"></span>
+                    </div>
                     <div id="top-10-overall" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
-                <!-- NEW: Top 5 by Gender -->
+                <!-- Age Group Rankings -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">👶 Top 3 by Age Group</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-3">
+                            <h3 class="font-bold text-blue-800 text-center mb-2 text-sm">Under 8</h3>
+                            <div id="top-u8" class="space-y-1"></div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3">
+                            <h3 class="font-bold text-green-800 text-center mb-2 text-sm">Under 10</h3>
+                            <div id="top-u10" class="space-y-1"></div>
+                        </div>
+                        <div class="bg-yellow-50 rounded-lg p-3">
+                            <h3 class="font-bold text-yellow-800 text-center mb-2 text-sm">Under 12</h3>
+                            <div id="top-u12" class="space-y-1"></div>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-3">
+                            <h3 class="font-bold text-orange-800 text-center mb-2 text-sm">Under 15</h3>
+                            <div id="top-u15" class="space-y-1"></div>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-3">
+                            <h3 class="font-bold text-purple-800 text-center mb-2 text-sm">Under 18</h3>
+                            <div id="top-u18" class="space-y-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top 5 by Gender -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-xl font-semibold text-blue-800 mb-4">👦 Top 5 Male</h2>
@@ -595,18 +683,12 @@
                     </div>
                 </div>
 
-                <!-- NEW: Monthly Leaders Title with Filter -->
+                <!-- Monthly Leaders Title -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-200">
-                    <h2 class="text-2xl font-bold text-gray-800">📅 Leaders of the Month</h2>
-                    <div class="flex items-center space-x-2">
-                        <label for="month-filter" class="text-sm font-medium text-gray-600">Select Month:</label>
-                        <select id="month-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white min-w-[200px]">
-                            <!-- Options populated by JS -->
-                        </select>
-                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">📅 Category Leaders (Filtered)</h2>
                 </div>
 
-                <!-- NEW: Monthly Stats Grid -->
+                <!-- Monthly Stats Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Top Scorers (Total Points) -->
                     <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-orange-500">
@@ -631,11 +713,6 @@
                 </div>
             </div>
         </div>
-        <!-- Contact Info -->
-        <div class="mt-8 text-center">
-            <p id="contact-text" class="text-gray-600">For questions, contact your chess academy administrator</p>
-        </div>
-    </div>
     <script>
         // ============================================
         // CONFIGURATION
@@ -944,6 +1021,11 @@
                 students = await fetchFromGoogleSheets('getStudents');
                 pendingRecords = await fetchFromGoogleSheets('getPendingRecords');
                 approvedRecords = await fetchFromGoogleSheets('getApprovedRecords');
+                
+                // NEW: Automatically recalculate ratings based on history
+                // This ensures if a record is deleted in the sheet, the rating updates automatically on reload
+                recalculateLocalRatings();
+
                 updateStudentsList();
                 updatePendingList();
                 if (currentView === 'dashboard') {
@@ -953,6 +1035,76 @@
                 console.error('Failed to load data:', error);
                 showMessage('Failed to load data from Google Sheets. Please refresh the page.', 'error');
             }
+        }
+
+        // NEW: Function to recalculate ratings from scratch based on approved records
+        function recalculateLocalRatings() {
+            if (!students || !approvedRecords) return;
+
+            const currentYear = new Date().getFullYear();
+
+            // 1. Reset all students to baseline & Update Age
+            const studentMap = {};
+            students.forEach(student => {
+                student.current_rating = 1400; // Reset to base
+                student.total_points_earned = 0;
+                student.total_tournaments = 0;
+                
+                // Recalculate Age dynamically based on IC and Current Year
+                if (student.ic_number && student.ic_number.length >= 12) {
+                    const icStr = String(student.ic_number).replace(/[-\s]/g, '');
+                    const yearPrefix = parseInt(icStr.substring(0, 2));
+                    
+                    // Logic to determine century (Standard Malaysian IC logic approximation)
+                    // If year prefix is > current year last 2 digits (plus buffer), assume 1900s.
+                    // e.g. In 2025: 26-99 -> 1926-1999. 00-25 -> 2000-2025.
+                    const currentYearShort = currentYear % 100;
+                    let birthYear = (yearPrefix > currentYearShort) ? (1900 + yearPrefix) : (2000 + yearPrefix);
+                    
+                    student.student_age = currentYear - birthYear;
+                }
+
+                // Update tier to base
+                const baseTier = getTierInfo(1400);
+                student.current_tier = baseTier.mainTier;
+                student.current_sub_tier = baseTier.subTier;
+                
+                // Create map for fast lookup
+                if (student.kc_id) {
+                    studentMap[String(student.kc_id).trim().toUpperCase()] = student;
+                }
+            });
+
+            // 2. Sort approved records by date (oldest to newest) to apply points in order
+            const sortedRecords = [...approvedRecords].sort((a, b) => new Date(a.tournament_date) - new Date(b.tournament_date));
+
+            // 3. Replay history
+            sortedRecords.forEach(record => {
+                if (!record.kc_id) return;
+                const kcId = String(record.kc_id).trim().toUpperCase();
+                const student = studentMap[kcId];
+
+                if (student) {
+                    const points = parseInt(record.total_points) || 0;
+                    
+                    // Update stats
+                    student.total_points_earned += points;
+                    student.total_tournaments += 1;
+                    student.current_rating += points;
+                    
+                    // Ensure rating doesn't drop below 0 (though 1400 is usually min, logic allows drop if desired, but here we enforce math)
+                    if (student.current_rating < 0) student.current_rating = 0;
+                }
+            });
+
+            // 4. Final Tier Update after all points applied
+            students.forEach(student => {
+                const tierInfo = getTierInfo(student.current_rating);
+                student.current_tier = tierInfo.mainTier;
+                student.current_sub_tier = tierInfo.subTier;
+            });
+            
+            console.log("Ratings & Ages recalculated.");
         }
 
         // ============================================
@@ -1076,10 +1228,20 @@
             // Tier filter
             document.getElementById('tier-filter').addEventListener('change', updateStudentsList);
             
-            // Month filter - Updates BOTH Top 5 Gender and Leaders of Month
-            document.getElementById('month-filter').addEventListener('change', () => {
-                updateTop5ByGender();
-                updateMonthlyStats();
+            // NEW: Student List Name Search
+            document.getElementById('student-search-name').addEventListener('input', updateStudentsList);
+
+            // Advanced Filters Event Listeners
+            const filters = ['filter-time-control', 'filter-gender', 'filter-state', 'filter-age-group'];
+            filters.forEach(id => {
+                document.getElementById(id).addEventListener('change', updateDashboard);
+            });
+
+            // New Period Filter Listeners
+            document.getElementById('filter-period-input').addEventListener('change', updateDashboard);
+            document.getElementById('filter-period-reset').addEventListener('click', () => {
+                document.getElementById('filter-period-input').value = ''; // Clear value
+                updateDashboard();
             });
 
             // Dashboard Search
@@ -1286,8 +1448,8 @@
             else if (percentile <= 40) bonusPoints = bonusArray[2];
             else if (percentile <= 50) bonusPoints = bonusArray[3];
             else if (percentile <= 60) bonusPoints = bonusArray[4];
-            else if (percentile <= 70) bonusPoints = bonusArray[5];
-            else bonusPoints = 0;
+            // Fix: Cap deduction at Top 70% level for any percentile > 60%
+            else bonusPoints = bonusArray[5];
 
             const basePoints = tournamentPoints[tournamentLevel];
             const totalPoints = basePoints + bonusPoints;
@@ -1386,7 +1548,8 @@
                 };
 
                 await postToGoogleSheets('addPendingRecord', recordData);
-                await loadAllData();
+                // Removed await here to make UI faster
+                loadAllData();
 
                 document.getElementById('record-form').reset();
                 document.getElementById('student-verification').classList.add('hidden');
@@ -1412,6 +1575,9 @@
         function updateStudentsList() {
             const container = document.getElementById('students-list');
             const selectedTier = document.getElementById('tier-filter').value;
+            // NEW: Get search term
+            const searchTerm = document.getElementById('student-search-name').value.trim().toUpperCase();
+
             if (students.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
@@ -1424,7 +1590,16 @@
             // Group students by tier
             const tierOrder = ['Grandmaster', 'King', 'Queen', 'Rook', 'Bishop', 'Knight', 'Pawn', 'Beginner'];
             const studentsByTier = {};
+            
+            // Track if we found any students after filtering
+            let matchCount = 0;
+
             students.forEach(student => {
+                // NEW: Filter by Name
+                if (searchTerm && !student.student_name.includes(searchTerm)) {
+                    return;
+                }
+
                 const rating = student.current_rating || 1400;
                 const tierInfo = getTierInfo(rating);
                 const tierName = tierInfo.mainTier;
@@ -1432,7 +1607,18 @@
                     studentsByTier[tierName] = [];
                 }
                 studentsByTier[tierName].push(student);
+                matchCount++;
             });
+
+            // Handle no results state
+            if (matchCount === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        No students found matching "${searchTerm}".
+                    </div>
+                `;
+                return;
+            }
 
             // Sort students within each tier by rating (highest first)
             Object.keys(studentsByTier).forEach(tier => {
@@ -1452,11 +1638,11 @@
             let html = '';
             tiersToShow.forEach(tierName => {
                 if (!studentsByTier[tierName] || studentsByTier[tierName].length === 0) {
-                    // If a specific tier is selected but has no students, show a message
+                    // If a specific tier is selected but has no students matching search
                     if (selectedTier !== 'all') {
                         html += `
                             <div class="text-center text-gray-500 py-8">
-                                No students in ${tierName} tier yet.
+                                No students in ${tierName} tier matching your search.
                             </div>
                         `;
                     }
@@ -1897,12 +2083,13 @@ Chess Rating System by Kamus Catur`;
                     throw new Error('Student not found');
                 }
 
-                const originalRating = student.current_rating || 1400;
-                const newRating = originalRating + record.total_points;
+                const originalRating = parseInt(student.current_rating) || 1400;
+                const pointsToAdd = parseInt(record.total_points) || 0;
+                const newRating = originalRating + pointsToAdd;
                 student.current_rating = Math.max(0, newRating);
                 student.last_updated = new Date().toISOString();
-                student.total_tournaments = (student.total_tournaments || 0) + 1;
-                student.total_points_earned = (student.total_points_earned || 0) + record.total_points;
+                student.total_tournaments = (parseInt(student.total_tournaments) || 0) + 1;
+                student.total_points_earned = (parseInt(student.total_points_earned) || 0) + pointsToAdd;
                 const tierInfo = getTierInfo(student.current_rating);
                 student.current_tier = tierInfo.mainTier;
                 student.current_sub_tier = tierInfo.subTier;
@@ -2024,7 +2211,7 @@ Chess Rating System by Kamus Catur`;
                 else if (percentile <= 40) bonusPoints = bonusArray[2];
                 else if (percentile <= 50) bonusPoints = bonusArray[3];
                 else if (percentile <= 60) bonusPoints = bonusArray[4];
-                else if (percentile <= 70) bonusPoints = bonusArray[5];
+                else bonusPoints = bonusArray[5];
 
                 const basePoints = tournamentPoints[tournamentLevel];
                 const totalPoints = basePoints + bonusPoints;
@@ -2091,7 +2278,7 @@ Chess Rating System by Kamus Catur`;
             else if (percentile <= 40) bonusPoints = bonusArray[2];
             else if (percentile <= 50) bonusPoints = bonusArray[3];
             else if (percentile <= 60) bonusPoints = bonusArray[4];
-            else if (percentile <= 70) bonusPoints = bonusArray[5];
+            else bonusPoints = bonusArray[5];
 
             const basePoints = tournamentPoints[tournamentLevel];
             const totalPoints = basePoints + bonusPoints;
@@ -2120,61 +2307,121 @@ Chess Rating System by Kamus Catur`;
         // DASHBOARD FUNCTIONS
         // ============================================
 
-        // Helper: Get sorted leaderboard based on period
-        function getLeaderboard(period) {
-            // Normalization helper
+        function populateAdvancedFilters() {
+            const stateSelect = document.getElementById('filter-state');
+            if (stateSelect.options.length <= 1) {
+                const uniqueStates = new Set(Object.values(stateCodes));
+                [...uniqueStates].sort().forEach(state => {
+                    const opt = document.createElement('option');
+                    opt.value = state;
+                    opt.textContent = state;
+                    stateSelect.appendChild(opt);
+                });
+            }
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('filter-period-input').max = `${year}-${month}`;
+        }
+
+        function isGenderMatch(student, genderFilter) {
+            if (!genderFilter || genderFilter === 'all') return true;
+            const isMale = student.student_gender === 'Male' || student.student_gender === 'Lelaki / Male' || (student.ic_number && parseInt(String(student.ic_number).slice(-1)) % 2 !== 0);
+            return genderFilter === 'Male' ? isMale : !isMale;
+        }
+
+        function isAgeMatch(student, ageFilter) {
+            if (!ageFilter || ageFilter === 'all') return true;
+            const age = student.student_age || 0;
+            switch(ageFilter) {
+                case 'U8': return age <= 8;
+                case 'U10': return age > 8 && age <= 10;
+                case 'U12': return age > 10 && age <= 12;
+                case 'U15': return age > 12 && age <= 15;
+                case 'U18': return age > 15 && age <= 18;
+                default: return true;
+            }
+        }
+
+        function isStateMatch(student, stateFilter) {
+            if (!stateFilter || stateFilter === 'all') return true;
+            return student.student_state === stateFilter;
+        }
+
+        function getLeaderboard() {
+            const period = document.getElementById('filter-period-input').value; 
+            const timeControl = document.getElementById('filter-time-control').value;
+            const gender = document.getElementById('filter-gender').value;
+            const state = document.getElementById('filter-state').value;
+            const ageGroup = document.getElementById('filter-age-group').value;
+
             const norm = (id) => String(id).trim().toUpperCase();
 
-            if (period === 'all') {
-                // All Time: Sort by Current Rating
-                return [...students].map(s => ({
+            const isRatingMode = (!period && timeControl === 'all'); 
+
+            if (isRatingMode) {
+                return students.filter(s => 
+                    isGenderMatch(s, gender) &&
+                    isStateMatch(s, state) &&
+                    isAgeMatch(s, ageGroup)
+                ).map(s => ({
                     ...s, 
                     score: s.current_rating || 1400,
                     scoreLabel: 'Rating'
                 })).sort((a, b) => b.score - a.score);
+
             } else {
-                // Specific Month: Sort by Total Points earned in that month
-                const [year, month] = period.split('-').map(Number);
                 const scores = {};
+                const eligibleStudents = students.filter(s => 
+                    isGenderMatch(s, gender) &&
+                    isStateMatch(s, state) &&
+                    isAgeMatch(s, ageGroup)
+                );
                 
-                // Initialize all students with 0
-                students.forEach(s => scores[norm(s.kc_id)] = 0);
+                eligibleStudents.forEach(s => scores[norm(s.kc_id)] = 0);
 
                 approvedRecords.forEach(r => {
                     if (!r.tournament_date || !r.kc_id) return;
-                    const rDate = new Date(r.tournament_date);
-                    if (rDate.getFullYear() === year && rDate.getMonth() === month) {
-                        const key = norm(r.kc_id);
-                        if (scores[key] !== undefined) {
-                            scores[key] += (parseInt(r.total_points) || 0);
-                        }
+                    
+                    if (period) {
+                        const [filterYear, filterMonth] = period.split('-').map(Number);
+                        const rDate = new Date(r.tournament_date);
+                        if (rDate.getFullYear() !== filterYear || (rDate.getMonth() + 1) !== filterMonth) return;
+                    }
+
+                    if (timeControl !== 'all' && r.time_control !== timeControl) return;
+
+                    const key = norm(r.kc_id);
+                    if (scores[key] !== undefined) {
+                        scores[key] += (parseInt(r.total_points) || 0);
                     }
                 });
 
                 return Object.entries(scores).map(([kcId, score]) => {
-                    const student = students.find(s => norm(s.kc_id) === kcId);
+                    const student = eligibleStudents.find(s => norm(s.kc_id) === kcId);
                     return student ? { 
                         ...student, 
                         score,
                         scoreLabel: 'Pts' 
                     } : null;
-                }).filter(s => s) // remove nulls
+                }).filter(s => s) 
                 .sort((a, b) => b.score - a.score);
             }
         }
 
         function handleDashboardSearch() {
             const input = document.getElementById('dashboard-search-input');
-            const monthFilter = document.getElementById('student-search-month').value;
             const resultContainer = document.getElementById('dashboard-search-result');
             const kcId = input.value.trim().toUpperCase();
+
+            const period = document.getElementById('filter-period-input').value; 
+            const timeControl = document.getElementById('filter-time-control').value;
 
             if (!kcId) {
                 showMessage('Please enter a KC ID', 'error');
                 return;
             }
 
-            // Find the student object first to get name/current rating
             const student = students.find(s => s.kc_id && s.kc_id.toString() === kcId);
 
             if (!student) {
@@ -2187,58 +2434,45 @@ Chess Rating System by Kamus Catur`;
                 return;
             }
 
-            // 1. Get Leaderboard for selected period
-            const leaderboard = getLeaderboard(monthFilter);
-            
-            // 2. Determine Overall Rank
-            // Since leaderboard is already sorted, find index
+            const leaderboard = getLeaderboard();
             const rank = leaderboard.findIndex(s => String(s.kc_id).trim().toUpperCase() === kcId) + 1;
+            const rankDisplay = rank > 0 ? `#${rank}` : 'N/A (Filtered)';
 
-            // 3. Determine Gender Rank
-            // Filter leaderboard by student's gender first
-            const isMale = student.student_gender === 'Male' || student.student_gender === 'Lelaki / Male' || (student.ic_number && parseInt(String(student.ic_number).slice(-1)) % 2 !== 0);
-            const genderLeaderboard = leaderboard.filter(s => {
-                const sIsMale = s.student_gender === 'Male' || s.student_gender === 'Lelaki / Male' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 !== 0);
-                return isMale === sIsMale;
-            });
-            const genderRank = genderLeaderboard.findIndex(s => String(s.kc_id).trim().toUpperCase() === kcId) + 1;
-
-            // 4. Calculate Stats Details
-            let totalBase = 0, totalBonus = 0, tournamentsCount = 0, totalPoints = 0;
-            let rankLabel = monthFilter === 'all' ? "Current Rank" : "Monthly Rank";
-            let pointsLabel = monthFilter === 'all' ? "Total Points" : "Points (Month)";
-            let studentRecords = [];
-
-            // Helper for date filtering logic
-            const checkDate = (r) => {
-                if (monthFilter === 'all') return true;
-                const [year, month] = monthFilter.split('-').map(Number);
-                const rDate = new Date(r.tournament_date);
-                return rDate.getFullYear() === year && rDate.getMonth() === month;
-            };
+            let totalBase = 0, totalBonus = 0, tournamentsCount = 0;
+            let filteredRecords = [];
 
             approvedRecords.forEach(r => {
-                if (r.kc_id && String(r.kc_id).trim().toUpperCase() === kcId && checkDate(r)) {
+                if (r.kc_id && String(r.kc_id).trim().toUpperCase() === kcId) {
+                    if (period) {
+                        const [filterYear, filterMonth] = period.split('-').map(Number);
+                        const rDate = new Date(r.tournament_date);
+                        if (rDate.getFullYear() !== filterYear || (rDate.getMonth() + 1) !== filterMonth) return;
+                    }
+                    if (timeControl !== 'all' && r.time_control !== timeControl) return;
+
                     totalBase += (parseInt(r.base_points) || 0);
                     totalBonus += (parseInt(r.bonus_points) || 0);
                     tournamentsCount++;
-                    studentRecords.push(r);
+                    filteredRecords.push(r);
                 }
             });
-            totalPoints = totalBase + totalBonus;
+            const totalPoints = totalBase + totalBonus;
 
             const tierInfo = getTierInfo(student.current_rating || 1400);
+            filteredRecords.sort((a, b) => new Date(b.tournament_date) - new Date(a.tournament_date));
 
-            // Sort records by date descending
-            studentRecords.sort((a, b) => new Date(b.tournament_date) - new Date(a.tournament_date));
-
-            // Generate Tournament List HTML (same as before)
             let recordsHtml = '';
-            if (studentRecords.length > 0) {
+            const periodLabel = period ? (() => {
+                const [y, m] = period.split('-');
+                const d = new Date(y, m - 1);
+                return d.toLocaleString('default', { month: 'long', year: 'numeric' });
+            })() : 'All Time';
+
+            if (filteredRecords.length > 0) {
                 recordsHtml = `
                     <div class="mt-6 border-t border-gray-100 pt-4">
                         <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                            <span class="text-xl">♟️</span> Tournament History (${monthFilter === 'all' ? 'All Time' : document.getElementById('student-search-month').options[document.getElementById('student-search-month').selectedIndex].text})
+                            <span class="text-xl">♟️</span> Tournament History (${periodLabel})
                         </h4>
                         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                             <div class="overflow-x-auto">
@@ -2247,16 +2481,15 @@ Chess Rating System by Kamus Catur`;
                                         <tr>
                                             <th class="px-4 py-3 text-left font-medium uppercase tracking-wider">Date</th>
                                             <th class="px-4 py-3 text-left font-medium uppercase tracking-wider">Tournament</th>
-                                            <th class="px-4 py-3 text-left font-medium uppercase tracking-wider">Level</th>
+                                            <th class="px-4 py-3 text-left font-medium uppercase tracking-wider">Format</th>
                                             <th class="px-4 py-3 text-center font-medium uppercase tracking-wider">Result</th>
                                             <th class="px-4 py-3 text-right font-medium uppercase tracking-wider">Points</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
-                                        ${studentRecords.map(r => {
+                                        ${filteredRecords.map(r => {
                                             const total = (parseInt(r.base_points) || 0) + (parseInt(r.bonus_points) || 0);
                                             const bonus = parseInt(r.bonus_points) || 0;
-                                            const isBonusPositive = bonus >= 0;
                                             return `
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-4 py-3 whitespace-nowrap text-gray-600">${new Date(r.tournament_date).toLocaleDateString()}</td>
@@ -2264,18 +2497,15 @@ Chess Rating System by Kamus Catur`;
                                                     <div>${r.tournament_name}</div>
                                                     <div class="text-xs text-gray-500 md:hidden">${r.tournament_level}</div>
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600 hidden md:table-cell">
-                                                    <span class="px-2 py-1 rounded text-xs bg-gray-100 border border-gray-200">${r.tournament_level}</span>
+                                                <td class="px-4 py-3 whitespace-nowrap text-gray-600">
+                                                    ${r.time_control}
                                                 </td>
                                                 <td class="px-4 py-3 whitespace-nowrap text-center text-gray-600">
                                                     ${r.final_ranking}/${r.total_players}
-                                                    ${r.has_special_prize ? '<span class="ml-1 text-purple-600" title="Special Prize">🏅</span>' : ''}
+                                                    ${r.has_special_prize ? '🏅' : ''}
                                                 </td>
                                                 <td class="px-4 py-3 whitespace-nowrap text-right font-bold">
                                                     <div class="text-orange-600">+${total}</div>
-                                                    <div class="text-[10px] font-normal text-gray-400">
-                                                        (Base: ${r.base_points} <span class="${isBonusPositive ? 'text-green-600' : 'text-red-500'}">Bonus: ${isBonusPositive ? '+' : ''}${bonus}</span>)
-                                                    </div>
                                                 </td>
                                             </tr>
                                             `;
@@ -2287,14 +2517,9 @@ Chess Rating System by Kamus Catur`;
                     </div>
                 `;
             } else {
-                recordsHtml = `
-                    <div class="mt-6 border-t border-gray-100 pt-6 text-center text-gray-500 italic">
-                        No tournament records found for this period.
-                    </div>
-                `;
+                recordsHtml = `<div class="mt-6 border-t border-gray-100 pt-6 text-center text-gray-500 italic">No records match current filters.</div>`;
             }
 
-            // Render Result with Gender Rank
             resultContainer.innerHTML = `
                 <div class="border border-orange-200 bg-orange-50 rounded-lg p-4 md:p-6 relative overflow-hidden">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 text-9xl opacity-5 select-none pointer-events-none">
@@ -2306,16 +2531,14 @@ Chess Rating System by Kamus Catur`;
                             <h3 class="text-xl font-bold text-gray-900">${student.student_name}</h3>
                             <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-1 text-sm text-gray-600">
                                 <span class="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">KC ID: ${student.kc_id}</span>
-                                <span>${student.student_gender || 'Unknown'}</span>
-                                ${student.student_age ? `<span>${student.student_age} years old</span>` : ''}
+                                <span>${student.student_gender || '-'}</span>
+                                <span>${student.student_state || '-'}</span>
+                                ${student.student_age ? `<span>${student.student_age} years</span>` : ''}
                             </div>
                             
                             <div class="flex items-center gap-2 mt-3">
-                                <span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-700 shadow-sm" title="Overall Rank">
-                                    Overall: #${rank}
-                                </span>
-                                <span class="px-3 py-1 bg-white border border-${isMale ? 'blue' : 'pink'}-200 rounded-full text-sm font-bold text-${isMale ? 'blue' : 'pink'}-700 shadow-sm" title="Gender Rank">
-                                    ${isMale ? 'Male' : 'Female'} Rank: #${genderRank}
+                                <span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-700 shadow-sm">
+                                    Filtered Rank: ${rankDisplay}
                                 </span>
                                 <span class="px-3 py-1 rounded-full text-sm font-bold text-white shadow-sm flex items-center gap-1" style="background-color: ${tierInfo.color}">
                                     ${tierInfo.icon} ${tierInfo.subTier}
@@ -2325,31 +2548,15 @@ Chess Rating System by Kamus Catur`;
 
                         <div class="flex gap-3 text-center w-full md:w-auto">
                             <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex-1 md:flex-none md:min-w-[100px]">
-                                <div class="text-xs text-gray-500 uppercase font-semibold">Current Rating</div>
+                                <div class="text-xs text-gray-500 uppercase font-semibold">Rating</div>
                                 <div class="text-2xl font-bold text-orange-600">${student.current_rating || 1400}</div>
                             </div>
                             <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex-1 md:flex-none md:min-w-[100px]">
-                                <div class="text-xs text-gray-500 uppercase font-semibold">${pointsLabel}</div>
+                                <div class="text-xs text-gray-500 uppercase font-semibold">Filtered Pts</div>
                                 <div class="text-2xl font-bold text-blue-600">${totalPoints}</div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm border-t border-orange-200 pt-4 relative z-10">
-                        <div class="bg-white/50 p-2 rounded">
-                            <span class="block text-gray-500 text-xs">Tournaments Played</span>
-                            <span class="font-semibold text-gray-800">${tournamentsCount}</span>
-                        </div>
-                        <div class="bg-white/50 p-2 rounded">
-                            <span class="block text-gray-500 text-xs">Base Points (Participation)</span>
-                            <span class="font-semibold text-blue-700">${totalBase}</span>
-                        </div>
-                        <div class="bg-white/50 p-2 rounded">
-                            <span class="block text-gray-500 text-xs">Bonus Points (Performance)</span>
-                            <span class="font-semibold text-green-700">${totalBonus > 0 ? '+' : ''}${totalBonus}</span>
-                        </div>
-                    </div>
-
                     ${recordsHtml}
                 </div>
             `;
@@ -2357,49 +2564,15 @@ Chess Rating System by Kamus Catur`;
         }
 
         function updateDashboard() {
-            // Populate month filters if empty
-            if (document.getElementById('month-filter').options.length === 0) {
-                populateMonthFilter();
-            }
+            populateAdvancedFilters();
 
             const analytics = calculateAnalytics();
             updateDashboardStats(analytics);
             
-            // Update all sections
             updateTop10Overall();
             updateTop5ByGender();
+            updateAgeGroupRankings();
             updateMonthlyStats();
-        }
-
-        function populateMonthFilter() {
-            const dashboardSelect = document.getElementById('month-filter');
-            const searchSelect = document.getElementById('student-search-month');
-            const now = new Date();
-            
-            dashboardSelect.innerHTML = '<option value="all">All Time</option>';
-            searchSelect.innerHTML = '<option value="all">All Time</option>';
-
-            // Generate options for the last 12 months
-            for (let i = 0; i < 12; i++) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const value = `${d.getFullYear()}-${d.getMonth()}`; 
-                const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-                
-                // Append to Leaders Filter
-                const option1 = document.createElement('option');
-                option1.value = value;
-                option1.textContent = label;
-                dashboardSelect.appendChild(option1);
-
-                // Append to Student Search Filter
-                const option2 = document.createElement('option');
-                option2.value = value;
-                option2.textContent = label;
-                searchSelect.appendChild(option2);
-            }
-            
-            // Set default to current month for dashboard filter if you prefer, or keep "All Time"
-            // For now "All Time" is index 0
         }
 
         function calculateAnalytics() {
@@ -2420,120 +2593,151 @@ Chess Rating System by Kamus Catur`;
 
         function updateTop10Overall() {
             const container = document.getElementById('top-10-overall');
-            if (students.length === 0) {
-                container.innerHTML = '<div class="col-span-2 text-center text-gray-500">No students registered.</div>';
+            const leaderboard = getLeaderboard().slice(0, 10);
+            
+            const subtitle = document.getElementById('ranking-subtitle');
+            const period = document.getElementById('filter-period-input').value; 
+            const timeControl = document.getElementById('filter-time-control').value;
+            
+            if (!period && timeControl === 'all') { 
+                subtitle.textContent = "By Current Rating";
+            } else {
+                subtitle.textContent = "By Points (Filtered)";
+            }
+
+            if (leaderboard.length === 0) {
+                container.innerHTML = '<div class="col-span-2 text-center text-gray-500 py-4">No students found matching filters.</div>';
                 return;
             }
 
-            const top10 = [...students]
-                .sort((a, b) => (b.current_rating || 1400) - (a.current_rating || 1400))
-                .slice(0, 10);
-
-            container.innerHTML = top10.map((student, index) => renderRankItem(student, index + 1)).join('');
+            container.innerHTML = leaderboard.map((s, i) => `
+                <div class="flex items-center p-3 rounded-lg border bg-gray-50 border-gray-200 mb-2">
+                    <div class="font-bold text-xl w-8 text-center text-gray-600">${i + 1}</div>
+                    <div class="flex-1 px-2 overflow-hidden">
+                        <div class="font-bold truncate">${s.student_name}</div>
+                        <div class="text-xs text-gray-500">${s.kc_id}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-xl text-orange-600">${s.score}</div>
+                        <div class="text-[10px] uppercase text-gray-400">${s.scoreLabel}</div>
+                    </div>
+                </div>
+            `).join('');
         }
         
         function updateTop5ByGender() {
             const maleContainer = document.getElementById('top-5-male');
             const femaleContainer = document.getElementById('top-5-female');
-            const monthFilter = document.getElementById('month-filter').value;
             
-            // Use the centralized leaderboard helper
-            const leaderboard = getLeaderboard(monthFilter);
+            const leaderboard = getLeaderboard();
             
-            // Filter by Gender
-            // Gender check helper
             const isMale = (s) => s.student_gender === 'Male' || s.student_gender === 'Lelaki / Male' || (s.ic_number && parseInt(String(s.ic_number).slice(-1)) % 2 !== 0);
             
             const males = leaderboard.filter(s => isMale(s)).slice(0, 5);
             const females = leaderboard.filter(s => !isMale(s)).slice(0, 5);
 
-            // Updated render function to show Score or Rating based on context
             const renderItem = (s, i) => `
                 <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border-b border-gray-100 last:border-0">
-                    <div class="flex items-center flex-1 mr-2">
+                    <div class="flex items-center flex-1 mr-2 overflow-hidden">
                         <span class="text-gray-500 font-medium w-6 flex-shrink-0">${i + 1}.</span>
-                        <span class="font-medium text-gray-800 break-words leading-tight">${s.student_name}</span>
+                        <span class="font-medium text-gray-800 truncate">${s.student_name}</span>
                     </div>
                     <div class="text-right flex-shrink-0">
                         <span class="font-bold text-gray-600 block">${s.score}</span>
-                        <span class="text-[10px] text-gray-400 uppercase">${s.scoreLabel || 'Rating'}</span>
+                        <span class="text-[10px] text-gray-400 uppercase">${s.scoreLabel}</span>
                     </div>
                 </div>
             `;
 
-            maleContainer.innerHTML = males.length ? males.map((s, i) => renderItem(s, i)).join('') : '<div class="text-gray-500 text-sm">No male students found for this period.</div>';
-            femaleContainer.innerHTML = females.length ? females.map((s, i) => renderItem(s, i)).join('') : '<div class="text-gray-500 text-sm">No female students found for this period.</div>';
+            maleContainer.innerHTML = males.length ? males.map((s, i) => renderItem(s, i)).join('') : '<div class="text-gray-500 text-sm text-center py-2">No data.</div>';
+            femaleContainer.innerHTML = females.length ? females.map((s, i) => renderItem(s, i)).join('') : '<div class="text-gray-500 text-sm text-center py-2">No data.</div>';
+        }
+
+        function updateAgeGroupRankings() {
+            const leaderboard = getLeaderboard();
+
+            const u8 = leaderboard.filter(s => s.student_age <= 8).slice(0, 3);
+            const u10 = leaderboard.filter(s => s.student_age > 8 && s.student_age <= 10).slice(0, 3);
+            const u12 = leaderboard.filter(s => s.student_age > 10 && s.student_age <= 12).slice(0, 3);
+            const u15 = leaderboard.filter(s => s.student_age > 12 && s.student_age <= 15).slice(0, 3);
+            const u18 = leaderboard.filter(s => s.student_age > 15 && s.student_age <= 18).slice(0, 3);
+
+            const renderSmallItem = (s, i) => `
+                <div class="flex justify-between items-center text-xs p-1 border-b border-gray-100 last:border-0">
+                    <div class="flex-1 truncate pr-1">
+                        <span class="font-bold text-gray-500 mr-1">${i + 1}.</span>${s.student_name}
+                    </div>
+                    <div class="font-bold text-gray-700">${s.score}</div>
+                </div>
+            `;
+
+            const renderEmpty = () => '<div class="text-xs text-gray-400 italic text-center p-2">-</div>';
+
+            document.getElementById('top-u8').innerHTML = u8.length ? u8.map((s, i) => renderSmallItem(s, i)).join('') : renderEmpty();
+            document.getElementById('top-u10').innerHTML = u10.length ? u10.map((s, i) => renderSmallItem(s, i)).join('') : renderEmpty();
+            document.getElementById('top-u12').innerHTML = u12.length ? u12.map((s, i) => renderSmallItem(s, i)).join('') : renderEmpty();
+            document.getElementById('top-u15').innerHTML = u15.length ? u15.map((s, i) => renderSmallItem(s, i)).join('') : renderEmpty();
+            document.getElementById('top-u18').innerHTML = u18.length ? u18.map((s, i) => renderSmallItem(s, i)).join('') : renderEmpty();
         }
 
         function updateMonthlyStats() {
-            const select = document.getElementById('month-filter');
-            // If "All Time" selected, hide monthly specific stats or show empty? 
-            // The request was specific about "Leaders of the Month", so if "All Time" is selected, 
-            // we can either show all-time leaders (by points?) or just clear it.
-            // Let's assume All Time means "Total Points Earned All Time" for these categories.
-            
+            const period = document.getElementById('filter-period-input').value; 
+            const timeControl = document.getElementById('filter-time-control').value;
+            const gender = document.getElementById('filter-gender').value;
+            const state = document.getElementById('filter-state').value;
+            const ageGroup = document.getElementById('filter-age-group').value;
+
+            const eligibleStudentIds = new Set(students.filter(s => 
+                isGenderMatch(s, gender) &&
+                isStateMatch(s, state) &&
+                isAgeMatch(s, ageGroup)
+            ).map(s => s.kc_id));
+
             let stats = {};
             
-            if (select.value === 'all') {
-                // Aggregate ALL records
-                approvedRecords.forEach(record => {
-                    const kcId = record.kc_id;
-                    if (!stats[kcId]) {
-                        // Find student name if not in record, fallback to KC ID
-                        let studentName = record.student_name;
-                        if(!studentName) {
-                            const student = students.find(s => s.kc_id === kcId);
-                            studentName = student ? student.student_name : kcId;
-                        }
-                        stats[kcId] = { name: studentName, total: 0, base: 0, bonus: 0, kc_id: kcId };
-                    }
-                    stats[kcId].total += (parseInt(record.total_points) || 0);
-                    stats[kcId].base += (parseInt(record.base_points) || 0);
-                    stats[kcId].bonus += (parseInt(record.bonus_points) || 0);
-                });
-            } else {
-                const [selectedYear, selectedMonth] = select.value.split('-').map(Number);
-                approvedRecords.forEach(record => {
+            approvedRecords.forEach(record => {
+                if (!eligibleStudentIds.has(record.kc_id)) return;
+
+                if (period) {
+                    const [filterYear, filterMonth] = period.split('-').map(Number);
                     const rDate = new Date(record.tournament_date);
-                    if (rDate.getMonth() === selectedMonth && rDate.getFullYear() === selectedYear) {
-                        const kcId = record.kc_id;
-                        if (!stats[kcId]) {
-                            let studentName = record.student_name;
-                            if(!studentName) {
-                                const student = students.find(s => s.kc_id === kcId);
-                                studentName = student ? student.student_name : kcId;
-                            }
-                            stats[kcId] = { name: studentName, total: 0, base: 0, bonus: 0, kc_id: kcId };
-                        }
-                        stats[kcId].total += (parseInt(record.total_points) || 0);
-                        stats[kcId].base += (parseInt(record.base_points) || 0);
-                        stats[kcId].bonus += (parseInt(record.bonus_points) || 0);
+                    if (rDate.getFullYear() !== filterYear || (rDate.getMonth() + 1) !== filterMonth) return;
+                }
+
+                if (timeControl !== 'all' && record.time_control !== timeControl) return;
+
+                const kcId = record.kc_id;
+                if (!stats[kcId]) {
+                    let studentName = record.student_name;
+                    if(!studentName) {
+                        const student = students.find(s => s.kc_id === kcId);
+                        studentName = student ? student.student_name : kcId;
                     }
-                });
-            }
+                    stats[kcId] = { name: studentName, total: 0, base: 0, bonus: 0, kc_id: kcId };
+                }
+                stats[kcId].total += (parseInt(record.total_points) || 0);
+                stats[kcId].base += (parseInt(record.base_points) || 0);
+                stats[kcId].bonus += (parseInt(record.bonus_points) || 0);
+            });
             
             const statsArray = Object.values(stats);
             
-            // 1. Top Scorers (Total Points)
             const topScorers = [...statsArray].sort((a, b) => b.total - a.total).slice(0, 5);
             document.getElementById('top-scorers-month').innerHTML = topScorers.length ? 
                 topScorers.map((s, i) => renderMonthlyItem(s, i + 1, s.total, 'pts')).join('') : 
-                '<div class="text-gray-500 text-sm">No records for this period.</div>';
+                '<div class="text-gray-500 text-sm text-center py-2">No records found.</div>';
                 
-            // 2. Most Active (Base Points)
             const mostActive = [...statsArray].sort((a, b) => b.base - a.base).slice(0, 5);
             document.getElementById('top-active-month').innerHTML = mostActive.length ? 
                 mostActive.map((s, i) => renderMonthlyItem(s, i + 1, s.base, 'base pts')).join('') : 
-                '<div class="text-gray-500 text-sm">No records for this period.</div>';
+                '<div class="text-gray-500 text-sm text-center py-2">No records found.</div>';
 
-            // 3. Best Performance (Bonus Points)
             const bestPerf = [...statsArray].sort((a, b) => b.bonus - a.bonus).slice(0, 5);
             document.getElementById('top-performance-month').innerHTML = bestPerf.length ? 
                 bestPerf.map((s, i) => renderMonthlyItem(s, i + 1, s.bonus, 'bonus pts')).join('') : 
-                '<div class="text-gray-500 text-sm">No records for this period.</div>';
+                '<div class="text-gray-500 text-sm text-center py-2">No records found.</div>';
         }
 
-        // Helper render functions
         function renderRankItem(student, rank) {
             const tierInfo = getTierInfo(student.current_rating || 1400);
             let rankColor = 'bg-gray-100 text-gray-700';
@@ -2541,15 +2745,21 @@ Chess Rating System by Kamus Catur`;
             if (rank === 2) rankColor = 'bg-gray-200 text-gray-800 border-gray-400';
             if (rank === 3) rankColor = 'bg-orange-100 text-orange-800 border-orange-300';
             
+            const scoreLabel = student.scoreLabel || 'Rating';
+            const scoreValue = student.score !== undefined ? student.score : (student.current_rating || 1400);
+
             return `
                 <div class="flex items-center p-3 rounded-lg border ${rankColor} mb-2">
                     <div class="font-bold text-xl w-8 text-center">${rank}</div>
                     <div class="text-2xl mr-3">${tierInfo.icon}</div>
-                    <div class="flex-1">
-                        <div class="font-bold">${student.student_name}</div>
+                    <div class="flex-1 overflow-hidden">
+                        <div class="font-bold truncate">${student.student_name}</div>
                         <div class="text-xs opacity-75">${tierInfo.mainTier} • ${tierInfo.subTier}</div>
                     </div>
-                    <div class="font-bold text-xl">${student.current_rating || 1400}</div>
+                    <div class="text-right">
+                        <div class="font-bold text-xl">${scoreValue}</div>
+                        <div class="text-[10px] uppercase opacity-75">${scoreLabel}</div>
+                    </div>
                 </div>
             `;
         }
@@ -2557,9 +2767,9 @@ Chess Rating System by Kamus Catur`;
         function renderSimpleRankItem(student, rank) {
             return `
                 <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border-b border-gray-100 last:border-0">
-                    <div class="flex items-center flex-1 mr-2">
+                    <div class="flex items-center flex-1 mr-2 overflow-hidden">
                         <span class="text-gray-500 font-medium w-6 flex-shrink-0">${rank}.</span>
-                        <span class="font-medium text-gray-800 break-words leading-tight">${student.student_name}</span>
+                        <span class="font-medium text-gray-800 truncate">${student.student_name}</span>
                     </div>
                     <span class="font-bold text-gray-600 flex-shrink-0">${student.current_rating || 1400}</span>
                 </div>
@@ -2590,10 +2800,6 @@ Chess Rating System by Kamus Catur`;
             if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
             return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
         }
-
-        // ============================================
-        // INITIALIZE APP
-        // ============================================
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
