@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* STANDARDIZED THEME */
+    :root { --primary: #ff9800; --dark: #e65100; --bg: #fff3e0; }
+    body { background-color: var(--bg); font-family: 'Poppins', sans-serif; color: #333; padding-bottom: 50px; }
+    
+    .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
+    .logo-img { width: 120px; display: block; margin: 0 auto 20px; }
+    .page-title { text-align: center; font-weight: 800; color: var(--dark); text-transform: uppercase; margin-bottom: 30px; }
+
+    /* CARD STYLE */
+    .custom-card {
+      background: white; border: none; border-radius: 15px;
+      border-top: 5px solid var(--primary);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+      padding: 30px; margin-bottom: 20px;
+    }
+
+    /* FORMS */
+    .form-label { font-weight: 600; color: var(--dark); }
+    .form-control, .form-select {
+      border: 2px solid #eee; border-radius: 10px; padding: 10px;
+    }
+    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: none; }
+
+    /* BUTTONS */
+    .btn-theme {
+      background-color: var(--primary); color: white; border: none;
+      padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; transition: 0.3s;
+    }
+    .btn-theme:hover { background-color: var(--dark); }
+
+    /* QUIZ SPECIFIC */
+    .section-header {
+      background: var(--dark); color: white; padding: 10px 20px;
+      border-radius: 10px; margin: 30px 0 20px; font-weight: 600;
+    }
+    .option-label {
+      display: block; padding: 12px; border: 1px solid #eee; border-radius: 8px;
+      margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+    }
+    .option-label:hover { background: var(--bg); border-color: var(--primary); }
+    input[type="radio"] { margin-right: 10px; accent-color: var(--dark); }
+
+    /* REPORT CARD */
+    #result-container { display: none; }
+    .role-badge {
+      background: var(--dark); color: white; padding: 10px 20px;
+      border-radius: 50px; font-size: 1.5em; font-weight: bold; margin: 20px 0; display: inline-block;
+    }
+    .score-bar-bg { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; }
+    .score-bar-fill { background: var(--primary); height: 100%; }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    <img src="https://github.com/luqmanjuhar/kamus-catur-portal/raw/b0e496e7f3e95920aa671c535858c718c45ff010/Asset%2028.png" class="logo-img">
+    <h1 class="page-title">Ujian Personaliti Catur</h1>
+
+    <div id="intro-section" class="custom-card">
+      <h4 class="mb-3 text-center" style="color:var(--dark)">Profil Peserta</h4>
+      <div class="mb-3">
+        <label class="form-label">Nama Penuh</label>
+        <input type="text" id="intro-name" class="form-control" placeholder="Nama anda...">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Status Keahlian</label>
+        <select id="intro-status" class="form-select">
+          <option value="">-- Pilih --</option>
+          <option value="KCHERS">KCHERS</option>
+          <option value="AHLI AKTIF">AHLI AKTIF</option>
+          <option value="ALUMNI">ALUMNI</option>
+          <option value="BUKAN AHLI">BUKAN AHLI</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Tarikh Lahir</label>
+        <input type="date" id="intro-dob" class="form-control">
+      </div>
+      <button class="btn-theme" onclick="startQuiz()">MULA UJIAN</button>
+    </div>
+
+    <div id="quiz-section" style="display:none;">
+      <form id="quiz-form">
+        <div id="quiz-container">
+          <div class="text-center py-5">Memuatkan Soalan...</div>
+        </div>
+        <div class="mt-4">
+          <button type="button" class="btn-theme" onclick="submitQuiz()">HANTAR JAWAPAN</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="result-container" class="custom-card text-center">
+      <h3 style="color:#777; letter-spacing:2px; font-size:1em;">ANALISIS PERSONALITI</h3>
+      <h2 id="display-name" style="color:var(--primary); font-weight:800; text-transform:uppercase;">NAMA</h2>
+      <p id="display-details" class="text-muted small"></p>
+      
+      <hr>
+      <p>Personaliti Dominan Anda:</p>
+      <div id="final-role" class="role-badge">ROLE</div>
+
+      <div class="text-start mt-4">
+        <table class="table table-borderless table-sm">
+          <tr><td width="30%">Player</td><td><div class="score-bar-bg"><div id="bar-p" class="score-bar-fill" style="width:0%"></div></div></td><td width="10%" id="val-p">0</td></tr>
+          <tr><td>Coach</td><td><div class="score-bar-bg"><div id="bar-c" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-c">0</td></tr>
+          <tr><td>Arbiter</td><td><div class="score-bar-bg"><div id="bar-a" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-a">0</td></tr>
+          <tr><td>Instructor</td><td><div class="score-bar-bg"><div id="bar-i" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-i">0</td></tr>
+          <tr><td>Parent</td><td><div class="score-bar-bg"><div id="bar-par" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-par">0</td></tr>
+        </table>
+      </div>
+
+      <div class="mt-4 text-start p-3" style="background:#f9f9f9; border-radius:10px;">
+        <h5 style="color:var(--dark)">Analisis Kekuatan</h5>
+        <p id="analysis-text" style="font-size:0.95em; line-height:1.6;"></p>
+        <h5 style="color:var(--dark); margin-top:15px;">Cadangan</h5>
+        <ul id="suggestion-list" style="padding-left:20px; font-size:0.9em;"></ul>
+      </div>
+
+      <button class="btn btn-outline-secondary mt-4 rounded-pill px-4" onclick="location.reload()">Mula Semula</button>
+    </div>
+  </div>
+
+  <script>
+    // Paste your original Javascript logic here (startQuiz, renderQuiz, submitQuiz etc.)
+    // Ensure 'google.script.run' functions are inside.
+    let userProfile = { name: "", status: "", dob: "" };
+    let totalQuestions = 0;
+
+    function startQuiz() {
+       const name = document.getElementById('intro-name').value;
+       const status = document.getElementById('intro-status').value;
+       const dob = document.getElementById('intro-dob').value;
+       if(!name || !status || !dob) { alert("Sila lengkapkan maklumat."); return; }
+       
+       userProfile = { name, status, dob };
+       document.getElementById('intro-section').style.display = 'none';
+       document.getElementById('quiz-section').style.display = 'block';
+       
+       google.script.run.withSuccessHandler(renderQuiz).getData();
+    }
+
+    // ... (Paste the rest of your original JS functions: renderQuiz, shuffleArray, submitQuiz, showReport)
+    // IMPORTANT: In renderQuiz, ensure classes match Bootstrap (e.g., use 'section-header' and 'option-label')
+    
+    function renderQuiz(jsonString) {
+      const sectionsData = JSON.parse(jsonString);
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = "";
+      let globalIndex = 0;
+
+      sectionsData.forEach(section => {
+        let header = document.createElement('div');
+        header.className = 'section-header';
+        header.innerText = section.category;
+        container.appendChild(header);
+
+        section.items.forEach(item => {
+          let card = document.createElement('div');
+          card.className = 'custom-card p-3 mb-3'; // Use new class
+          card.style.borderTop = "none"; // Small cards don't need top border inside section
+          card.style.borderLeft = "4px solid var(--primary)";
+
+          let html = `<div class="fw-bold mb-2">${item.q}</div>`;
+          // Shuffle options logic here...
+          item.opts.forEach(opt => {
+             html += `<label class="option-label">
+                <input type="radio" name="q${globalIndex}" value="${opt.type}"> ${opt.txt}
+             </label>`;
+          });
+          card.innerHTML = html;
+          container.appendChild(card);
+          globalIndex++;
+        });
+      });
+      totalQuestions = globalIndex;
+    }
+    
+    // ... Paste remaining JS logic (submitQuiz, etc) here ...
+    // Note: Use same logic as your previous code, just update ID references if they changed.
+    
+    // Quick Fix for submitQuiz to use new IDs:
+    function submitQuiz() {
+        // ... calculation logic ...
+        // google.script.run ...
+    }
+    
+    function showReport(winner, scores) {
+        document.getElementById('quiz-section').style.display = 'none';
+        document.getElementById('result-container').style.display = 'block';
+        document.getElementById('display-name').innerText = userProfile.name;
+        // ... rest of report logic ...
+    }
+  </script>
+</body>
+</html>
