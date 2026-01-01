@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-orange: #ff9800;
+      --dark-orange: #e65100;
+      --bg-color: #fff3e0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .header-container {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .logo {
+      width: 140px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+    h1 {
+      color: var(--dark-orange);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 2.2em;
+      margin: 0;
+    }
+    p.subtitle {
+      color: #555;
+      font-size: 1.1em;
+      max-width: 600px;
+      margin-top: 10px;
+    }
+    /* CARD GRID */
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+      max-width: 900px;
+      width: 100%;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      flex: 1 1 300px; /* Responsive flex */
+      max-width: 400px;
+      padding: 40px 30px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      border-top: 8px solid var(--primary-orange);
+      transition: transform 0.3s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card:hover { transform: translateY(-10px); }
+    .icon { font-size: 4em; margin-bottom: 15px; display: block; }
+    h2 { color: #333; margin-bottom: 10px; }
+    .desc { color: #777; font-size: 0.9em; margin-bottom: 30px; line-height: 1.5; }
+    
+    .btn {
+      display: block;
+      background-color: var(--primary-orange);
+      color: white;
+      text-decoration: none;
+      padding: 15px 0;
+      border-radius: 50px;
+      font-weight: 700;
+      width: 100%;
+      transition: background 0.3s;
+    }
+    .btn:hover { background-color: var(--dark-orange); }
+    
+    .footer { margin-top: auto; padding: 20px; color: #888; font-size: 0.8em; }
+  </style>
+</head>
+<body>
+
+  <div class="header-container">
+    <img src="https://github.com/luqmanjuhar/kamus-catur-portal/raw/b0e496e7f3e95920aa671c535858c718c45ff010/Asset%2028.png" alt="Logo" class="logo">
+    <h1>Portal Psikometrik</h1>
+    <p class="subtitle">Pilih ujian di bawah untuk menganalisis potensi, gaya permainan, dan tahap mental anda.</p>
+  </div>
+
+  <div class="card-container">
+    <div class="card">
+      <div>
+        <span class="icon">♟️</span>
+        <h2>Personaliti Catur</h2>
+        <p class="desc">Ketahui watak dominan anda dalam dunia catur. Adakah anda seorang "The Player", "Coach", atau "Arbiter"?</p>
+      </div>
+      <a href="<?= url ?>?page=personaliti" class="btn">Mula Ujian</a>
+    </div>
+
+    <div class="card">
+      <div>
+        <span class="icon">📊</span>
+        <h2>Penilaian Pemain</h2>
+        <p class="desc">Analisis tahap mental, emosi, disiplin, dan cara membuat keputusan (Decision Making) anda.</p>
+      </div>
+      <a href="<?= url ?>?page=penilaian" class="btn">Mula Penilaian</a>
+    </div>
+  </div>
+
+  <div class="footer">&copy; 2026 Kamus Catur Portal</div>
+
+</body>
+</html>
