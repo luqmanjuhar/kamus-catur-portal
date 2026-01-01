@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* STANDARDIZED THEME - SAME AS PAGE 1 */
+    :root { --primary: #ff9800; --dark: #e65100; --bg: #fff3e0; }
+    body { background-color: var(--bg); font-family: 'Poppins', sans-serif; color: #333; padding-bottom: 50px; }
+    
+    .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
+    .logo-img { width: 120px; display: block; margin: 0 auto 20px; }
+    .page-title { text-align: center; font-weight: 800; color: var(--dark); text-transform: uppercase; margin-bottom: 30px; }
+
+    .custom-card {
+      background: white; border: none; border-radius: 15px;
+      border-top: 5px solid var(--primary);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+      padding: 30px; margin-bottom: 20px;
+    }
+
+    .form-label { font-weight: 600; color: var(--dark); font-size: 0.9em; }
+    .form-control, .form-select { border: 2px solid #eee; border-radius: 10px; padding: 10px; }
+    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: none; }
+
+    .btn-theme {
+      background-color: var(--primary); color: white; border: none;
+      padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; transition: 0.3s;
+    }
+    .btn-theme:hover { background-color: var(--dark); }
+
+    /* Assessment Specific */
+    .question-row { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
+    .section-badge { background: var(--dark); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; margin-top: 20px; display: inline-block; }
+    
+    /* Result Specific */
+    .score-circle { 
+        width: 120px; height: 120px; background: var(--primary); color: white; 
+        border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+        flex-direction: column; margin: 0 auto 20px; 
+    }
+    .cat-box { background: #fffcf5; border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="main-container">
+  <img src="https://github.com/luqmanjuhar/kamus-catur-portal/raw/b0e496e7f3e95920aa671c535858c718c45ff010/Asset%2028.png" class="logo-img">
+  <h1 class="page-title">Penilaian Prestasi Pemain</h1>
+
+  <div id="formCard" class="custom-card">
+    <form id="quizForm">
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label">NAMA PENUH</label>
+          <input type="text" name="nama" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+           <label class="form-label">STATUS</label>
+           <select name="status" class="form-select" required>
+             <option value="">- Pilih -</option>
+             <option>KCHERS</option>
+             <option>AHLI AKTIF</option>
+             <option>ALUMNI</option>
+             <option>BUKAN AHLI</option>
+           </select>
+        </div>
+        <div class="col-md-12">
+           <label class="form-label">TARIKH LAHIR</label>
+           <input type="date" name="dob" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="alert alert-warning text-center small">Skala: 1 (Sangat Tidak Setuju) - 5 (Sangat Setuju)</div>
+      <div id="soalanContainer"></div>
+
+      <button type="submit" id="submitBtn" class="btn-theme mt-4">HANTAR ANALISIS</button>
+    </form>
+  </div>
+
+  <div id="resultBox" class="custom-card text-center" style="display:none;">
+    <h3 style="color:#777; letter-spacing:2px; font-size:1em;">LAPORAN PRESTASI</h3>
+    <h2 id="resNama" style="color:var(--primary); font-weight:800; text-transform:uppercase;">NAMA</h2>
+    <p id="resStatus" class="text-muted small"></p>
+
+    <div class="score-circle">
+        <span id="resSkor" style="font-size:2.5em; font-weight:800; line-height:1;">0</span>
+        <span style="font-size:0.8em;">/ 200</span>
+    </div>
+    <div id="resTahap" class="badge bg-dark fs-6 mb-4">TAHAP</div>
+
+    <div class="text-start">
+       <div class="cat-box">
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>🧠 Mental</span><span id="skorMental"></span></div>
+          <small id="tipsMental" class="d-block mt-1 text-secondary"></small>
+       </div>
+       <div class="cat-box">
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>❤️ Emosi</span><span id="skorEmosi"></span></div>
+          <small id="tipsEmosi" class="d-block mt-1 text-secondary"></small>
+       </div>
+       <div class="cat-box">
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>📅 Disiplin</span><span id="skorDisiplin"></span></div>
+          <small id="tipsDisiplin" class="d-block mt-1 text-secondary"></small>
+       </div>
+       <div class="cat-box">
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>♟️ Keputusan</span><span id="skorKeputusan"></span></div>
+          <small id="tipsKeputusan" class="d-block mt-1 text-secondary"></small>
+       </div>
+       <div class="cat-box">
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>🚀 Mindset</span><span id="skorMindset"></span></div>
+          <small id="tipsMindset" class="d-block mt-1 text-secondary"></small>
+       </div>
+    </div>
+
+    <button onclick="location.reload()" class="btn btn-outline-secondary mt-4 rounded-pill px-4">Isi Semula</button>
+  </div>
+</div>
+
+<script>
+  // Paste your original Javascript here.
+  // Make sure the render logic adds <div class="section-badge"> for category headers.
+  
+  const soalanList = [ 
+    // ... Copy your original question list here ... 
+    "Saya kekal fokus walaupun perlawanan berlarutan lebih 4 jam.",
+    // ... etc
+  ];
+
+  const container = document.getElementById('soalanContainer');
+  // Loop logic (Standardized to use Bootstrap Rows)
+  for (let i = 0; i < 40; i++) { // Assuming 40 questions
+      let nombor = i + 1;
+      let labelCat = "";
+      if(i===0) labelCat = "<div class='section-badge'>BAHAGIAN 1: KETAHANAN MENTAL</div>";
+      if(i===8) labelCat = "<div class='section-badge'>BAHAGIAN 2: KAWALAN EMOSI</div>";
+      // ... Add other categories ...
+
+      let questionHTML = `
+      ${labelCat}
+      <div class="question-row d-flex justify-content-between align-items-center">
+        <div style="width:55%; font-size:0.95em;">${nombor}. ${soalanList[i] || "Soalan..."}</div>
+        <div class="d-flex justify-content-between" style="width:40%;">
+            ${[1,2,3,4,5].map(n => `
+              <div class="text-center">
+                <input type="radio" name="soalan${nombor}" value="${n}" required>
+                <div style="font-size:10px; color:#999;">${n}</div>
+              </div>`).join('')}
+        </div>
+      </div>`;
+      container.innerHTML += questionHTML;
+  }
+
+  // ... Paste the rest of your form submission logic here (google.script.run) ...
+</script>
+</body>
+</html>
