@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* TEMA OREN */
+    :root {
+      --primary-orange: #ff9800;
+      --dark-orange: #e65100;
+      --light-orange: #fff3e0;
+      --text-color: #333;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light-orange);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      max-width: 200px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: var(--dark-orange);
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-top: 0;
+    }
+
+    /* SECTION HEADER (KATEGORI) */
+    .section-header {
+      background-color: var(--dark-orange);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin: 30px 0 20px 0;
+      font-size: 1.3em;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-header::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: white;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+
+    /* FORMS & INPUTS STYLE */
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .input-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--dark-orange);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1em;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      transition: border 0.3s;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary-orange);
+      outline: none;
+    }
+    
+    /* Intro Card Design */
+    .intro-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      border-top: 8px solid var(--primary-orange);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border-left: 5px solid var(--primary-orange);
+    }
+
+    .question-title {
+      font-size: 1.1em;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--dark-orange);
+    }
+
+    .options label {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      margin: 8px 0;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #eee;
+      transition: all 0.2s;
+    }
+
+    .options label:hover {
+      background-color: var(--light-orange);
+      border-color: var(--primary-orange);
+    }
+
+    .options input[type="radio"] {
+      margin-right: 15px;
+      accent-color: var(--dark-orange);
+      transform: scale(1.2);
+    }
+
+    .btn {
+      background-color: var(--primary-orange);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.2em;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(230, 81, 0, 0.3);
+      transition: background 0.3s;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: var(--dark-orange);
+    }
+
+    /* Report Card Design */
+    #result-container {
+      display: none;
+    }
+
+    .report-card {
+      background: white;
+      border: 8px solid var(--primary-orange);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      position: relative;
+      background-image: radial-gradient(#fff3e0 10%, transparent 10%);
+      background-size: 20px 20px;
+    }
+
+    .report-header {
+      border-bottom: 2px dashed #ccc;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .report-title {
+      font-size: 1.5em;
+      letter-spacing: 2px;
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    .user-name {
+      font-size: 2em;
+      font-weight: 800;
+      color: var(--dark-orange);
+      margin: 10px 0;
+      text-transform: uppercase;
+    }
+    
+    .user-details {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    .role-badge {
+      background: var(--dark-orange);
+      color: white;
+      display: inline-block;
+      padding: 10px 30px;
+      border-radius: 50px;
+      font-size: 1.8em;
+      font-weight: bold;
+      margin: 20px 0;
+      box-shadow: 0 5px 15px rgba(230,81,0,0.4);
+    }
+
+    .score-table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    .score-table td {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+    }
+
+    .score-bar-bg {
+      background: #eee;
+      height: 12px;
+      border-radius: 6px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      background: var(--primary-orange);
+    }
+
+    .analysis-text {
+      text-align: justify;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    .suggestion-box {
+      margin-top: 20px;
+      text-align: left;
+    }
+    
+    .footer-note {
+      margin-top: 30px;
+      font-size: 0.8em;
+      color: #777;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,255,255,0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 999;
+    }
+    
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-orange);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+
+  <div id="loading-overlay" class="loading-overlay" style="display:none;">
+    <div class="spinner"></div>
+    <p style="margin-top:20px; font-weight:600; color:var(--dark-orange)">Sedang Memproses...</p>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <img src="https://github.com/luqmanjuhar/kamus-catur-portal/raw/b0e496e7f3e95920aa671c535858c718c45ff010/Asset%2028.png" alt="Logo" class="logo">
+      <h1>Ujian Personaliti Catur</h1>
+    </div>
+
+    <div id="intro-section">
+      <div class="intro-card">
+        <h2 style="color:var(--dark-orange);">Selamat Datang</h2>
+        <p>Sila lengkapkan profil anda sebelum memulakan ujian 40 soalan ini.</p>
+        
+        <div class="input-group">
+            <label class="input-label">Nama Penuh</label>
+            <input type="text" id="intro-name" class="form-control" placeholder="Contoh: Ali bin Abu">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Status Keahlian</label>
+            <select id="intro-status" class="form-control">
+                <option value="">-- Sila Pilih --</option>
+                <option value="KCHERS">KCHERS</option>
+                <option value="AHLI AKTIF">AHLI AKTIF</option>
+                <option value="ALUMNI">ALUMNI</option>
+                <option value="BUKAN AHLI">BUKAN AHLI</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Tarikh Lahir</label>
+            <input type="date" id="intro-dob" class="form-control">
+        </div>
+
+        <button class="btn" onclick="startQuiz()">MULA UJIAN</button>
+      </div>
+    </div>
+
+    <div id="quiz-section" style="display:none;">
+        <form id="quiz-form">
+            <div id="quiz-container">
+                <div style="text-align:center; padding:20px; color:#777;">Memuatkan Soalan...</div>
+            </div>
+            <br>
+            <button type="button" class="btn" onclick="submitQuiz()">HANTAR JAWAPAN</button>
+        </form>
+    </div>
+
+    <div id="result-container">
+        <div class="report-card">
+        <div class="report-header">
+            <img src="https://github.com/luqmanjuhar/kamus-catur-portal/raw/b0e496e7f3e95920aa671c535858c718c45ff010/Asset%2028.png" alt="Logo" class="logo" style="margin-bottom:0;">
+            <div class="report-title">Laporan Analisis Personaliti</div>
+            <div class="user-name" id="display-name">NAMA PENGGUNA</div>
+            <div class="user-details" id="display-details"></div>
+        </div>
+
+        <div>Personaliti Dominan Anda Ialah:</div>
+        <div class="role-badge" id="final-role">ROLE</div>
+        
+        <table class="score-table">
+            <tr><td width="30%">Pemain (Player)</td><td><div class="score-bar-bg"><div id="bar-p" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-p" width="10%">0</td></tr>
+            <tr><td>Jurulatih (Coach)</td><td><div class="score-bar-bg"><div id="bar-c" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-c">0</td></tr>
+            <tr><td>Arbiter (Pengadil)</td><td><div class="score-bar-bg"><div id="bar-a" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-a">0</td></tr>
+            <tr><td>Instruktor Sekolah</td><td><div class="score-bar-bg"><div id="bar-i" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-i">0</td></tr>
+            <tr><td>Ibu Bapa (Parent)</td><td><div class="score-bar-bg"><div id="bar-par" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-par">0</td></tr>
+        </table>
+
+        <div class="analysis-box">
+            <h3 style="color:var(--dark-orange); margin-top:0;">Analisis Kekuatan</h3>
+            <p id="analysis-text" class="analysis-text"></p>
+            
+            <h3 style="color:var(--dark-orange); margin-top:20px;">Cadangan Aktiviti</h3>
+            <ul id="suggestion-list" class="suggestion-box"></ul>
+        </div>
+
+        <div class="footer-note">
+            Disahkan oleh Algoritma Psikometrik Catur<br>
+            Sila Screenshot Laporan Ini Untuk Simpanan Anda.
+        </div>
+        </div>
+        
+        <div style="text-align:center; margin-top:20px; margin-bottom:50px;">
+        <button class="btn" onclick="location.reload()" style="background:#555; width:auto; padding:10px 30px;">Keluar / Mula Semula</button>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    // Variable Global untuk simpan data pengguna
+    let userProfile = {
+        name: "",
+        status: "",
+        dob: ""
+    };
+    let sectionsData = [];
+    let totalQuestions = 0;
+
+    // 1. Fungsi Mula Quiz (Validasi Borang)
+    function startQuiz() {
+        const name = document.getElementById('intro-name').value;
+        const status = document.getElementById('intro-status').value;
+        const dob = document.getElementById('intro-dob').value;
+
+        if (name.trim() === "" || status === "" || dob === "") {
+            alert("Sila lengkapkan semua maklumat (Nama, Status & Tarikh Lahir) sebelum mula.");
+            return;
+        }
+
+        // Simpan data
+        userProfile.name = name;
+        userProfile.status = status;
+        userProfile.dob = dob;
+
+        // UI Transition
+        document.getElementById('intro-section').style.display = 'none';
+        document.getElementById('loading-overlay').style.display = 'flex'; // Tunjuk loading
+
+        // Panggil Soalan dari Server
+        google.script.run.withSuccessHandler(renderQuiz).getData();
+    }
+
+    // 2. Fungsi Shuffle Jawapan
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // 3. Render Soalan
+    function renderQuiz(jsonString) {
+      sectionsData = JSON.parse(jsonString);
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = ""; // Bersihkan loading text
+
+      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('quiz-section').style.display = 'block';
+
+      let globalIndex = 0;
+
+      sectionsData.forEach((section) => {
+        let sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section-header';
+        sectionDiv.innerText = section.category;
+        container.appendChild(sectionDiv);
+
+        section.items.forEach((item) => {
+          let shuffledOptions = shuffleArray([...item.opts]); 
+          let card = document.createElement('div');
+          card.className = 'card';
+
+          let html = `<div class="question-title">${item.q}</div><div class="options">`;
+          
+          shuffledOptions.forEach(opt => {
+            html += `
+              <label>
+                <input type="radio" name="q${globalIndex}" value="${opt.type}">
+                <span>${opt.txt}</span>
+              </label>
+            `;
+          });
+          
+          html += `</div>`;
+          card.innerHTML = html;
+          container.appendChild(card);
+          
+          globalIndex++; 
+        });
+      });
+
+      totalQuestions = globalIndex;
+    }
+
+    // 4. Submit & Kira Markah
+    function submitQuiz() {
+      let scores = { p: 0, c: 0, a: 0, i: 0, par: 0 };
+      let answeredCount = 0;
+
+      for (let i = 0; i < totalQuestions; i++) {
+        let radios = document.getElementsByName(`q${i}`);
+        for (let radio of radios) {
+          if (radio.checked) {
+            scores[radio.value]++;
+            answeredCount++;
+          }
+        }
+      }
+
+      if (answeredCount < totalQuestions) {
+        alert(`Sila jawab semua soalan! Anda baru menjawab ${answeredCount} daripada ${totalQuestions} soalan.`);
+        return;
+      }
+
+      // Cari Pemenang
+      let maxScore = -1;
+      let winner = '';
+      for (let key in scores) {
+        if (scores[key] > maxScore) {
+          maxScore = scores[key];
+          winner = key;
+        }
+      }
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+
+      // Gabungkan Profil & Keputusan untuk Database
+      const payload = {
+        name: userProfile.name,
+        status: userProfile.status,
+        dob: userProfile.dob,
+        result: convertCodeToRole(winner),
+        scores: scores
+      };
+
+      google.script.run
+        .withSuccessHandler(function() {
+           showReport(winner, scores);
+        })
+        .withFailureHandler(function(err) {
+           console.log(err);
+           alert("Data gagal disimpan ke Database, tetapi laporan anda tetap dijana.");
+           showReport(winner, scores);
+        })
+        .saveToSheet(payload);
+    }
+
+    function convertCodeToRole(code) {
+      const roles = {
+        'p': 'THE PLAYER',
+        'c': 'THE COACH',
+        'a': 'THE ARBITER',
+        'i': 'SCHOOL INSTRUCTOR',
+        'par': 'CHESS PARENT'
+      };
+      return roles[code] || 'UNKNOWN';
+    }
+
+    // 5. Papar Laporan
+    function showReport(winner, scores) {
+      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('quiz-section').style.display = 'none';
+      document.getElementById('result-container').style.display = 'block';
+
+      // Isi Data Profil
+      document.getElementById('display-name').innerText = userProfile.name;
+      
+      const dobDate = new Date(userProfile.dob);
+      const dobString = dobDate.toLocaleDateString('ms-MY');
+      document.getElementById('display-details').innerText = `Status: ${userProfile.status} | Tarikh Lahir: ${dobString}`;
+      
+      document.getElementById('final-role').innerText = convertCodeToRole(winner);
+
+      const maxQ = 40; 
+      
+      const updateBar = (idBar, idVal, score) => {
+         let percentage = (score / maxQ) * 100;
+         let visualWidth = Math.min(percentage * 2.5, 100); 
+         document.getElementById(idBar).style.width = visualWidth + '%';
+         document.getElementById(idVal).innerText = score;
+      };
+
+      updateBar('bar-p', 'val-p', scores.p);
+      updateBar('bar-c', 'val-c', scores.c);
+      updateBar('bar-a', 'val-a', scores.a);
+      updateBar('bar-i', 'val-i', scores.i);
+      updateBar('bar-par', 'val-par', scores.par);
+
+      let analysis = "";
+      let suggestions = [];
+      let extraTips = "";
+
+      switch(winner) {
+        case 'p':
+          analysis = "Jiwa anda adalah seorang PEJUANG (FIGHTER). Anda memiliki ego kompetitif yang sihat, semangat juang tinggi, dan sentiasa mahu membaiki diri sendiri. Bagi anda, catur adalah medan pertempuran intelek dan pembuktian kemampuan diri.";
+          suggestions = ["Cari jurulatih peribadi (Personal Coach).", "Sasarkan gelaran Master (NM/FM).", "Tingkatkan latihan taktikal harian."];
+          extraTips = "💡 Tips Bonus: Sebagai pemain, musuh terbesar adalah diri sendiri. Belajar untuk memisahkan emosi kekalahan daripada identiti diri anda. Jika anda juga mengajar, ingat bahawa tidak semua orang memiliki naluri pembunuh (killer instinct) seperti anda.";
+          break;
+        case 'c':
+          analysis = "Anda seorang PEMIKIR dan PENDIDIK (STRATEGIST). Kepuasan utama anda bukan bermain sendiri, tetapi melihat orang lain faham dan berjaya menggunakan ilmu anda. Anda mementingkan struktur dan teknik yang betul.";
+          suggestions = ["Ambil kursus pensijilan FIDE Trainer (FT/FI).", "Mula menulis blog/vlog catur.", "Tubuhkan akademi kecil."];
+          extraTips = "💡 Tips Bonus: Jurulatih hebat bukan yang paling pandai main, tapi yang paling pandai menyampaikan. Raikan kemajuan kecil pelajar anda (small wins). Jangan lupa untuk terus bermain catur santai supaya anda tidak hilang sentuhan rasa seronok permainan ini.";
+          break;
+        case 'a':
+          analysis = "Anda PENJAGA UNDANG-UNDANG (GUARDIAN). Anda teliti, objektif, dan tenang. Anda suka sistem yang teratur dan keadilan mutlak. Tanpa ketelitian anda, kejohanan catur akan menjadi huru-hara.";
+          suggestions = ["Hadir ke Kursus Arbiter Kebangsaan (NA).", "Jadi sukarelawan kejohanan.", "Kaji Buku Panduan Arbiter FIDE."];
+          extraTips = "💡 Tips Bonus: Arbiter dihormati kerana ketenangan, bukan kerana garang. Gunakan undang-undang untuk mendidik pemain muda, bukan sekadar menghukum. Pastikan anda kekal neutral walaupun kawan baik atau anak murid sendiri sedang bermain.";
+          break;
+        case 'i':
+          analysis = "Anda GURU DAN PENGGERAK (INSTRUCTOR). Anda pakar dalam memupuk minat di peringkat akar umbi. Anda penyabar dan tahu bahawa catur adalah alat pendidikan untuk membina karakter kanak-kanak.";
+          suggestions = ["Dapatkan sijil FIDE School Instructor (SI).", "Anjurkan program 'Catur Masuk Sekolah'.", "Fokus gamifikasi (mini-games)."];
+          extraTips = "💡 Tips Bonus: Anda adalah pintu gerbang pertama kanak-kanak ke dunia catur. Pastikan pengalaman pertama mereka positif. Fokus pada 'Keseronokan' dahulu, 'Disiplin' kemudian. Jika murid seronok, mereka akan belajar sendiri.";
+          break;
+        case 'par':
+          analysis = "Anda WIRA TAK DIDENDANG (THE SUPPORTER). Anda pakar logistik, penyokong emosi, dan tulang belakang kejayaan pemain. Anda sanggup berkorban masa dan tenaga demi memastikan bakat orang lain bersinar.";
+          suggestions = ["Sertai komuniti ibu bapa catur.", "Pelajari asas catur.", "Rancang bajet tahunan dengan teliti."];
+          extraTips = "💡 Tips Bonus: Peranan anda paling sukar tetapi paling mulia. Anak anda perlukan sokongan tanpa syarat—menang atau kalah, anda tetap bangga dengan usaha mereka. Elakkan bercakap tentang catur dalam perjalanan pulang jika anak sedang sedih akibat kekalahan.";
+          break;
+      }
+
+      document.getElementById('analysis-text').innerHTML = analysis + "<br><br><span style='background:#fff3e0; padding:10px; border-radius:8px; display:block; border:1px dashed #ff9800;'>" + extraTips + "</span>";
+      
+      let ul = document.getElementById('suggestion-list');
+      ul.innerHTML = "";
+      suggestions.forEach(s => {
+        let li = document.createElement('li');
+        li.innerText = s;
+        li.style.marginBottom = "10px";
+        ul.appendChild(li);
+      });
+
+      window.scrollTo(0,0);
+    }
+  </script>
+</body>
+</html>
