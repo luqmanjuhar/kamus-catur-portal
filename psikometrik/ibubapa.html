@@ -3,320 +3,331 @@
 <head>
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   
   <style>
-    /* STANDARDIZED THEME */
+    /* THEME UTAMA */
     :root { --primary: #ff9800; --dark: #e65100; --bg: #fff3e0; }
-    body { background-color: var(--bg); font-family: 'Poppins', sans-serif; color: #333; padding-bottom: 50px; }
+    body { background-color: var(--bg); font-family: 'Poppins', sans-serif; padding-bottom: 50px; color: #333; }
     
     .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
-    .logo-img { width: 120px; display: block; margin: 0 auto 20px; }
-    .page-title { text-align: center; font-weight: 800; color: var(--dark); text-transform: uppercase; margin-bottom: 10px; line-height: 1.2; }
-    .page-subtitle { text-align: center; color: #666; font-size: 0.9em; margin-bottom: 30px; }
-
-    .custom-card { 
-      background: white; border: none; border-radius: 15px; 
-      border-top: 5px solid var(--primary); 
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
-      padding: 30px; margin-bottom: 20px; 
-    }
-
-    .form-label { font-weight: 600; color: var(--dark); }
-    .form-control, .form-select { border: 2px solid #eee; border-radius: 10px; padding: 10px; }
-    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: none; }
-
-    .btn-theme { 
-      background-color: var(--primary); color: white; border: none; 
-      padding: 12px 40px; border-radius: 50px; font-weight: 600; 
-      width: 100%; transition: 0.3s; 
-    }
+    .custom-card { background: white; border-radius: 15px; border-top: 5px solid var(--primary); padding: 30px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; width: 100%; font-weight: 600; transition: 0.3s; }
     .btn-theme:hover { background-color: var(--dark); }
 
-    /* Question Specific */
-    .section-badge { 
-      background: var(--dark); color: white; padding: 8px 20px; 
-      border-radius: 50px; font-size: 0.9em; margin-top: 30px; margin-bottom: 15px; 
-      display: inline-block; font-weight: bold; letter-spacing: 1px;
-    }
-    .question-row { border-bottom: 1px solid #f0f0f0; padding: 20px 0; }
-    .likert-scale { display: flex; justify-content: space-between; width: 100%; max-width: 300px; margin-top: 10px; }
-    .likert-opt { text-align: center; cursor: pointer; }
+    /* FORM STYLES */
+    .section-badge { background: var(--dark); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; margin-top: 30px; margin-bottom: 15px; display: inline-block; font-weight: bold; letter-spacing: 1px; }
+    .question-row { border-bottom: 1px solid #eee; padding: 15px 0; }
+    .likert-opt { text-align: center; margin: 0 5px; flex: 1; }
     .likert-opt input { transform: scale(1.3); accent-color: var(--dark); cursor: pointer; }
-    .likert-label { font-size: 0.75em; color: #888; margin-top: 5px; }
+    .likert-label { font-size: 10px; color: #888; margin-top: 5px; }
 
-    /* Result Specific */
-    .score-circle { 
-        width: 140px; height: 140px; background: var(--primary); color: white; 
-        border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-        flex-direction: column; margin: 0 auto 20px; border: 5px solid #fff3e0;
-    }
-    .cat-box { 
-      background: #fff; border: 1px solid #eee; border-left: 5px solid var(--primary); 
-      padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-    .cat-title { font-weight: 700; color: var(--dark); display: flex; justify-content: space-between; }
-    .cat-status { font-size: 0.8em; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
-    .bg-green { background: #e8f5e9; color: #2e7d32; }
-    .bg-yellow { background: #fffde7; color: #f57f17; }
-    .bg-red { background: #ffebee; color: #c62828; }
-
-    .diagnosis-box { background: #fff8e1; border: 2px dashed var(--dark); padding: 20px; border-radius: 10px; margin-top: 20px; }
+    /* REPORT STYLES */
+    .score-circle { width: 130px; height: 130px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; margin: 0 auto 20px; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .score-val { font-size: 3em; font-weight: 800; line-height: 1; }
+    
+    .report-box { text-align: left; background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #ccc; }
+    .report-title { font-weight: 800; color: var(--dark); text-transform: uppercase; margin-bottom: 10px; }
+    
+    .cat-table { width: 100%; font-size: 0.9em; margin-top: 15px; }
+    .cat-table td { padding: 8px; border-bottom: 1px solid #eee; }
+    .cat-score { font-weight: bold; color: var(--dark); text-align: right; }
+    
+    .alert-diagnosis { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: left; }
+    
+    ul.tips-list { padding-left: 20px; margin-top: 10px; }
+    ul.tips-list li { margin-bottom: 8px; font-size: 0.95em; }
   </style>
 </head>
 <body>
 
-<div class="main-container">
-  <img src="https://github.com/luqmanjuhar/kamus-catur-portal/raw/b0e496e7f3e95920aa671c535858c718c45ff010/Asset%2028.png" class="logo-img">
-  <h1 class="page-title">Inventori Profil<br>Ibu Bapa Catur (CPPI)</h1>
-  <p class="page-subtitle">Ketahui gaya keibubapaan catur anda: Adakah anda Penyokong atau Punca Tekanan?</p>
-
-  <div id="formCard" class="custom-card">
-    <div class="alert alert-info small">
-      <strong>Panduan:</strong> Jawab jujur berdasarkan perasaan anda 3 bulan terkini.<br>
-      1 = Sangat Tidak Setuju | 5 = Sangat Setuju
+  <div class="main-container">
+    <div class="text-center mb-4">
+      <h2 style="color:var(--dark); font-weight:800;">INVENTORI IBU BAPA</h2>
+      <p class="text-muted small">Kenali profil keibubapaan catur anda</p>
+    </div>
+    
+    <div id="formCard" class="custom-card">
+      <div class="alert alert-info small text-center">
+        Jawab jujur: 1 (Sangat Tidak Setuju) hingga 5 (Sangat Setuju)
+      </div>
+      <form id="quizForm">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6"><label class="fw-bold small">Nama Anda</label><input type="text" name="nama" class="form-control" required placeholder="Cth: Encik Ali"></div>
+          <div class="col-md-6"><label class="fw-bold small">Nama Anak</label><input type="text" name="anak" class="form-control" required placeholder="Cth: Aiman"></div>
+        </div>
+        
+        <div id="soalanContainer"></div>
+        
+        <button type="submit" id="submitBtn" class="btn-theme mt-5 py-3">ANALISIS PROFIL SAYA</button>
+      </form>
     </div>
 
-    <form id="quizForm">
-      <div class="row g-3 mb-4">
-        <div class="col-md-6">
-          <label class="form-label">Nama Anda</label>
-          <input type="text" name="nama" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-           <label class="form-label">Nama Anak (Pemain)</label>
-           <input type="text" name="anak" class="form-control" required>
+    <div id="resultBox" class="custom-card text-center" style="display:none;">
+      <h4 class="text-secondary mb-3" style="letter-spacing: 2px;">LAPORAN ANALISIS</h4>
+      
+      <div class="score-circle">
+        <span id="resTotal" class="score-val">0</span>
+        <span style="font-size:0.8em; opacity:0.9;">/ 200</span>
+      </div>
+
+      <h2 id="resTitle" style="color:var(--dark); font-weight:800; margin-bottom:0;">TITLE</h2>
+      <div id="resBadge" class="badge bg-secondary mb-4">CATEGORY</div>
+
+      <div class="report-box" style="border-left-color: var(--primary);">
+        <h5 class="report-title">Ulasan Psikologi</h5>
+        <p id="resReview" style="font-size:0.95em; line-height:1.6;">Ulasan...</p>
+        
+        <h6 class="fw-bold mt-3">✅ Langkah Seterusnya:</h6>
+        <ul id="resTips" class="tips-list"></ul>
+      </div>
+
+      <div class="row mt-4 text-start">
+        <div class="col-12">
+          <h5 class="fw-bold text-secondary border-bottom pb-2">Analisis Terperinci</h5>
+          <table class="cat-table">
+            <tr><td>🧠 A: Emosi & Reaksi</td><td class="cat-score" id="sA">0/50</td></tr>
+            <tr><td>📊 B: Data & Rating</td><td class="cat-score" id="sB">0/50</td></tr>
+            <tr><td>🎮 C: Campur Tangan</td><td class="cat-score" id="sC">0/50</td></tr>
+            <tr><td>⚖️ D: Keseimbangan</td><td class="cat-score" id="sD">0/50</td></tr>
+          </table>
         </div>
       </div>
 
-      <div id="soalanContainer"></div>
+      <div class="alert-diagnosis">
+        <h5 class="fw-bold mb-2">⚠️ Diagnosis Kritikal: <span id="domType" class="text-dark"></span></h5>
+        <p class="small mb-2" id="domProb">Masalah...</p>
+        <hr style="border-color:#dbc6a0;">
+        <p class="fw-bold small mb-1">💊 Preskripsi Pemulihan:</p>
+        <p class="small fst-italic mb-0" id="domRx">Tips...</p>
+      </div>
 
-      <button type="submit" id="submitBtn" class="btn-theme mt-5">ANALISIS PROFIL SAYA</button>
-    </form>
+      <div class="mt-4">
+        <button onclick="downloadPDF()" class="btn btn-success rounded-pill px-4 me-2">📥 Muat Turun PDF</button>
+        <button onclick="location.reload()" class="btn btn-outline-secondary rounded-pill px-4">🔄 Mula Semula</button>
+      </div>
+    </div>
   </div>
 
-  <div id="resultBox" class="custom-card text-center" style="display:none;">
-    <h3 style="color:#777; letter-spacing:2px; font-size:1em; margin-bottom:20px;">KEPUTUSAN ANALISIS CPPI</h3>
-    
-    <div class="score-circle">
-        <span id="resTotal" style="font-size:2.8em; font-weight:800; line-height:1;">0</span>
-        <span style="font-size:0.8em;">/ 200</span>
-    </div>
-    
-    <h2 id="resTitle" style="color:var(--dark); font-weight:800; margin-bottom:5px;">TITLE</h2>
-    <p id="resDesc" style="font-size:0.9em; color:#555; margin-bottom:30px; padding:0 10px;"></p>
+  <script>
+    // --- DATA SOALAN (40 Soalan) ---
+    const qs = [
+      // A: Emosi
+      "Fizikal saya tertekan (jantung laju) bila anak kalah.", 
+      "Sukar cakap lembut sejurus selepas anak buat blunder.", 
+      "Malu jumpa parent lain jika anak kalah awal.", 
+      "Mood saya bergantung pada prestasi anak.", 
+      "Salahkan faktor luar (arbiter/nasib) bila kalah.", 
+      "Tunjuk kesilapan anak serta-merta lepas game.", 
+      "Kemenangan anak = Kejayaan saya.", 
+      "Sukar tidur malam jika anak kalah.", 
+      "Pernah marah anak dalam kereta lepas tournament.", 
+      "Fokus 'kenapa kalah' berbanding 'apa belajar'.", 
+      // B: Data
+      "Check chess-results setiap jam.", 
+      "Tahu rating lawan sebelum anak tahu.", 
+      "Kira perubahan rating (Elo) setiap pusingan.", 
+      "Sangat kecewa jika rating drop sedikit.", 
+      "Banding graf rating dengan budak lain.", 
+      "Tetapkan target rating wajib capai.", 
+      "Stalk history lawan di database.", 
+      "Rasa tak guna main jika rating tak naik.", 
+      "Hafal rating top players lain.", 
+      "Rating penentu kepintaran anak.", 
+      // C: Control
+      "Bagi arahan teknikal (opening) walau bukan coach.", 
+      "Rasa lebih tahu dari coach.", 
+      "Tukar coach jika tiada result segera.", 
+      "Pantau sesi training terlalu ketat.", 
+      "Guna engine buktikan coach salah.", 
+      "Paksa latih walau anak sakit/penat.", 
+      "Rungut pada penganjur hal remeh.", 
+      "Duduk terlalu dekat dengan papan main.", 
+      "Bagi isyarat suruh draw/reject draw.", 
+      "Soal kredibiliti coach depan anak.", 
+      // D: Balance
+      "Semua cuti keluarga ialah tournament catur.", 
+      "Belanja lebih kemampuan demi catur.", 
+      "Bual catur 90% di meja makan.", 
+      "Benarkan ponteng sekolah demi catur.", 
+      "Harap catur jadi kerjaya/sumber duit.", 
+      "Anak tiada hobi lain selain catur.", 
+      "Ungkit duit yang dah habis.", 
+      "Gaduh suami isteri sebab catur.", 
+      "Catur satu-satunya jalan kejayaan.", 
+      "Tiada kawan luar komuniti catur." 
+    ];
 
-    <div class="text-start">
-       <h5 class="mb-3 border-bottom pb-2">Analisis Per Bahagian</h5>
-       
-       <div class="cat-box">
-          <div class="cat-title">A. Emosi & Reaksi <span id="skorA">0/50</span></div>
-          <div class="small mt-1" id="statA"></div>
-       </div>
-
-       <div class="cat-box">
-          <div class="cat-title">B. Obsesi Data & Rating <span id="skorB">0/50</span></div>
-          <div class="small mt-1" id="statB"></div>
-       </div>
-
-       <div class="cat-box">
-          <div class="cat-title">C. Campur Tangan <span id="skorC">0/50</span></div>
-          <div class="small mt-1" id="statC"></div>
-       </div>
-
-       <div class="cat-box">
-          <div class="cat-title">D. Keseimbangan Hidup <span id="skorD">0/50</span></div>
-          <div class="small mt-1" id="statD"></div>
-       </div>
-
-       <div class="diagnosis-box text-start">
-         <h5 style="color:var(--dark); font-weight:bold;">⚠️ Diagnosis Dominan: <span id="domType"></span></h5>
-         <p style="font-size:0.9em; margin-bottom:5px;"><b>Masalah:</b> <span id="domProb"></span></p>
-         <p style="font-size:0.9em; color:#d84315;"><b>Preskripsi:</b> <span id="domRx"></span></p>
-       </div>
-    </div>
-
-    <button onclick="location.reload()" class="btn btn-outline-secondary mt-4 rounded-pill px-4">Buat Semula</button>
-  </div>
-</div>
-
-<script>
-  // DATABASE SOALAN (40 Soalan)
-  const soalanCPPI = [
-    // BAHAGIAN A: EMOSI (1-10)
-    "Saya merasa fizikal saya tertekan (jantung laju, berpeluh) apabila melihat anak saya dalam situasi kalah.",
-    "Jika anak saya kalah kerana 'blunder' mudah, saya sukar untuk bercakap lembut dengan mereka sejurus selepas permainan.",
-    "Saya berasa malu untuk berhadapan dengan ibu bapa lain jika anak saya kalah awal.",
-    "Mood saya sepanjang hari bergantung sepenuhnya kepada prestasi catur anak saya hari ini.",
-    "Saya sering menyalahkan faktor luaran (arbiter, bising, nasib, pairing) apabila anak kalah.",
-    "Saya segera menunjukkan kesilapan anak sebaik sahaja mereka keluar dari dewan permainan.",
-    "Saya rasa kemenangan anak adalah kejayaan saya, dan kekalahan mereka adalah kegagalan saya.",
-    "Saya sukar tidur malam jika anak saya kalah perlawanan penting.",
-    "Saya pernah memarahi anak di dalam kereta atau bilik hotel selepas kejohanan tamat.",
-    "Saya lebih fokus kepada 'kenapa kalah' berbanding 'apa yang dipelajari'.",
-
-    // BAHAGIAN B: DATA (11-20)
-    "Saya menyemak chess-results.com berkali-kali setiap jam semasa kejohanan berlangsung.",
-    "Saya tahu rating lawan anak saya sebelum anak saya sendiri mengetahuinya.",
-    "Saya mengira perubahan rating (Elo calculation) anak setiap kali selepas satu pusingan tamat.",
-    "Saya merasa sangat kecewa jika rating anak saya turun (drop), walaupun sedikit.",
-    "Saya sering membandingkan graf kemajuan rating anak saya dengan pemain sebaya yang lain.",
-    "Saya menetapkan sasaran rating spesifik yang 'wajib' dicapai oleh anak dalam tempoh setahun.",
-    "Saya menyelidik (stalk) sejarah permainan lawan anak saya di database sebelum perlawanan bermula.",
-    "Saya rasa anak saya tidak patut bermain dalam kejohanan jika tiada peluang menaikkan rating.",
-    "Saya hafal rating pemain-pemain top lain dalam kategori umur anak saya.",
-    "Bagi saya, rating adalah penentu utama kepintaran atau potensi masa depan anak saya.",
-
-    // BAHAGIAN C: CAMPUR TANGAN (21-30)
-    "Saya sering memberi arahan teknikal (opening apa perlu main) walaupun saya bukan jurulatih mereka.",
-    "Saya rasa saya lebih tahu apa yang terbaik untuk anak berbanding jurulatih mereka.",
-    "Saya sering menukar jurulatih jika tiada peningkatan keputusan segera dalam 3-6 bulan.",
-    "Saya memantau sesi latihan anak dengan jurulatih secara ketat dan menyampuk jika perlu.",
-    "Saya menggunakan enjin catur (Stockfish/Lichess) untuk membuktikan anak saya atau jurulatih salah.",
-    "Saya memaksa anak berlatih catur walaupun mereka sedang sakit ringan atau terlalu letih.",
-    "Saya merungut kepada penganjur atau arbiter tentang perkara kecil yang tidak menjejaskan permainan.",
-    "Saya duduk sangat hampir dengan papan catur anak (jika dibenarkan) untuk 'memberi semangat' (atau tekanan).",
-    "Saya menyuruh anak menawarkan 'draw' atau menolak 'draw' semasa permainan sedang berlangsung (melalui isyarat).",
-    "Saya mempersoalkan kaedah pengajaran jurulatih di hadapan anak.",
-
-    // BAHAGIAN D: KESEIMBANGAN (31-40)
-    "Hampir semua percutian keluarga kami adalah perjalanan ke kejohanan catur.",
-    "Saya membelanjakan wang melebihi kemampuan kewangan keluarga demi catur anak.",
-    "Topik perbualan di meja makan kami 90% adalah mengenai catur.",
-    "Saya sanggup anak ponteng sekolah kerap kali demi latihan atau kejohanan catur.",
-    "Saya mengharapkan catur menjadi kerjaya atau sumber pendapatan anak suatu hari nanti untuk membalas pelaburan saya.",
-    "Anak saya tiada hobi lain selain catur kerana saya tidak membenarkannya.",
-    "Saya sering mengingatkan anak tentang berapa banyak wang yang telah saya habiskan untuk mereka.",
-    "Hubungan saya dengan pasangan (suami/isteri) tegang disebabkan isu catur anak.",
-    "Saya melihat catur sebagai satu-satunya jalan untuk anak saya berjaya dalam hidup.",
-    "Saya rasa kehidupan sosial saya hanya berkisar dengan komuniti ibu bapa catur sahaja."
-  ];
-
-  // RENDER SOALAN
-  const container = document.getElementById('soalanContainer');
-  
-  soalanCPPI.forEach((q, index) => {
-      let nombor = index + 1;
-      let labelHTML = "";
-
-      if(index === 0) labelHTML = `<div class="section-badge">BAHAGIAN A: EMOSI & REAKSI</div>`;
-      if(index === 10) labelHTML = `<div class="section-badge">BAHAGIAN B: OBSESI DATA & RATING</div>`;
-      if(index === 20) labelHTML = `<div class="section-badge">BAHAGIAN C: CAMPUR TANGAN TEKNIKAL</div>`;
-      if(index === 30) labelHTML = `<div class="section-badge">BAHAGIAN D: KESEIMBANGAN HIDUP</div>`;
-
-      let html = `
-        ${labelHTML}
-        <div class="question-row">
-           <p class="mb-2 fw-bold" style="font-size:0.95em;">${nombor}. ${q}</p>
-           <div class="d-flex justify-content-between align-items-center" style="max-width:400px;">
-              <span class="small text-muted me-2">Tidak<br>Setuju</span>
-              <div class="d-flex justify-content-between flex-grow-1">
-                 ${[1,2,3,4,5].map(v => `
-                    <div class="likert-opt">
-                       <input type="radio" name="q${nombor}" value="${v}" required>
-                       <div class="likert-label">${v}</div>
-                    </div>
-                 `).join('')}
-              </div>
-              <span class="small text-muted ms-2">Sangat<br>Setuju</span>
-           </div>
-        </div>
-      `;
-      container.innerHTML += html;
-  });
-
-  // LOGIK PENGIRAAN
-  document.getElementById('quizForm').onsubmit = function(e) {
-      e.preventDefault();
-      document.getElementById('submitBtn').innerHTML = "SEDANG MENGIRA...";
+    // --- RENDER SOALAN ---
+    const cont = document.getElementById('soalanContainer');
+    qs.forEach((q, i) => {
+      let secTitle = "";
+      if(i===0) secTitle = "BAHAGIAN A: EMOSI & REAKSI";
+      if(i===10) secTitle = "BAHAGIAN B: OBSESI DATA & RATING";
+      if(i===20) secTitle = "BAHAGIAN C: CAMPUR TANGAN TEKNIKAL";
+      if(i===30) secTitle = "BAHAGIAN D: KESEIMBANGAN HIDUP";
       
-      const formData = new FormData(this);
-      let total = 0;
-      let scoreA = 0, scoreB = 0, scoreC = 0, scoreD = 0;
+      if(secTitle) cont.innerHTML += `<div class="section-badge">${secTitle}</div>`;
+      
+      cont.innerHTML += `
+        <div class="question-row">
+          <p class="mb-2 small fw-bold">${i+1}. ${q}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted" style="font-size:9px;">Tidak<br>Setuju</span>
+            <div class="d-flex justify-content-center flex-grow-1">
+              ${[1,2,3,4,5].map(v => `
+                <div class="likert-opt">
+                  <input type="radio" name="q${i+1}" value="${v}" required>
+                  <div class="likert-label">${v}</div>
+                </div>
+              `).join('')}
+            </div>
+            <span class="text-muted" style="font-size:9px;">Sangat<br>Setuju</span>
+          </div>
+        </div>`;
+    });
 
+    // --- LOGIK UTAMA ---
+    document.getElementById('quizForm').onsubmit = function(e) {
+      e.preventDefault();
+      document.getElementById('submitBtn').innerText = "MENGANALISIS DATA...";
+      document.getElementById('submitBtn').disabled = true;
+
+      const fd = new FormData(this);
+      let t=0, sA=0, sB=0, sC=0, sD=0;
+      
       for(let i=1; i<=40; i++) {
-          let val = parseInt(formData.get('q'+i));
-          total += val;
-          if(i <= 10) scoreA += val;
-          else if(i <= 20) scoreB += val;
-          else if(i <= 30) scoreC += val;
-          else scoreD += val;
+        let v = parseInt(fd.get('q'+i));
+        t += v;
+        if(i<=10) sA+=v; else if(i<=20) sB+=v; else if(i<=30) sC+=v; else sD+=v;
       }
 
-      // 1. Diagnosis Keseluruhan
-      let title = "", desc = "";
-      if(total <= 80) {
-          title = "The Supportive Gardener";
-          desc = "Anda ibu bapa ideal! Anda menyokong minat anak tanpa tekanan. Teruskan begini.";
-      } else if (total <= 120) {
-          title = "The Enthusiastic Manager";
-          desc = "Anda sangat berminat tetapi hati-hati, jangan sampai 'micromanage' anak anda.";
-      } else if (total <= 160) {
-          title = "The Helicopter Tiger";
-          desc = "Bahaya. Anda terlalu terikat dengan prestasi anak. Sila jarakkan diri sedikit.";
+      // 1. Tentukan Profil Keseluruhan
+      let profile = {};
+      if(t <= 80) {
+        profile = {
+          title: "THE SUPPORTIVE GARDENER",
+          badge: "IBU BAPA IDEAL",
+          review: "Tahniah. Anda berada di zon yang sangat sihat. Anda menganggap catur sebagai alat pendidikan, bukan alat untuk memuaskan ego sendiri. Anda menyiram 'bunga' (anak) dan membiarkannya tumbuh mengikut kadarnya sendiri.",
+          tips: [
+            "Teruskan memberi sokongan tanpa syarat (Unconditional Love).",
+            "Fokus kepada keseronokan bermain, bukan keputusan.",
+            "Kekalkan jarak yang sihat dengan jurulatih."
+          ]
+        };
+      } else if(t <= 120) {
+        profile = {
+          title: "THE ENTHUSIASTIC MANAGER",
+          badge: "ZON BERHATI-HATI",
+          review: "Anda sangat komited dan mahukan yang terbaik, tetapi kadangkala semangat anda memberi tekanan tidak sedar kepada anak. Anda mungkin mula terlalu memandang nombor dan ranking.",
+          tips: [
+            "Kurangkan melihat chess-results semasa kejohanan.",
+            "Jangan bincang pasal catur dalam perjalanan pulang jika anak kalah.",
+            "Berikan anak ruang untuk bernafas selepas game."
+          ]
+        };
+      } else if(t <= 160) {
+        profile = {
+          title: "THE HELICOPTER TIGER",
+          badge: "ZON BAHAYA",
+          review: "Amaran. Penglibatan anda terlalu tinggi (over-involved). Identiti diri anda mula terikat dengan prestasi anak. Anak mungkin bermain kerana takut mengecewakan anda, bukan kerana minat.",
+          tips: [
+            "Wajibkan 'Zon Bebas Catur' di rumah.",
+            "Berhenti menganalisis game anak. Serahkan 100% pada coach.",
+            "Pertimbangkan untuk tidak hadir ke beberapa kejohanan kecil."
+          ]
+        };
       } else {
-          title = "The Obsessive Parent (Toxic)";
-          desc = "Kritikal. Anda perlukan perubahan drastik atau anak anda akan burnout.";
+        profile = {
+          title: "THE OBSESSIVE PARENT",
+          badge: "ZON TOKSIK",
+          review: "Situasi ini kritikal. Obsesi anda sedang merosakkan minat anak dan hubungan kekeluargaan. Risiko 'burnout' anak sangat tinggi. Catur bukan lagi permainan, tetapi bebanan hutang emosi.",
+          tips: [
+            "Anda memerlukan 'Detox Catur' segera (rehat 1-2 bulan).",
+            "Dapatkan kaunseling atau nasihat profesional.",
+            "Refleksi semula: Adakah ini impian anda atau impian anak?"
+          ]
+        };
       }
 
-      // 2. Fungsi Helper Status Zon
-      function getStatus(skor) {
-          if(skor <= 20) return `<span class="cat-status bg-green">Zon Hijau (Sihat)</span>`;
-          if(skor <= 35) return `<span class="cat-status bg-yellow">Zon Kuning (Waspada)</span>`;
-          return `<span class="cat-status bg-red">Zon Merah (Bahaya)</span>`;
-      }
+      // 2. Tentukan Diagnosis Spesifik
+      let max = Math.max(sA, sB, sC, sD);
+      let diag = {};
 
-      // 3. Diagnosis Dominan
-      let maxScore = Math.max(scoreA, scoreB, scoreC, scoreD);
-      let domType = "", domProb = "", domRx = "";
-
-      if (maxScore === scoreA) {
-          domType = "The Emotional Rollercoaster";
-          domProb = "Emosi anda tidak stabil membuatkan anak takut memberitahu keputusan game.";
-          domRx = "Belajar teknik pernafasan. Haramkan bedah siasat game 2 jam selepas tamat.";
-      } else if (maxScore === scoreB) {
-          domType = "The Statistician / Rating Slave";
-          domProb = "Anda melihat anak sebagai nombor. Anak jadi takut ambil risiko.";
-          domRx = "Padam aplikasi Elo Calculator. Fokus kualiti move, bukan keputusan 1-0.";
-      } else if (maxScore === scoreC) {
-          domType = "The Sideline Coach";
-          domProb = "Anda mengelirukan anak dan merosakkan autoriti jurulatih.";
-          domRx = "Perjanjian bisu: Anda hanya 'Pemandu & Penaja Makanan' semasa kejohanan.";
+      if(max === sA) {
+        diag = { type: "Emotional Rollercoaster", prob: "Emosi anda tidak stabil. Anak takut memberitahu keputusan game kerana takut melihat reaksi muka anda.", rx: "Amalkan teknik pernafasan 4-7-8 sebelum anak keluar dewan. Tetapkan peraturan 'No Post-Mortem' selama 2 jam." };
+      } else if(max === sB) {
+        diag = { type: "The Rating Slave", prob: "Anda melihat anak sebagai nombor. Anak jadi takut ambil risiko (play safe) sebab takut rating tolak.", rx: "Padam aplikasi Elo Calculator. Fokus kualiti move (performance), bukan keputusan 1-0." };
+      } else if(max === sC) {
+        diag = { type: "The Sideline Coach", prob: "Anda mengelirukan anak dan merosakkan autoriti jurulatih dengan arahan bercanggah.", rx: "Perjanjian bisu: Anda hanya 'Pemandu & Penaja Makanan'. Zon teknikal adalah kawasan larangan." };
       } else {
-          domType = "The All-In Gambler";
-          domProb = "Identiti keluarga 'ditelan' catur. Anda menuntut pulangan pelaburan.";
-          domRx = "Cari hobi lain. Tetapkan bajet ketat. Adakan hujung minggu Bebas Catur.";
+        diag = { type: "The All-In Gambler", prob: "Identiti keluarga 'ditelan' catur. Anda menuntut pulangan pelaburan kewangan melalui kemenangan.", rx: "Cari hobi peribadi lain. Tetapkan bajet tahunan ketat. Wujudkan hujung minggu tanpa catur." };
       }
 
-      // Papar Result
-      setTimeout(() => {
-          document.getElementById('formCard').style.display = 'none';
-          document.getElementById('resultBox').style.display = 'block';
-          
-          document.getElementById('resTotal').innerText = total;
-          document.getElementById('resTitle').innerText = title;
-          document.getElementById('resDesc').innerText = desc;
+      // 3. Simpan ke Google Sheet
+      const payload = { 
+        nama: fd.get('nama'), anak: fd.get('anak'), 
+        total: t, profil: profile.title, 
+        skorA: sA, skorB: sB, skorC: sC, skorD: sD, 
+        dominan: diag.type 
+      };
 
-          document.getElementById('skorA').innerText = scoreA + "/50";
-          document.getElementById('statA').innerHTML = getStatus(scoreA);
+      google.script.run.withSuccessHandler(() => {
+        // Paparkan Result
+        document.getElementById('formCard').style.display = 'none';
+        document.getElementById('resultBox').style.display = 'block';
+        
+        document.getElementById('resTotal').innerText = t;
+        document.getElementById('resTitle').innerText = profile.title;
+        document.getElementById('resBadge').innerText = profile.badge;
+        
+        // Warna Badge ikut level
+        let bg = t<=80?"bg-success":t<=120?"bg-warning text-dark":t<=160?"bg-orange":"bg-danger";
+        document.getElementById('resBadge').className = `badge ${bg} mb-4 fs-6`;
 
-          document.getElementById('skorB').innerText = scoreB + "/50";
-          document.getElementById('statB').innerHTML = getStatus(scoreB);
+        document.getElementById('resReview').innerText = profile.review;
+        
+        // List Tips
+        const tipsUl = document.getElementById('resTips');
+        tipsUl.innerHTML = "";
+        profile.tips.forEach(tip => {
+          tipsUl.innerHTML += `<li>${tip}</li>`;
+        });
 
-          document.getElementById('skorC').innerText = scoreC + "/50";
-          document.getElementById('statC').innerHTML = getStatus(scoreC);
+        // Scores
+        document.getElementById('sA').innerText = sA+"/50";
+        document.getElementById('sB').innerText = sB+"/50";
+        document.getElementById('sC').innerText = sC+"/50";
+        document.getElementById('sD').innerText = sD+"/50";
 
-          document.getElementById('skorD').innerText = scoreD + "/50";
-          document.getElementById('statD').innerHTML = getStatus(scoreD);
+        // Diagnosis
+        document.getElementById('domType').innerText = diag.type;
+        document.getElementById('domProb').innerText = diag.prob;
+        document.getElementById('domRx').innerText = diag.rx;
 
-          document.getElementById('domType').innerText = domType;
-          document.getElementById('domProb').innerText = domProb;
-          document.getElementById('domRx').innerText = domRx;
+        window.scrollTo(0,0);
 
-          window.scrollTo(0,0);
-      }, 800);
-  };
-</script>
+      }).withFailureHandler((err)=>{
+         alert("Data gagal disimpan, tetapi keputusan dipaparkan.");
+         console.log(err);
+      }).simpanIbuBapa(payload);
+    };
+
+    // --- FUNGSI DOWNLOAD PDF ---
+    function downloadPDF() {
+      const el = document.getElementById('resultBox');
+      const nama = document.querySelector('input[name="nama"]').value;
+      const opt = {
+        margin: 0.3,
+        filename: `Laporan_IbuBapa_${nama}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(el).save();
+    }
+  </script>
 </body>
 </html>
