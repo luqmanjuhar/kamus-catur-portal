@@ -24,9 +24,10 @@
     <div id="formCard" class="custom-card">
       <form id="quizForm">
         <div class="row g-3 mb-3">
-          <div class="col-6"><label>Nama</label><input type="text" name="nama" class="form-control" required></div>
-          <div class="col-6"><label>Status</label><select name="status" class="form-select"><option>KCHERS</option><option>LAIN</option></select></div>
-          <div class="col-12"><label>Lahir</label><input type="date" name="dob" class="form-control" required></div>
+          <div class="col-md-6"><label>Nama Penuh</label><input type="text" name="nama" class="form-control" required></div>
+          <div class="col-md-6"><label>Status</label>
+            <select name="status" class="form-select" required><option>KCHERS</option><option>AHLI AKTIF</option><option>ALUMNI</option><option>BUKAN AHLI</option></select>
+          </div>
         </div>
         <div id="soalanContainer"></div>
         <button type="submit" id="submitBtn" class="btn-theme mt-4">HANTAR & SIMPAN</button>
@@ -51,11 +52,11 @@
 
   <script>
     const qs = [
-      "Saya kekal fokus walaupun game > 4 jam.", "Saya tak mudah mengaku kalah.", "Saya kawal nafas bila genting.", "Tak terganggu provokasi.", "Tenang walau masa suntuk.", "Stamina mental tinggi.", "Tekanan itu motivasi.", "Tak hirau bunyi bising.", // Mental
-      "Lupa blunder segera.", "Game lepas tak ganggu game baru.", "Poker face.", "Kalah tanggungjawab sendiri.", "Tak salah faktor luar.", "Tenang bila lawan buat move pelik.", "Emosi konsisten.", "Tak takut rating tinggi.", // Emosi
-      "Jadual latihan tetap.", "Analisis game kalah.", "Buat puzzle konsisten.", "Kaji opening.", "Jaga tidur/makan.", "Tulis nota.", "Fokus masa training.", "Korban hiburan.", // Disiplin
-      "Check ancaman dulu.", "Ambil risiko terkira.", "Urus masa fikir.", "Ada plan middle-game.", "Yakin gerak hati.", "Tak main laju.", "Ubah strategi jika perlu.", "Cari best move.", // Keputusan
-      "Percaya usaha.", "Terima kritikan.", "Suka teknik baru.", "Idola inspirasi.", "Tak takut kalah cuba baru.", "Kualiti > Rating.", "Tanya senior.", "Komited jadi lebih baik." // Mindset
+      "Saya kekal fokus walaupun game > 4 jam.", "Saya tak mudah mengaku kalah.", "Saya kawal nafas bila genting.", "Tak terganggu provokasi.", "Tenang walau masa suntuk.", "Stamina mental tinggi.", "Tekanan itu motivasi.", "Tak hirau bunyi bising.",
+      "Lupa blunder segera.", "Game lepas tak ganggu game baru.", "Poker face.", "Kalah tanggungjawab sendiri.", "Tak salah faktor luar.", "Tenang bila lawan buat move pelik.", "Emosi konsisten.", "Tak takut rating tinggi.",
+      "Jadual latihan tetap.", "Analisis game kalah.", "Buat puzzle konsisten.", "Kaji opening.", "Jaga tidur/makan.", "Tulis nota.", "Fokus masa training.", "Korban hiburan.",
+      "Check ancaman dulu.", "Ambil risiko terkira.", "Urus masa fikir.", "Ada plan middle-game.", "Yakin gerak hati.", "Tak main laju.", "Ubah strategi jika perlu.", "Cari best move.",
+      "Percaya usaha.", "Terima kritikan.", "Suka teknik baru.", "Idola inspirasi.", "Tak takut kalah cuba baru.", "Kualiti > Rating.", "Tanya senior.", "Komited jadi lebih baik."
     ];
 
     const cont = document.getElementById('soalanContainer');
@@ -81,7 +82,7 @@
        const tips = (s) => s>=32 ? "✅ Cemerlang" : s>=24 ? "⚠️ Sederhana" : "🛑 Perlu Fokus";
 
        const payload = {
-          nama: fd.get('nama'), status: fd.get('status'), dob: fd.get('dob'),
+          nama: fd.get('nama'), status: fd.get('status'),
           total: total, mental: scores[0], emosi: scores[1], disiplin: scores[2], keputusan: scores[3], mindset: scores[4]
        };
 
