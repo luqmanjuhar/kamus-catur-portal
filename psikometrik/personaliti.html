@@ -3,77 +3,43 @@
 <head>
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-  
   <style>
-    /* STYLE YANG SAMA SEPERTI SEBELUM INI */
     :root { --primary: #ff9800; --dark: #e65100; --bg: #fff3e0; }
     body { background-color: var(--bg); font-family: 'Poppins', sans-serif; color: #333; padding-bottom: 50px; }
     .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
-    .logo-img { width: 120px; display: block; margin: 0 auto 20px; }
-    .page-title { text-align: center; font-weight: 800; color: var(--dark); text-transform: uppercase; margin-bottom: 30px; }
-    .custom-card { background: white; border: none; border-radius: 15px; border-top: 5px solid var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 20px; }
-    .form-control, .form-select { border: 2px solid #eee; border-radius: 10px; padding: 10px; }
-    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: none; }
-    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; transition: 0.3s; }
-    .btn-theme:hover { background-color: var(--dark); }
-    .section-header { background: var(--dark); color: white; padding: 10px 20px; border-radius: 10px; margin: 30px 0 20px; font-weight: 600; }
-    .option-label { display: block; padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; width: 100%; font-weight:normal; }
-    .option-label:hover { background: var(--bg); border-color: var(--primary); }
-    input[type="radio"] { margin-right: 10px; accent-color: var(--dark); }
+    .custom-card { background: white; border: none; border-radius: 15px; border-top: 5px solid var(--primary); padding: 30px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; }
     .role-badge { background: var(--dark); color: white; padding: 10px 30px; border-radius: 50px; font-size: 1.5em; font-weight: bold; margin: 20px 0; display: inline-block; }
     .score-bar-bg { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; width:100%; }
     .score-bar-fill { background: var(--primary); height: 100%; }
-    .loading-spinner { display:none; text-align: center; padding: 20px; }
+    .option-label { display: block; padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; width: 100%; }
+    .option-label:hover { background: var(--bg); border-color: var(--primary); }
+    input[type="radio"] { margin-right: 10px; accent-color: var(--dark); }
   </style>
 </head>
 <body>
-
   <div class="main-container">
-    <img src="https://github.com/luqmanjuhar/kamus-catur-portal/raw/b0e496e7f3e95920aa671c535858c718c45ff010/Asset%2028.png" class="logo-img">
-    <h1 class="page-title">Ujian Personaliti Catur</h1>
-
+    <div class="text-center mb-4"><h2 style="color:var(--dark); font-weight:800;">UJIAN PERSONALITI</h2></div>
+    
     <div id="intro-section" class="custom-card">
-      <h4 class="mb-3 text-center" style="color:var(--dark)">Profil Peserta</h4>
-      <div class="mb-3">
-        <label class="form-label">Nama Penuh</label>
-        <input type="text" id="intro-name" class="form-control" placeholder="Nama anda...">
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Status Keahlian</label>
-        <select id="intro-status" class="form-select">
-          <option value="">-- Pilih --</option>
-          <option value="KCHERS">KCHERS</option>
-          <option value="AHLI AKTIF">AHLI AKTIF</option>
-          <option value="ALUMNI">ALUMNI</option>
-          <option value="BUKAN AHLI">BUKAN AHLI</option>
-        </select>
-      </div>
-      <div class="mb-4">
-        <label class="form-label">Tarikh Lahir</label>
-        <input type="date" id="intro-dob" class="form-control">
-      </div>
+      <div class="mb-3"><label class="fw-bold">Nama Penuh</label><input type="text" id="intro-name" class="form-control"></div>
+      <div class="mb-3"><label class="fw-bold">Status</label><select id="intro-status" class="form-select"><option>AHLI</option><option>BUKAN AHLI</option></select></div>
+      <div class="mb-3"><label class="fw-bold">Tarikh Lahir</label><input type="date" id="intro-dob" class="form-control"></div>
       <button class="btn-theme" onclick="startQuiz()">MULA UJIAN</button>
     </div>
 
     <div id="quiz-section" style="display:none;">
-      <form id="quiz-form">
-        <div id="quiz-container"></div> <div class="mt-4">
-          <button type="button" class="btn-theme" onclick="submitQuiz()">HANTAR JAWAPAN</button>
-        </div>
-      </form>
+      <div id="quiz-container"></div>
+      <button class="btn-theme mt-4" onclick="submitQuiz()" id="submitBtn">HANTAR JAWAPAN</button>
     </div>
 
     <div id="result-container" class="custom-card text-center" style="display:none;">
-      <h3 style="color:#777; letter-spacing:2px; font-size:1em;">ANALISIS PERSONALITI</h3>
-      <h2 id="display-name" style="color:var(--primary); font-weight:800; text-transform:uppercase;">NAMA</h2>
-      <p id="display-details" class="text-muted small"></p>
-      
-      <hr>
-      <p>Personaliti Dominan Anda:</p>
+      <h4 id="display-name" style="color:var(--primary); font-weight:800;">NAMA</h4>
+      <p id="display-details" class="small text-muted"></p>
       <div id="final-role" class="role-badge">ROLE</div>
-
       <div class="text-start mt-4">
         <table class="table table-borderless table-sm">
           <tr><td width="30%">Player</td><td><div class="score-bar-bg"><div id="bar-p" class="score-bar-fill" style="width:0%"></div></div></td><td width="10%" id="val-p">0</td></tr>
@@ -83,211 +49,93 @@
           <tr><td>Parent</td><td><div class="score-bar-bg"><div id="bar-par" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-par">0</td></tr>
         </table>
       </div>
-
-      <div class="mt-4 text-start p-3" style="background:#f9f9f9; border-radius:10px;">
-        <h5 style="color:var(--dark)">Analisis Kekuatan</h5>
-        <p id="analysis-text" style="font-size:0.95em; line-height:1.6;"></p>
-        <h5 style="color:var(--dark); margin-top:15px;">Cadangan</h5>
-        <ul id="suggestion-list" style="padding-left:20px; font-size:0.9em;"></ul>
-      </div>
-
-      <button class="btn btn-outline-secondary mt-4 rounded-pill px-4" onclick="location.reload()">Mula Semula</button>
+      <div class="mt-4 text-start p-3 bg-light rounded"><p id="analysis-text"></p></div>
+      <button onclick="downloadPDF()" class="btn btn-success mt-3 rounded-pill px-4">📥 Muat Turun PDF</button>
     </div>
   </div>
 
   <script>
-    // DATA SOALAN DISIMPAN TERUS DI SINI (Supaya tak perlu loading server)
     const questionsData = [
-      {
-        category: "Bahagian 1: Di Dewan Kejohanan",
-        items: [
-          { q: "1. Apa perkara pertama anda cari bila sampai di dewan kejohanan?", opts: [{txt: "Di mana papan nombor 1 dan siapa lawan saya.", type: "p"}, {txt: "Di mana anak murid saya duduk dan adakah mereka bersedia mental.", type: "c"}, {txt: "Adakah susunan meja ikut pelan lantai dan jam berfungsi.", type: "a"}, {txt: "Adakah suasana ceria dan murid-murid saya nampak seronok.", type: "i"}, {txt: "Di mana tandas, tempat menunggu yang selesa, dan kedai makan untuk anak saya.", type: "par"}] },
-          { q: "2. Seorang kanak-kanak menangis selepas kalah 'Scholar's Mate' (4 moves). Reaksi anda:", opts: [{txt: "Lemahnya mental, kena belajar tahan tekanan.", type: "p"}, {txt: "Tunjuk saya game tu, kita tengok macam mana nak elak lain kali.", type: "c"}, {txt: "Adik, tolong jangan bising di kawasan permainan. Sila keluar.", type: "a"}, {txt: "Tak apa, jom main lagi satu game santai. Catur ni seronok!", type: "i"}, {txt: "Alolo kesiannya anak (atau anak orang lain). Jom beli aiskrim.", type: "par"}] },
-          { q: "3. Apa yang ada dalam beg anda ke kejohanan?", opts: [{txt: "Coklat, air, dan buku nota opening untuk prep.", type: "p"}, {txt: "Laptop dengan ChessBase untuk analisis game pelajar.", type: "c"}, {txt: "Buku Undang-undang FIDE, pen merah, dan borang pairing.", type: "a"}, {txt: "Gula-gula untuk murid, set catur plastik tambahan, dan penanda kehadiran.", type: "i"}, {txt: "Bekal makanan, tikar, powerbank, kerusi lipat, dan jaket anak.", type: "par"}] },
-          { q: "4. Anda melihat 'Illegal Move' dilakukan oleh budak baru belajar (U10).", opts: [{txt: "Angkat tangan, panggil arbiter, tuntut kemenangan/tambah masa.", type: "p"}, {txt: "Geleng kepala. Teknik asas pun belum mantap lagi.", type: "c"}, {txt: "Datang, tambah 2 minit untuk lawan, dan beri amaran rasmi.", type: "a"}, {txt: "Senyum dan betulkan. 'Eh, Bishop tak boleh jalan macam tu. Jalan macam ni...'", type: "i"}, {txt: "Risau. 'Harap anak aku tak buat silap macam tu.'", type: "par"}] },
-          { q: "5. Pandangan anda tentang yuran penyertaan kejohanan:", opts: [{txt: "Mahal tak apa, asalkan hadiah tunai (Cash Prize) lumayan.", type: "p"}, {txt: "Berpatutan asalkan penganjur sediakan sijil pencapaian yang laku.", type: "c"}, {txt: "Perlu telus dan digunakan untuk bayar elaun Arbiter yang setimpal.", type: "a"}, {txt: "Sepatutnya murah supaya semua murid sekolah mampu main.", type: "i"}, {txt: "Saya tak kisah bayar berapa pun, asalkan kejohanan selesa untuk anak saya.", type: "par"}] }
-        ]
-      },
-      {
-        category: "Bahagian 2: Latihan & Pembelajaran",
-        items: [
-          { q: "6. Cara terbaik untuk belajar catur ialah:", opts: [{txt: "Main blitz beribu-ribu game di online.", type: "p"}, {txt: "Analisis mendalam Grandmaster games dan endgame studies.", type: "c"}, {txt: "Membaca dan memahami setiap klausa peraturan kejohanan.", type: "a"}, {txt: "Bermain mini-games (cth: main guna Pawn sahaja) supaya tak bosan.", type: "i"}, {txt: "Hantar ke kelas tusyen catur terbaik dan pantau kerja rumah dia.", type: "par"}] },
-          { q: "7. 'Checkmate' yang paling memuaskan ialah:", opts: [{txt: "Bila saya korbankan Queen dan lawan terkejut.", type: "p"}, {txt: "Bila pelajar saya aplikasikan taktik yang baru diajar semalam.", type: "c"}, {txt: "Checkmate yang sah, jam ditekan, dan keputusan direkod dengan betul.", type: "a"}, {txt: "Bila murid saya yang pemalu akhirnya berani jerit 'Checkmate!'.", type: "i"}, {txt: "Bila anak saya menang dan lari peluk saya dengan gembira.", type: "par"}] },
-          { q: "8. Topik apa yang anda paling suka bincangkan?", opts: [{txt: "Rating ELO saya naik atau turun.", type: "p"}, {txt: "Kelemahan struktur pawn dalam Sicilian Defense.", type: "c"}, {txt: "Peraturan baru FIDE tentang penggunaan tandas semasa game.", type: "a"}, {txt: "Cara tarik minat budak-budak supaya tak main gadget.", type: "i"}, {txt: "Jadual kejohanan mana yang tak bertembung dengan periksa sekolah.", type: "par"}] },
-          { q: "9. Jika membeli set catur, anda pilih yang mana?", opts: [{txt: "Set kayu berat (weighted) yang sedap dipegang untuk blitz.", type: "p"}, {txt: "Set standard kejohanan untuk simulasi sebenar.", type: "c"}, {txt: "Set DGT (elektronik) yang boleh sambung ke komputer.", type: "a"}, {txt: "Set plastik warna-warni atau kartun supaya budak tertarik.", type: "i"}, {txt: "Set yang paling ringan dan ada beg galas supaya anak senang bawa.", type: "par"}] },
-          { q: "10. 'Chess Engine' (Stockfish/AI) bagi anda ialah:", opts: [{txt: "Kawan baik untuk cari silap saya.", type: "p"}, {txt: "Alat bantu mengajar, tapi bahaya kalau pelajar malas berfikir.", type: "c"}, {txt: "Musuh utama integriti (alat menipu/cheating).", type: "a"}, {txt: "Terlalu rumit. Budak-budak perlu belajar konsep manusia dulu.", type: "i"}, {txt: "Benda yang perlu saya install dalam iPad anak sebab coach suruh.", type: "par"}] }
-        ]
-      },
-      // ... (Anda boleh tambah soalan lain jika perlu, setakat ini 10 soalan sample dimasukkan untuk test)
+      { category: "Bahagian 1", items: [
+          { q: "1. Apa perkara pertama anda cari di dewan?", opts: [{txt: "Papan No 1 & lawan.", type: "p"}, {txt: "Anak murid saya.", type: "c"}, {txt: "Susunan meja & jam.", type: "a"}, {txt: "Suasana ceria.", type: "i"}, {txt: "Tandas & tempat menunggu.", type: "par"}] },
+          { q: "2. Reaksi bila budak menangis kalah awal?", opts: [{txt: "Lemah mental.", type: "p"}, {txt: "Analisis game tu.", type: "c"}, {txt: "Sila keluar dewan.", type: "a"}, {txt: "Jom main game santai.", type: "i"}, {txt: "Jom beli aiskrim.", type: "par"}] },
+          { q: "3. Dalam beg ada apa?", opts: [{txt: "Coklat & nota opening.", type: "p"}, {txt: "Laptop & ChessBase.", type: "c"}, {txt: "Buku Rules & pen merah.", type: "a"}, {txt: "Gula-gula & set plastik.", type: "i"}, {txt: "Bekal & kerusi lipat.", type: "par"}] },
+          // Tambah soalan selebihnya di sini...
+      ]}
     ];
-
-    let userProfile = { name: "", status: "", dob: "" };
-    let totalQuestions = 0;
+    
+    let user = {};
 
     function startQuiz() {
-       const name = document.getElementById('intro-name').value;
-       const status = document.getElementById('intro-status').value;
-       const dob = document.getElementById('intro-dob').value;
+       user.name = document.getElementById('intro-name').value;
+       user.status = document.getElementById('intro-status').value;
+       user.dob = document.getElementById('intro-dob').value;
+       if(!user.name || !user.dob) return alert("Sila isi maklumat.");
        
-       if(!name || !status || !dob) { 
-         alert("Sila lengkapkan maklumat."); 
-         return; 
-       }
-       
-       userProfile = { name, status, dob };
        document.getElementById('intro-section').style.display = 'none';
        document.getElementById('quiz-section').style.display = 'block';
-       
-       // Panggil render terus dari variable, bukan server
-       renderQuiz(questionsData);
+       renderQuiz();
     }
 
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
-    function renderQuiz(data) {
+    function renderQuiz() {
       const container = document.getElementById('quiz-container');
-      container.innerHTML = "";
-      let globalIndex = 0;
-
-      data.forEach(section => {
-        let header = document.createElement('div');
-        header.className = 'section-header';
-        header.innerText = section.category;
-        container.appendChild(header);
-
-        section.items.forEach(item => {
-          let card = document.createElement('div');
-          card.className = 'custom-card p-3 mb-3';
-          card.style.borderTop = "none";
-          card.style.borderLeft = "4px solid var(--primary)";
-
-          let shuffledOptions = shuffleArray([...item.opts]);
-          let html = `<div class="fw-bold mb-2">${item.q}</div>`;
-          
-          shuffledOptions.forEach(opt => {
-             html += `<label class="option-label">
-                <input type="radio" name="q${globalIndex}" value="${opt.type}"> ${opt.txt}
-             </label>`;
-          });
-          card.innerHTML = html;
-          container.appendChild(card);
-          globalIndex++;
+      let idx = 0;
+      questionsData.forEach(sect => {
+        container.innerHTML += `<h5 class="mt-4 text-white bg-dark p-2 rounded">${sect.category}</h5>`;
+        sect.items.forEach(item => {
+           let html = `<div class="custom-card p-3 mb-3 border-start border-4 border-warning"><p class="fw-bold">${item.q}</p>`;
+           item.opts.sort(()=>Math.random()-0.5).forEach(opt => html += `<label class="option-label"><input type="radio" name="q${idx}" value="${opt.type}"> ${opt.txt}</label>`);
+           container.innerHTML += html + `</div>`;
+           idx++;
         });
       });
-      totalQuestions = globalIndex;
+      user.totalQ = idx;
     }
 
     function submitQuiz() {
-      let scores = { p: 0, c: 0, a: 0, i: 0, par: 0 };
-      let answeredCount = 0;
-
-      for (let i = 0; i < totalQuestions; i++) {
-        let radios = document.getElementsByName(`q${i}`);
-        for (let radio of radios) {
-          if (radio.checked) {
-            scores[radio.value]++;
-            answeredCount++;
-          }
-        }
+      let scores = {p:0, c:0, a:0, i:0, par:0};
+      for(let i=0; i<user.totalQ; i++) {
+         let el = document.querySelector(`input[name="q${i}"]:checked`);
+         if(el) scores[el.value]++;
       }
-
-      if (answeredCount < totalQuestions) {
-        alert(`Sila jawab semua soalan! (${answeredCount}/${totalQuestions})`);
-        return;
-      }
-
-      // Kira Pemenang
-      let maxScore = -1;
-      let winner = '';
-      for (let key in scores) {
-        if (scores[key] > maxScore) {
-          maxScore = scores[key];
-          winner = key;
-        }
-      }
-
-      // Jika guna GitHub, kita tak boleh save ke database. Terus tunjuk result.
-      showReport(winner, scores);
+      
+      let winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+      let roleMap = {'p':'THE PLAYER', 'c':'THE COACH', 'a':'THE ARBITER', 'i':'INSTRUCTOR', 'par':'CHESS PARENT'};
+      
+      // Save
+      document.getElementById('submitBtn').innerText = "Menyimpan...";
+      google.script.run.withSuccessHandler(() => showResult(winner, scores, roleMap)).saveToSheet({
+        name: user.name, status: user.status, dob: user.dob,
+        result: roleMap[winner], scores: scores
+      });
     }
 
-    function convertCodeToRole(code) {
-      const roles = {
-        'p': 'THE PLAYER',
-        'c': 'THE COACH',
-        'a': 'THE ARBITER',
-        'i': 'SCHOOL INSTRUCTOR',
-        'par': 'CHESS PARENT'
-      };
-      return roles[code] || 'UNKNOWN';
-    }
-
-    function showReport(winner, scores) {
+    function showResult(winner, scores, roleMap) {
       document.getElementById('quiz-section').style.display = 'none';
       document.getElementById('result-container').style.display = 'block';
-
-      document.getElementById('display-name').innerText = userProfile.name;
-      const dobDate = new Date(userProfile.dob);
-      document.getElementById('display-details').innerText = `Status: ${userProfile.status} | Tarikh Lahir: ${dobDate.toLocaleDateString('ms-MY')}`;
-      document.getElementById('final-role').innerText = convertCodeToRole(winner);
-
-      // Update Bar Graf
-      const maxQ = totalQuestions; 
-      const updateBar = (idBar, idVal, score) => {
-         let percentage = (score / maxQ) * 100 * 2.5; // Scale visual
-         if(percentage > 100) percentage = 100;
-         document.getElementById(idBar).style.width = percentage + '%';
-         document.getElementById(idVal).innerText = score;
-      };
-
-      updateBar('bar-p', 'val-p', scores.p);
-      updateBar('bar-c', 'val-c', scores.c);
-      updateBar('bar-a', 'val-a', scores.a);
-      updateBar('bar-i', 'val-i', scores.i);
-      updateBar('bar-par', 'val-par', scores.par);
-
-      // Analisis Teks
-      let analysis = "";
-      let suggestions = [];
+      document.getElementById('display-name').innerText = user.name;
+      document.getElementById('display-details').innerText = `${user.status} | ${user.dob}`;
+      document.getElementById('final-role').innerText = roleMap[winner];
       
-      switch(winner) {
-        case 'p':
-          analysis = "Jiwa anda adalah seorang PEJUANG (FIGHTER). Anda memiliki ego kompetitif yang sihat.";
-          suggestions = ["Cari jurulatih peribadi.", "Sasarkan gelaran Master.", "Latihan taktikal harian."];
-          break;
-        case 'c':
-          analysis = "Anda seorang PEMIKIR dan PENDIDIK (STRATEGIST). Kepuasan utama anda adalah melihat orang lain berjaya.";
-          suggestions = ["Ambil kursus FIDE Trainer.", "Tulis blog catur.", "Tubuhkan kelab."];
-          break;
-        case 'a':
-          analysis = "Anda PENJAGA UNDANG-UNDANG (GUARDIAN). Anda teliti, objektif, dan tenang.";
-          suggestions = ["Kursus Arbiter.", "Sukarelawan kejohanan.", "Kaji Buku Peraturan."];
-          break;
-        case 'i':
-          analysis = "Anda GURU DAN PENGGERAK (INSTRUCTOR). Anda pakar memupuk minat akar umbi.";
-          suggestions = ["Sijil School Instructor.", "Program Catur Sekolah.", "Gamifikasi."];
-          break;
-        case 'par':
-          analysis = "Anda WIRA TAK DIDENDANG (THE SUPPORTER). Tulang belakang kejayaan pemain.";
-          suggestions = ["Sertai komuniti ibu bapa.", "Belajar asas catur.", "Urus bajet kejohanan."];
-          break;
-      }
-
-      document.getElementById('analysis-text').innerText = analysis;
-      let ul = document.getElementById('suggestion-list');
-      ul.innerHTML = "";
-      suggestions.forEach(s => {
-        let li = document.createElement('li');
-        li.innerText = s;
-        ul.appendChild(li);
+      // Update Bars
+      const max = user.totalQ || 1; 
+      ['p','c','a','i','par'].forEach(k => {
+         document.getElementById(`bar-${k}`).style.width = (scores[k]/max*100*3) + '%';
+         document.getElementById(`val-${k}`).innerText = scores[k];
       });
       
-      window.scrollTo(0,0);
+      let txt = "";
+      if(winner === 'p') txt = "Anda seorang PEJUANG. Fokus pada kemenangan diri sendiri.";
+      else if(winner === 'c') txt = "Anda seorang STRATEGIST. Suka melihat orang lain faham.";
+      else if(winner === 'a') txt = "Anda PENJAGA UNDANG-UNDANG. Teliti dan objektif.";
+      else if(winner === 'i') txt = "Anda PENGGERAK. Suka memupuk minat akar umbi.";
+      else txt = "Anda PENYOKONG SETIA. Tulang belakang kejayaan orang lain.";
+      document.getElementById('analysis-text').innerText = txt;
+    }
+
+    function downloadPDF() {
+      const el = document.getElementById('result-container');
+      html2pdf().set({ margin:0.5, filename:`Personaliti_${user.name}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter'} }).from(el).save();
     }
   </script>
 </body>
