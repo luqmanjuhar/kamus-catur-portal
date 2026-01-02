@@ -11,7 +11,8 @@
     body { background-color: var(--bg); font-family: 'Poppins', sans-serif; color: #333; padding-bottom: 50px; }
     .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
     .custom-card { background: white; border: none; border-radius: 15px; border-top: 5px solid var(--primary); padding: 30px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; }
+    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; transition: 0.3s; }
+    .btn-theme:hover { background-color: var(--dark); }
     .role-badge { background: var(--dark); color: white; padding: 10px 30px; border-radius: 50px; font-size: 1.5em; font-weight: bold; margin: 20px 0; display: inline-block; }
     .score-bar-bg { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; width:100%; }
     .score-bar-fill { background: var(--primary); height: 100%; }
@@ -25,9 +26,12 @@
     <div class="text-center mb-4"><h2 style="color:var(--dark); font-weight:800;">UJIAN PERSONALITI</h2></div>
     
     <div id="intro-section" class="custom-card">
-      <div class="mb-3"><label class="fw-bold">Nama Penuh</label><input type="text" id="intro-name" class="form-control"></div>
-      <div class="mb-3"><label class="fw-bold">Status</label><select id="intro-status" class="form-select"><option>AHLI</option><option>BUKAN AHLI</option></select></div>
-      <div class="mb-3"><label class="fw-bold">Tarikh Lahir</label><input type="date" id="intro-dob" class="form-control"></div>
+      <div class="mb-3"><label class="fw-bold">Nama Penuh</label><input type="text" id="intro-name" class="form-control" placeholder="Nama Anda..."></div>
+      <div class="mb-4"><label class="fw-bold">Status Keahlian</label>
+        <select id="intro-status" class="form-select">
+          <option value="">-- Sila Pilih --</option><option>KCHERS</option><option>AHLI AKTIF</option><option>ALUMNI</option><option>BUKAN AHLI</option>
+        </select>
+      </div>
       <button class="btn-theme" onclick="startQuiz()">MULA UJIAN</button>
     </div>
 
@@ -49,18 +53,19 @@
           <tr><td>Parent</td><td><div class="score-bar-bg"><div id="bar-par" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-par">0</td></tr>
         </table>
       </div>
-      <div class="mt-4 text-start p-3 bg-light rounded"><p id="analysis-text"></p></div>
+      <div class="mt-4 text-start p-3 bg-light rounded"><p id="analysis-text" style="font-size:0.9em;"></p></div>
       <button onclick="downloadPDF()" class="btn btn-success mt-3 rounded-pill px-4">📥 Muat Turun PDF</button>
     </div>
   </div>
 
   <script>
+    // DATA SOALAN (Contoh 3 soalan, anda perlu copy paste 40 soalan penuh di sini dari kod asal)
     const questionsData = [
-      { category: "Bahagian 1", items: [
+      { category: "Bahagian 1: Dewan Kejohanan", items: [
           { q: "1. Apa perkara pertama anda cari di dewan?", opts: [{txt: "Papan No 1 & lawan.", type: "p"}, {txt: "Anak murid saya.", type: "c"}, {txt: "Susunan meja & jam.", type: "a"}, {txt: "Suasana ceria.", type: "i"}, {txt: "Tandas & tempat menunggu.", type: "par"}] },
           { q: "2. Reaksi bila budak menangis kalah awal?", opts: [{txt: "Lemah mental.", type: "p"}, {txt: "Analisis game tu.", type: "c"}, {txt: "Sila keluar dewan.", type: "a"}, {txt: "Jom main game santai.", type: "i"}, {txt: "Jom beli aiskrim.", type: "par"}] },
           { q: "3. Dalam beg ada apa?", opts: [{txt: "Coklat & nota opening.", type: "p"}, {txt: "Laptop & ChessBase.", type: "c"}, {txt: "Buku Rules & pen merah.", type: "a"}, {txt: "Gula-gula & set plastik.", type: "i"}, {txt: "Bekal & kerusi lipat.", type: "par"}] },
-          // Tambah soalan selebihnya di sini...
+          // ... Sila copy paste senarai soalan penuh anda di sini ...
       ]}
     ];
     
@@ -69,8 +74,7 @@
     function startQuiz() {
        user.name = document.getElementById('intro-name').value;
        user.status = document.getElementById('intro-status').value;
-       user.dob = document.getElementById('intro-dob').value;
-       if(!user.name || !user.dob) return alert("Sila isi maklumat.");
+       if(!user.name || !user.status) return alert("Sila isi maklumat.");
        
        document.getElementById('intro-section').style.display = 'none';
        document.getElementById('quiz-section').style.display = 'block';
@@ -102,10 +106,9 @@
       let winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
       let roleMap = {'p':'THE PLAYER', 'c':'THE COACH', 'a':'THE ARBITER', 'i':'INSTRUCTOR', 'par':'CHESS PARENT'};
       
-      // Save
       document.getElementById('submitBtn').innerText = "Menyimpan...";
       google.script.run.withSuccessHandler(() => showResult(winner, scores, roleMap)).saveToSheet({
-        name: user.name, status: user.status, dob: user.dob,
+        name: user.name, status: user.status,
         result: roleMap[winner], scores: scores
       });
     }
@@ -114,10 +117,9 @@
       document.getElementById('quiz-section').style.display = 'none';
       document.getElementById('result-container').style.display = 'block';
       document.getElementById('display-name').innerText = user.name;
-      document.getElementById('display-details').innerText = `${user.status} | ${user.dob}`;
+      document.getElementById('display-details').innerText = `${user.status}`;
       document.getElementById('final-role').innerText = roleMap[winner];
       
-      // Update Bars
       const max = user.totalQ || 1; 
       ['p','c','a','i','par'].forEach(k => {
          document.getElementById(`bar-${k}`).style.width = (scores[k]/max*100*3) + '%';
