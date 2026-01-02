@@ -7,42 +7,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   
   <style>
-    /* STANDARDIZED THEME - SAME AS PAGE 1 */
+    /* THEME SAMA */
     :root { --primary: #ff9800; --dark: #e65100; --bg: #fff3e0; }
     body { background-color: var(--bg); font-family: 'Poppins', sans-serif; color: #333; padding-bottom: 50px; }
     
     .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
     .logo-img { width: 120px; display: block; margin: 0 auto 20px; }
     .page-title { text-align: center; font-weight: 800; color: var(--dark); text-transform: uppercase; margin-bottom: 30px; }
-
-    .custom-card {
-      background: white; border: none; border-radius: 15px;
-      border-top: 5px solid var(--primary);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-      padding: 30px; margin-bottom: 20px;
-    }
-
-    .form-label { font-weight: 600; color: var(--dark); font-size: 0.9em; }
+    .custom-card { background: white; border: none; border-radius: 15px; border-top: 5px solid var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 20px; }
     .form-control, .form-select { border: 2px solid #eee; border-radius: 10px; padding: 10px; }
     .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: none; }
-
-    .btn-theme {
-      background-color: var(--primary); color: white; border: none;
-      padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; transition: 0.3s;
-    }
+    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; transition: 0.3s; }
     .btn-theme:hover { background-color: var(--dark); }
-
-    /* Assessment Specific */
     .question-row { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
-    .section-badge { background: var(--dark); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; margin-top: 20px; display: inline-block; }
-    
-    /* Result Specific */
-    .score-circle { 
-        width: 120px; height: 120px; background: var(--primary); color: white; 
-        border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-        flex-direction: column; margin: 0 auto 20px; 
-    }
+    .section-badge { background: var(--dark); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; margin-top: 20px; display: inline-block; font-weight:bold; }
+    .score-circle { width: 120px; height: 120px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; margin: 0 auto 20px; }
     .cat-box { background: #fffcf5; border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+    input[type="radio"] { accent-color: var(--dark); }
   </style>
 </head>
 <body>
@@ -75,6 +56,7 @@
       </div>
 
       <div class="alert alert-warning text-center small">Skala: 1 (Sangat Tidak Setuju) - 5 (Sangat Setuju)</div>
+      
       <div id="soalanContainer"></div>
 
       <button type="submit" id="submitBtn" class="btn-theme mt-4">HANTAR ANALISIS</button>
@@ -94,23 +76,23 @@
 
     <div class="text-start">
        <div class="cat-box">
-          <div class="d-flex justify-content-between fw-bold text-dark"><span>🧠 Mental</span><span id="skorMental"></span></div>
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>🧠 Mental</span><span id="skorMental">0/40</span></div>
           <small id="tipsMental" class="d-block mt-1 text-secondary"></small>
        </div>
        <div class="cat-box">
-          <div class="d-flex justify-content-between fw-bold text-dark"><span>❤️ Emosi</span><span id="skorEmosi"></span></div>
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>❤️ Emosi</span><span id="skorEmosi">0/40</span></div>
           <small id="tipsEmosi" class="d-block mt-1 text-secondary"></small>
        </div>
        <div class="cat-box">
-          <div class="d-flex justify-content-between fw-bold text-dark"><span>📅 Disiplin</span><span id="skorDisiplin"></span></div>
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>📅 Disiplin</span><span id="skorDisiplin">0/40</span></div>
           <small id="tipsDisiplin" class="d-block mt-1 text-secondary"></small>
        </div>
        <div class="cat-box">
-          <div class="d-flex justify-content-between fw-bold text-dark"><span>♟️ Keputusan</span><span id="skorKeputusan"></span></div>
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>♟️ Keputusan</span><span id="skorKeputusan">0/40</span></div>
           <small id="tipsKeputusan" class="d-block mt-1 text-secondary"></small>
        </div>
        <div class="cat-box">
-          <div class="d-flex justify-content-between fw-bold text-dark"><span>🚀 Mindset</span><span id="skorMindset"></span></div>
+          <div class="d-flex justify-content-between fw-bold text-dark"><span>🚀 Mindset</span><span id="skorMindset">0/40</span></div>
           <small id="tipsMindset" class="d-block mt-1 text-secondary"></small>
        </div>
     </div>
@@ -120,28 +102,74 @@
 </div>
 
 <script>
-  // Paste your original Javascript here.
-  // Make sure the render logic adds <div class="section-badge"> for category headers.
-  
-  const soalanList = [ 
-    // ... Copy your original question list here ... 
+  // SENARAI 40 SOALAN (HARDCODED)
+  const soalanList = [
+    // Mental (1-8)
     "Saya kekal fokus walaupun perlawanan berlarutan lebih 4 jam.",
-    // ... etc
+    "Saya tidak mudah mengaku kalah walaupun berada dalam posisi sukar.",
+    "Saya mampu mengawal pernafasan agar tenang semasa saat genting.",
+    "Saya tidak terganggu dengan provokasi atau taktik psikologi lawan.",
+    "Saya tetap tenang dan rasional walaupun masa jam sangat suntuk.",
+    "Saya mampu mengekalkan stamina mental sepanjang kejohanan.",
+    "Saya melihat tekanan perlawanan sebagai motivasi, bukan beban.",
+    "Saya tidak membenarkan gangguan bunyi luar menjejaskan fokus.",
+    
+    // Emosi (9-16)
+    "Saya segera melupakan kesilapan (blunder) dan fokus langkah seterusnya.",
+    "Kekalahan pusingan lepas tidak menjejaskan semangat pusingan baru.",
+    "Saya tidak menunjukkan reaksi wajah (kecewa/gembira) di papan.",
+    "Saya menerima kekalahan sebagai tanggungjawab sendiri, bukan nasib.",
+    "Saya tidak menyalahkan faktor luaran (cahaya/kerusi) jika kalah.",
+    "Saya mampu bertenang apabila lawan melakukan langkah mengejut.",
+    "Saya konsisten dalam kawalan emosi dari mula hingga akhir.",
+    "Saya tidak merasa rendah diri apabila berhadapan lawan 'rating' tinggi.",
+
+    // Disiplin (17-24)
+    "Saya mempunyai jadual latihan catur yang tetap setiap hari.",
+    "Saya menganalisis setiap perlawanan yang kalah secara teliti.",
+    "Saya melakukan latihan taktik (puzzle) secara konsisten.",
+    "Saya mengkaji teori opening secara mendalam dan sistematik.",
+    "Saya menjaga kesihatan fizikal (tidur/makan) sebelum kejohanan.",
+    "Saya mendokumentasikan nota latihan saya untuk rujukan.",
+    "Saya fokus sepenuhnya (tiada gajet) semasa sesi latihan.",
+    "Saya sanggup berkorban masa hiburan demi kemajuan catur.",
+
+    // Keputusan (25-32)
+    "Saya sentiasa memeriksa ancaman lawan sebelum membuat langkah.",
+    "Saya berani mengambil risiko yang telah dikira (calculated risk).",
+    "Saya menguruskan penggunaan masa berfikir dengan cekap.",
+    "Saya mempunyai rancangan jangka panjang dalam posisi middle-game.",
+    "Saya yakin dengan gerak hati saya selepas membuat pengiraan logik.",
+    "Saya tidak membuat langkah secara terburu-buru (impulsif).",
+    "Saya mampu mengubah strategi dengan pantas jika pelan asal gagal.",
+    "Saya sentiasa mencari langkah terbaik, bukan sekadar langkah selamat.",
+
+    // Mindset (33-40)
+    "Saya percaya kemahiran catur boleh ditingkatkan melalui usaha.",
+    "Saya terbuka menerima kritikan pedas terhadap permainan saya.",
+    "Saya seronok mempelajari teknik baru yang saya belum mahir.",
+    "Saya melihat pemain hebat sebagai inspirasi untuk berjaya.",
+    "Saya tidak takut kalah semasa mencuba variasi opening baru.",
+    "Saya lebih mementingkan kualiti permainan berbanding rating.",
+    "Saya aktif bertanya pendapat pemain senior selepas perlawanan.",
+    "Saya komited untuk menjadi versi diri yang lebih baik setiap hari."
   ];
 
+  // RENDER SOALAN
   const container = document.getElementById('soalanContainer');
-  // Loop logic (Standardized to use Bootstrap Rows)
-  for (let i = 0; i < 40; i++) { // Assuming 40 questions
+  for (let i = 0; i < soalanList.length; i++) {
       let nombor = i + 1;
       let labelCat = "";
       if(i===0) labelCat = "<div class='section-badge'>BAHAGIAN 1: KETAHANAN MENTAL</div>";
       if(i===8) labelCat = "<div class='section-badge'>BAHAGIAN 2: KAWALAN EMOSI</div>";
-      // ... Add other categories ...
+      if(i===16) labelCat = "<div class='section-badge'>BAHAGIAN 3: DISIPLIN & RUTIN</div>";
+      if(i===24) labelCat = "<div class='section-badge'>BAHAGIAN 4: PEMBUATAN KEPUTUSAN</div>";
+      if(i===32) labelCat = "<div class='section-badge'>BAHAGIAN 5: GROWTH MINDSET</div>";
 
       let questionHTML = `
       ${labelCat}
       <div class="question-row d-flex justify-content-between align-items-center">
-        <div style="width:55%; font-size:0.95em;">${nombor}. ${soalanList[i] || "Soalan..."}</div>
+        <div style="width:55%; font-size:0.9em; font-weight:500;">${nombor}. ${soalanList[i]}</div>
         <div class="d-flex justify-content-between" style="width:40%;">
             ${[1,2,3,4,5].map(n => `
               <div class="text-center">
@@ -153,7 +181,71 @@
       container.innerHTML += questionHTML;
   }
 
-  // ... Paste the rest of your form submission logic here (google.script.run) ...
+  // PENGIRAAN RESULT (Client-Side Logic)
+  document.getElementById('quizForm').onsubmit = function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "MENGANALISIS...";
+
+    // Kutip Data
+    const formData = new FormData(this);
+    let skorTotal = 0;
+    let skorMental = 0, skorEmosi = 0, skorDisiplin = 0, skorKeputusan = 0, skorMindset = 0;
+
+    for (let i = 1; i <= 40; i++) {
+        let val = parseInt(formData.get('soalan' + i));
+        skorTotal += val;
+        if (i <= 8) skorMental += val;
+        else if (i <= 16) skorEmosi += val;
+        else if (i <= 24) skorDisiplin += val;
+        else if (i <= 32) skorKeputusan += val;
+        else skorMindset += val;
+    }
+
+    // Tentukan Tahap
+    let tahap = "";
+    if (skorTotal >= 161) tahap = "ELITE MINDSET";
+    else if (skorTotal >= 121) tahap = "COMPETITIVE MINDSET";
+    else if (skorTotal >= 81) tahap = "DEVELOPING MINDSET";
+    else tahap = "BEGINNER MINDSET";
+
+    // Fungsi Helper Nasihat
+    function getTips(skor, type) {
+        if(skor >= 32) return "✅ Cemerlang. Kekalkan.";
+        if(skor >= 24) return "⚠️ Sederhana. Perbaiki lagi.";
+        return "🛑 Lemah. Perlu fokus segera.";
+    }
+
+    // Papar Result
+    setTimeout(() => {
+        document.getElementById('formCard').style.display = 'none';
+        document.getElementById('resultBox').style.display = 'block';
+
+        document.getElementById('resNama').innerText = formData.get('nama');
+        document.getElementById('resStatus').innerText = formData.get('status');
+        document.getElementById('resSkor').innerText = skorTotal;
+        document.getElementById('resTahap').innerText = tahap;
+
+        // Update Kategori
+        document.getElementById('skorMental').innerText = skorMental + "/40";
+        document.getElementById('tipsMental').innerText = getTips(skorMental);
+
+        document.getElementById('skorEmosi').innerText = skorEmosi + "/40";
+        document.getElementById('tipsEmosi').innerText = getTips(skorEmosi);
+
+        document.getElementById('skorDisiplin').innerText = skorDisiplin + "/40";
+        document.getElementById('tipsDisiplin').innerText = getTips(skorDisiplin);
+
+        document.getElementById('skorKeputusan').innerText = skorKeputusan + "/40";
+        document.getElementById('tipsKeputusan').innerText = getTips(skorKeputusan);
+
+        document.getElementById('skorMindset').innerText = skorMindset + "/40";
+        document.getElementById('tipsMindset').innerText = getTips(skorMindset);
+
+        window.scrollTo(0,0);
+    }, 1000);
+  };
 </script>
 </body>
 </html>
