@@ -1,144 +1,493 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root { --primary: #ff9800; --dark: #e65100; --bg: #fff3e0; }
-    body { background-color: var(--bg); font-family: 'Poppins', sans-serif; color: #333; padding-bottom: 50px; }
-    .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
-    .custom-card { background: white; border: none; border-radius: 15px; border-top: 5px solid var(--primary); padding: 30px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 600; width: 100%; transition: 0.3s; }
-    .btn-theme:hover { background-color: var(--dark); }
-    .role-badge { background: var(--dark); color: white; padding: 10px 30px; border-radius: 50px; font-size: 1.5em; font-weight: bold; margin: 20px 0; display: inline-block; }
-    .score-bar-bg { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; width:100%; }
-    .score-bar-fill { background: var(--primary); height: 100%; }
-    .option-label { display: block; padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; width: 100%; }
-    .option-label:hover { background: var(--bg); border-color: var(--primary); }
-    input[type="radio"] { margin-right: 10px; accent-color: var(--dark); }
-  </style>
-</head>
-<body>
-  <div class="main-container">
-    <div class="text-center mb-4"><h2 style="color:var(--dark); font-weight:800;">UJIAN PERSONALITI</h2></div>
+// ID Spreadsheet anda
+var SHEET_ID = '1exmE5ynRxkpQw23SW4CSt0rIojXJV-OYvEJVAQXePO8';
+var SHEET_NAME = 'Keputusan Peserta';
+
+function doGet() {
+  return HtmlService.createTemplateFromFile('index')
+      .evaluate()
+      .setTitle('Ujian Psikometrik Personaliti Catur')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+function getData() {
+  // Data dikelompokkan mengikut Bahagian
+  var categorizedQuestions = [
+    {
+      category: "Bahagian 1: Di Dewan Kejohanan",
+      items: [
+        {
+          q: "1. Apa perkara pertama anda cari bila sampai di dewan kejohanan?",
+          opts: [
+            {txt: "Di mana papan nombor 1 dan siapa lawan saya.", type: "p"},
+            {txt: "Di mana anak murid saya duduk dan adakah mereka bersedia mental.", type: "c"},
+            {txt: "Adakah susunan meja ikut pelan lantai dan jam berfungsi.", type: "a"},
+            {txt: "Adakah suasana ceria dan murid-murid saya nampak seronok.", type: "i"},
+            {txt: "Di mana tandas, tempat menunggu yang selesa, dan kedai makan untuk anak saya.", type: "par"}
+          ]
+        },
+        {
+          q: "2. Seorang kanak-kanak menangis selepas kalah 'Scholar's Mate' (4 moves). Reaksi anda:",
+          opts: [
+            {txt: "Lemahnya mental, kena belajar tahan tekanan.", type: "p"},
+            {txt: "Tunjuk saya game tu, kita tengok macam mana nak elak lain kali.", type: "c"},
+            {txt: "Adik, tolong jangan bising di kawasan permainan. Sila keluar.", type: "a"},
+            {txt: "Tak apa, jom main lagi satu game santai. Catur ni seronok!", type: "i"},
+            {txt: "Alolo kesiannya anak (atau anak orang lain). Jom beli aiskrim.", type: "par"}
+          ]
+        },
+        {
+          q: "3. Apa yang ada dalam beg anda ke kejohanan?",
+          opts: [
+            {txt: "Coklat, air, dan buku nota opening untuk prep.", type: "p"},
+            {txt: "Laptop dengan ChessBase untuk analisis game pelajar.", type: "c"},
+            {txt: "Buku Undang-undang FIDE, pen merah, dan borang pairing.", type: "a"},
+            {txt: "Gula-gula untuk murid, set catur plastik tambahan, dan penanda kehadiran.", type: "i"},
+            {txt: "Bekal makanan, tikar, powerbank, kerusi lipat, dan jaket anak.", type: "par"}
+          ]
+        },
+        {
+          q: "4. Anda melihat 'Illegal Move' dilakukan oleh budak baru belajar (U10).",
+          opts: [
+            {txt: "Angkat tangan, panggil arbiter, tuntut kemenangan/tambah masa.", type: "p"},
+            {txt: "Geleng kepala. Teknik asas pun belum mantap lagi.", type: "c"},
+            {txt: "Datang, tambah 2 minit untuk lawan, dan beri amaran rasmi.", type: "a"},
+            {txt: "Senyum dan betulkan. 'Eh, Bishop tak boleh jalan macam tu. Jalan macam ni...'", type: "i"},
+            {txt: "Risau. 'Harap anak aku tak buat silap macam tu.'", type: "par"}
+          ]
+        },
+        {
+          q: "5. Pandangan anda tentang yuran penyertaan kejohanan:",
+          opts: [
+            {txt: "Mahal tak apa, asalkan hadiah tunai (Cash Prize) lumayan.", type: "p"},
+            {txt: "Berpatutan asalkan penganjur sediakan sijil pencapaian yang laku.", type: "c"},
+            {txt: "Perlu telus dan digunakan untuk bayar elaun Arbiter yang setimpal.", type: "a"},
+            {txt: "Sepatutnya murah supaya semua murid sekolah mampu main.", type: "i"},
+            {txt: "Saya tak kisah bayar berapa pun, asalkan kejohanan selesa untuk anak saya.", type: "par"}
+          ]
+        }
+      ]
+    },
+    {
+      category: "Bahagian 2: Latihan & Pembelajaran",
+      items: [
+        {
+          q: "6. Cara terbaik untuk belajar catur ialah:",
+          opts: [
+            {txt: "Main blitz beribu-ribu game di online.", type: "p"},
+            {txt: "Analisis mendalam Grandmaster games dan endgame studies.", type: "c"},
+            {txt: "Membaca dan memahami setiap klausa peraturan kejohanan.", type: "a"},
+            {txt: "Bermain mini-games (cth: main guna Pawn sahaja) supaya tak bosan.", type: "i"},
+            {txt: "Hantar ke kelas tusyen catur terbaik dan pantau kerja rumah dia.", type: "par"}
+          ]
+        },
+        {
+          q: "7. 'Checkmate' yang paling memuaskan ialah:",
+          opts: [
+            {txt: "Bila saya korbankan Queen dan lawan terkejut.", type: "p"},
+            {txt: "Bila pelajar saya aplikasikan taktik yang baru diajar semalam.", type: "c"},
+            {txt: "Checkmate yang sah, jam ditekan, dan keputusan direkod dengan betul.", type: "a"},
+            {txt: "Bila murid saya yang pemalu akhirnya berani jerit 'Checkmate!'.", type: "i"},
+            {txt: "Bila anak saya menang dan lari peluk saya dengan gembira.", type: "par"}
+          ]
+        },
+        {
+          q: "8. Topik apa yang anda paling suka bincangkan?",
+          opts: [
+            {txt: "Rating ELO saya naik atau turun.", type: "p"},
+            {txt: "Kelemahan struktur pawn dalam Sicilian Defense.", type: "c"},
+            {txt: "Peraturan baru FIDE tentang penggunaan tandas semasa game.", type: "a"},
+            {txt: "Cara tarik minat budak-budak supaya tak main gadget.", type: "i"},
+            {txt: "Jadual kejohanan mana yang tak bertembung dengan periksa sekolah.", type: "par"}
+          ]
+        },
+        {
+          q: "9. Jika membeli set catur, anda pilih yang mana?",
+          opts: [
+            {txt: "Set kayu berat (weighted) yang sedap dipegang untuk blitz.", type: "p"},
+            {txt: "Set standard kejohanan untuk simulasi sebenar.", type: "c"},
+            {txt: "Set DGT (elektronik) yang boleh sambung ke komputer.", type: "a"},
+            {txt: "Set plastik warna-warni atau kartun supaya budak tertarik.", type: "i"},
+            {txt: "Set yang paling ringan dan ada beg galas supaya anak senang bawa.", type: "par"}
+          ]
+        },
+        {
+          q: "10. 'Chess Engine' (Stockfish/AI) bagi anda ialah:",
+          opts: [
+            {txt: "Kawan baik untuk cari silap saya.", type: "p"},
+            {txt: "Alat bantu mengajar, tapi bahaya kalau pelajar malas berfikir.", type: "c"},
+            {txt: "Musuh utama integriti (alat menipu/cheating).", type: "a"},
+            {txt: "Terlalu rumit. Budak-budak perlu belajar konsep manusia dulu.", type: "i"},
+            {txt: "Benda yang perlu saya install dalam iPad anak sebab coach suruh.", type: "par"}
+          ]
+        }
+      ]
+    },
+    {
+      category: "Bahagian 3: Emosi & Motivasi",
+      items: [
+        {
+          q: "11. Apa impian terbesar anda?",
+          opts: [
+            {txt: "Jadi Grandmaster (GM) atau Juara Kebangsaan.", type: "p"},
+            {txt: "Melahirkan Juara Dunia dari akademi saya.", type: "c"},
+            {txt: "Menjadi Ketua Arbiter di Olimpiad Catur.", type: "a"},
+            {txt: "Melihat catur dimainkan di setiap kantin sekolah di Malaysia.", type: "i"},
+            {txt: "Anak saya dapat biasiswa universiti melalui sukan catur.", type: "par"}
+          ]
+        },
+        {
+          q: "12. Perkara paling stress tentang catur:",
+          opts: [
+            {txt: "Kalah dengan pemain rating rendah.", type: "p"},
+            {txt: "Pelajar berbakat tapi malas atau tak disiplin.", type: "c"},
+            {txt: "Pemain, ibu bapa, dan jurulatih yang bergaduh pasal keputusan.", type: "a"},
+            {txt: "Budak-budak bising dan tak duduk diam masa belajar.", type: "i"},
+            {txt: "Menunggu anak habis main 4 jam, tak tahu menang atau kalah.", type: "par"}
+          ]
+        },
+        {
+          q: "13. Anda melihat dua pemain dewasa bergaduh mulut.",
+          opts: [
+            {txt: "Tonton je. Seronok tengok drama orang lain.", type: "p"},
+            {txt: "Nasihatkan mereka supaya jaga etika profesional.", type: "c"},
+            {txt: "Hentikan jam serta-merta, asingkan mereka, dan beri hukuman.", type: "a"},
+            {txt: "Jauhkan murid-murid saya, 'Jangan tiru perangai tu ya.'", type: "i"},
+            {txt: "Risau keselamatan anak saya, ajak anak duduk jauh sikit.", type: "par"}
+          ]
+        },
+        {
+          q: "14. Kenapa catur bagus?",
+          opts: [
+            {txt: "Ia membuktikan siapa lebih bijak.", type: "p"},
+            {txt: "Ia melatih pemikiran kritis dan penyelesaian masalah.", type: "c"},
+            {txt: "Ia mengajar disiplin dan kepatuhan kepada undang-undang.", type: "a"},
+            {txt: "Ia aktiviti sosial yang sihat dan murah untuk semua.", type: "i"},
+            {txt: "Ia bagus untuk CV dan permohonan asrama penuh/sekolah kluster.", type: "par"}
+          ]
+        },
+        {
+          q: "15. Hari Ahad ada kejohanan. Apa perasaan anda?",
+          opts: [
+            {txt: "Bersemangat! Masa untuk farm rating.", type: "p"},
+            {txt: "Sibuk! Kena siapkan opening preparation untuk team.", type: "c"},
+            {txt: "Fokus! Kena bangun awal untuk setup dewan.", type: "a"},
+            {txt: "Seronok! Boleh jumpa ramai kawan-kawan catur.", type: "i"},
+            {txt: "Penat! Kena bangun pukul 5 pagi gosok baju dan drive jauh.", type: "par"}
+          ]
+        }
+      ]
+    },
+    {
+      category: "Bahagian 4: Situasi Spesifik",
+      items: [
+        {
+          q: "16. Anak murid/anak anda nak berhenti main catur.",
+          opts: [
+            {txt: "Suka hati kau lah, kurang sikit pesaing aku.", type: "p"},
+            {txt: "Sayang bakat tu. Cuba kita ubah rejim latihan dulu.", type: "c"},
+            {txt: "Pastikan nama ditarik balik dari senarai pairing rasmi.", type: "a"},
+            {txt: "Tak apa, asalkan awak happy. Nak cuba main dam aji pula?", type: "i"},
+            {txt: "Jangan! Ibu dah bayar yuran tahunan mahal ni!", type: "par"}
+          ]
+        },
+        {
+          q: "17. Semasa menunggu pusingan seterusnya (pairing), anda buat apa?",
+          opts: [
+            {txt: "Dengar lagu, tutup mata, visualisasi game.", type: "p"},
+            {txt: "Semak game pusingan lepas dengan pelajar.", type: "c"},
+            {txt: "Masukkan keputusan ke dalam komputer (Swiss Manager).", type: "a"},
+            {txt: "Ajar budak-budak main 'Bughouse' (catur berpasukan 4 orang).", type: "i"},
+            {txt: "Suap anak makan, kipaskan dia, pastikan dia minum air.", type: "par"}
+          ]
+        },
+        {
+          q: "18. Definisi 'Fair Play' bagi anda:",
+          opts: [
+            {txt: "Menang tanpa menipu, tapi perang psikologi tu biasa.", type: "p"},
+            {txt: "Menghormati lawan dan permainan itu sendiri.", type: "c"},
+            {txt: "Mematuhi Artikel 11 (Tingkah Laku Pemain) sepenuhnya.", type: "a"},
+            {txt: "Bersalaman sebelum dan selepas, menang kalah tetap kawan.", type: "i"},
+            {txt: "Harap lawan anak saya tak buat benda pelik-pelik.", type: "par"}
+          ]
+        },
+        {
+          q: "19. Rakan ajak main catur santai di kedai mamak.",
+          opts: [
+            {txt: "Jom! Siapa kalah bayar teh tarik. (Main serius).", type: "p"},
+            {txt: "Boleh, tapi aku nak cuba opening baru ni. (Eksperimen).", type: "c"},
+            {txt: "Boleh, tapi kena pakai jam. Kalau takde jam, tak valid.", type: "a"},
+            {txt: "Jom! Kita main hand & brain atau main blindfold. (Main-main).", type: "i"},
+            {txt: "Korang mainlah, aku tolong tengok je. Penatlah.", type: "par"}
+          ]
+        },
+        {
+          q: "20. Pilih satu objek yang melambangkan anda:",
+          opts: [
+            {txt: "Piala (Trofi).", type: "p"},
+            {txt: "Papan Demonstrasi Magnetik.", type: "c"},
+            {txt: "Wisel atau Kad Kuning.", type: "a"},
+            {txt: "Maskot Catur yang comel.", type: "i"},
+            {txt: "Kerusi Lipat & Bekas Makanan.", type: "par"}
+          ]
+        }
+      ]
+    },
+    {
+      category: "Bahagian 5: Pandangan Dunia & Personaliti",
+      items: [
+        {
+          q: "21. Fokus utama anda:",
+          opts: [
+            {txt: "Kemenangan Diri", type: "p"},
+            {txt: "Pembangunan Teknikal", type: "c"},
+            {txt: "Keadilan", type: "a"},
+            {txt: "Minat Murid", type: "i"},
+            {txt: "Kebajikan Anak", type: "par"}
+          ]
+        },
+        {
+          q: "22. Anda paling pantang:",
+          opts: [
+            {txt: "Kalah masa", type: "p"},
+            {txt: "Murid tak dengar cakap", type: "c"},
+            {txt: "Salah pairing", type: "a"},
+            {txt: "Suasana terlalu serius", type: "i"},
+            {txt: "Anak dibuli", type: "par"}
+          ]
+        },
+        {
+          q: "23. Idola anda:",
+          opts: [
+            {txt: "Magnus Carlsen", type: "p"},
+            {txt: "Mark Dvoretsky (Coach terhebat)", type: "c"},
+            {txt: "Ketua Arbiter FIDE", type: "a"},
+            {txt: "Cikgu Kelab Catur Sekolah", type: "i"},
+            {txt: "Polgar Dad (Bapa yang melatih 3 anak jadi juara)", type: "par"}
+          ]
+        },
+        {
+          q: "24. Hubungan dengan Rating:",
+          opts: [
+            {txt: "Obses", type: "p"},
+            {txt: "Alat analisis", type: "c"},
+            {txt: "Data teknikal", type: "a"},
+            {txt: "Tak penting", type: "i"},
+            {txt: "Kayu ukur pelaburan", type: "par"}
+          ]
+        },
+        {
+          q: "25. Bila tengok papan catur kosong:",
+          opts: [
+            {txt: "Nampak medan perang", type: "p"},
+            {txt: "Nampak potensi pelajaran", type: "c"},
+            {txt: "Nampak sama ada papan tu bersih", type: "a"},
+            {txt: "Nampak permainan", type: "i"},
+            {txt: "Nampak hobi anak", type: "par"}
+          ]
+        },
+        {
+          q: "26. Reaksi bila orang kata 'Catur tu bosan':",
+          opts: [
+            {txt: "Sebab kau tak pandai.", type: "p"},
+            {txt: "Kau belum faham kedalamannya.", type: "c"},
+            {txt: "Ia sukan intelek yang diiktiraf.", type: "a"},
+            {txt: "Eh taklah, cuba main cara ni...", type: "i"},
+            {txt: "Asalkan anak aku tak merayau, okaylah.", type: "par"}
+          ]
+        },
+        {
+          q: "27. Kualiti diri anda:",
+          opts: [
+            {txt: "Kompetitif", type: "p"},
+            {txt: "Analitikal", type: "c"},
+            {txt: "Tegas", type: "a"},
+            {txt: "Penyabar", type: "i"},
+            {txt: "Penyayang/Pelindung", type: "par"}
+          ]
+        },
+        {
+          q: "28. Dalam group WhatsApp Catur, anda:",
+          opts: [
+            {txt: "Jarang bunyi kecuali share kemenangan", type: "p"},
+            {txt: "Share artikel teknik", type: "c"},
+            {txt: "Share peraturan baru", type: "a"},
+            {txt: "Share gambar budak-budak main", type: "i"},
+            {txt: "Tanya 'Bila sijil boleh dapat?'", type: "par"}
+          ]
+        },
+        {
+          q: "29. Sikap terhadap kekalahan:",
+          opts: [
+            {txt: "Dendam", type: "p"},
+            {txt: "Pengajaran", type: "c"},
+            {txt: "Statistik", type: "a"},
+            {txt: "Biasa", type: "i"},
+            {txt: "Simpati", type: "par"}
+          ]
+        },
+        {
+          q: "30. Jika ada duit lebih RM1000 untuk catur:",
+          opts: [
+            {txt: "Masuk tournament luar negara", type: "p"},
+            {txt: "Beli buku/software", type: "c"},
+            {txt: "Ambil kursus FIDE Arbiter", type: "a"},
+            {txt: "Beli 20 set catur untuk sekolah", type: "i"},
+            {txt: "Bayar private coach untuk anak", type: "par"}
+          ]
+        }
+      ]
+    },
+    {
+      category: "Bahagian 6: Gaya Hidup & Masa Depan",
+      items: [
+        {
+          q: "31. Rutin harian:",
+          opts: [
+            {txt: "Latihan taktik 2 jam", type: "p"},
+            {txt: "Rangka silibus", type: "c"},
+            {txt: "Semak e-mel FIDE", type: "a"},
+            {txt: "Cari idea game menarik", type: "i"},
+            {txt: "Hantar/Ambil anak latihan", type: "par"}
+          ]
+        },
+        {
+          q: "32. 'Gambit' (Korban buah) bagi anda:",
+          opts: [
+            {txt: "Risiko berbaloi", type: "p"},
+            {txt: "Perlu dikira tepat", type: "c"},
+            {txt: "Sah asalkan bukan illegal", type: "a"},
+            {txt: "Seronok!", type: "i"},
+            {txt: "Risau anak hilang buah free", type: "par"}
+          ]
+        },
+        {
+          q: "33. Anda di kedai buku, cari seksyen:",
+          opts: [
+            {txt: "Biografi Juara", type: "p"},
+            {txt: "Manual Latihan", type: "c"},
+            {txt: "Buku Undang-undang", type: "a"},
+            {txt: "Catur untuk Kanak-kanak", type: "i"},
+            {txt: "Motivasi Keibubapaan", type: "par"}
+          ]
+        },
+        {
+          q: "34. Paling takut:",
+          opts: [
+            {txt: "Rating jatuh bawah 1500", type: "p"},
+            {txt: "Murid tiada peningkatan", type: "c"},
+            {txt: "Buat keputusan salah yang viral", type: "a"},
+            {txt: "Murid bosan dan berhenti", type: "i"},
+            {txt: "Anak burnout", type: "par"}
+          ]
+        },
+        {
+          q: "35. Cita-cita:",
+          opts: [
+            {txt: "Master (FM/IM/GM)", type: "p"},
+            {txt: "FIDE Trainer (FT)", type: "c"},
+            {txt: "International Arbiter (IA)", type: "a"},
+            {txt: "Developmental Instructor (DI)", type: "i"},
+            {txt: "Chess Mom/Dad of the Year", type: "par"}
+          ]
+        },
+        {
+          q: "36. 'Touch Move':",
+          opts: [
+            {txt: "Pantang larang maut", type: "p"},
+            {txt: "Disiplin minda", type: "c"},
+            {txt: "Peraturan Artikel 4", type: "a"},
+            {txt: "Eh, fikir dulu baru pegang", type: "i"},
+            {txt: "Pesanan yang selalu diingatkan pada anak", type: "par"}
+          ]
+        },
+        {
+          q: "37. Peranan catur dalam hidup:",
+          opts: [
+            {txt: "Jati diri", type: "p"},
+            {txt: "Kerjaya", type: "c"},
+            {txt: "Tanggungjawab", type: "a"},
+            {txt: "Sumbangan sosial", type: "i"},
+            {txt: "Pengorbanan untuk keluarga", type: "par"}
+          ]
+        },
+        {
+          q: "38. Masa depan catur:",
+          opts: [
+            {txt: "Lebih ramai pro", type: "p"},
+            {txt: "Lebih tinggi kualiti", type: "c"},
+            {txt: "Lebih teratur", type: "a"},
+            {txt: "Lebih meriah", type: "i"},
+            {txt: "Lebih cerah untuk anak-anak", type: "par"}
+          ]
+        },
+        {
+          q: "39. Kalau boleh tukar satu peraturan:",
+          opts: [
+            {txt: "Hapuskan draw", type: "p"},
+            {txt: "Tambah masa fikir", type: "c"},
+            {txt: "Perjelaskan rules yang kabur", type: "a"},
+            {txt: "Kurangkan formaliti untuk budak", type: "i"},
+            {txt: "Pendekkan masa menunggu ibu bapa", type: "par"}
+          ]
+        },
+        {
+          q: "40. Kata akhir:",
+          opts: [
+            {txt: "Checkmate", type: "p"},
+            {txt: "Strategi", type: "c"},
+            {txt: "Integriti", type: "a"},
+            {txt: "Ceria", type: "i"},
+            {txt: "Sokongan", type: "par"}
+          ]
+        }
+      ]
+    }
+  ];
+  return JSON.stringify(categorizedQuestions);
+}
+
+// Fungsi Simpan Data yang dikemaskini dengan column baru
+function saveToSheet(data) {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME);
     
-    <div id="intro-section" class="custom-card">
-      <div class="mb-3"><label class="fw-bold">Nama Penuh</label><input type="text" id="intro-name" class="form-control" placeholder="Nama Anda..."></div>
-      <div class="mb-4"><label class="fw-bold">Status Keahlian</label>
-        <select id="intro-status" class="form-select">
-          <option value="">-- Sila Pilih --</option><option>KCHERS</option><option>AHLI AKTIF</option><option>ALUMNI</option><option>BUKAN AHLI</option>
-        </select>
-      </div>
-      <button class="btn-theme" onclick="startQuiz()">MULA UJIAN</button>
-    </div>
-
-    <div id="quiz-section" style="display:none;">
-      <div id="quiz-container"></div>
-      <button class="btn-theme mt-4" onclick="submitQuiz()" id="submitBtn">HANTAR JAWAPAN</button>
-    </div>
-
-    <div id="result-container" class="custom-card text-center" style="display:none;">
-      <h4 id="display-name" style="color:var(--primary); font-weight:800;">NAMA</h4>
-      <p id="display-details" class="small text-muted"></p>
-      <div id="final-role" class="role-badge">ROLE</div>
-      <div class="text-start mt-4">
-        <table class="table table-borderless table-sm">
-          <tr><td width="30%">Player</td><td><div class="score-bar-bg"><div id="bar-p" class="score-bar-fill" style="width:0%"></div></div></td><td width="10%" id="val-p">0</td></tr>
-          <tr><td>Coach</td><td><div class="score-bar-bg"><div id="bar-c" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-c">0</td></tr>
-          <tr><td>Arbiter</td><td><div class="score-bar-bg"><div id="bar-a" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-a">0</td></tr>
-          <tr><td>Instructor</td><td><div class="score-bar-bg"><div id="bar-i" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-i">0</td></tr>
-          <tr><td>Parent</td><td><div class="score-bar-bg"><div id="bar-par" class="score-bar-fill" style="width:0%"></div></div></td><td id="val-par">0</td></tr>
-        </table>
-      </div>
-      <div class="mt-4 text-start p-3 bg-light rounded"><p id="analysis-text" style="font-size:0.9em;"></p></div>
-      <button onclick="downloadPDF()" class="btn btn-success mt-3 rounded-pill px-4">📥 Muat Turun PDF</button>
-    </div>
-  </div>
-
-  <script>
-    // DATA SOALAN (Contoh 3 soalan, anda perlu copy paste 40 soalan penuh di sini dari kod asal)
-    const questionsData = [
-      { category: "Bahagian 1: Dewan Kejohanan", items: [
-          { q: "1. Apa perkara pertama anda cari di dewan?", opts: [{txt: "Papan No 1 & lawan.", type: "p"}, {txt: "Anak murid saya.", type: "c"}, {txt: "Susunan meja & jam.", type: "a"}, {txt: "Suasana ceria.", type: "i"}, {txt: "Tandas & tempat menunggu.", type: "par"}] },
-          { q: "2. Reaksi bila budak menangis kalah awal?", opts: [{txt: "Lemah mental.", type: "p"}, {txt: "Analisis game tu.", type: "c"}, {txt: "Sila keluar dewan.", type: "a"}, {txt: "Jom main game santai.", type: "i"}, {txt: "Jom beli aiskrim.", type: "par"}] },
-          { q: "3. Dalam beg ada apa?", opts: [{txt: "Coklat & nota opening.", type: "p"}, {txt: "Laptop & ChessBase.", type: "c"}, {txt: "Buku Rules & pen merah.", type: "a"}, {txt: "Gula-gula & set plastik.", type: "i"}, {txt: "Bekal & kerusi lipat.", type: "par"}] },
-          // ... Sila copy paste senarai soalan penuh anda di sini ...
-      ]}
-    ];
+    // Header jika sheet baru: Timestamp, Nama, Status, DOB, Dominan, Markah...
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME);
+      sheet.appendRow([
+        'Timestamp', 
+        'Nama', 
+        'Status Keahlian', 
+        'Tarikh Lahir',
+        'Dominan', 
+        'Skor Player', 
+        'Skor Coach', 
+        'Skor Arbiter', 
+        'Skor Instructor', 
+        'Skor Parent'
+      ]);
+      // Format header
+      sheet.getRange(1, 1, 1, 10).setFontWeight('bold').setBackground('#ff9800').setFontColor('white');
+    }
     
-    let user = {};
-
-    function startQuiz() {
-       user.name = document.getElementById('intro-name').value;
-       user.status = document.getElementById('intro-status').value;
-       if(!user.name || !user.status) return alert("Sila isi maklumat.");
-       
-       document.getElementById('intro-section').style.display = 'none';
-       document.getElementById('quiz-section').style.display = 'block';
-       renderQuiz();
-    }
-
-    function renderQuiz() {
-      const container = document.getElementById('quiz-container');
-      let idx = 0;
-      questionsData.forEach(sect => {
-        container.innerHTML += `<h5 class="mt-4 text-white bg-dark p-2 rounded">${sect.category}</h5>`;
-        sect.items.forEach(item => {
-           let html = `<div class="custom-card p-3 mb-3 border-start border-4 border-warning"><p class="fw-bold">${item.q}</p>`;
-           item.opts.sort(()=>Math.random()-0.5).forEach(opt => html += `<label class="option-label"><input type="radio" name="q${idx}" value="${opt.type}"> ${opt.txt}</label>`);
-           container.innerHTML += html + `</div>`;
-           idx++;
-        });
-      });
-      user.totalQ = idx;
-    }
-
-    function submitQuiz() {
-      let scores = {p:0, c:0, a:0, i:0, par:0};
-      for(let i=0; i<user.totalQ; i++) {
-         let el = document.querySelector(`input[name="q${i}"]:checked`);
-         if(el) scores[el.value]++;
-      }
-      
-      let winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-      let roleMap = {'p':'THE PLAYER', 'c':'THE COACH', 'a':'THE ARBITER', 'i':'INSTRUCTOR', 'par':'CHESS PARENT'};
-      
-      document.getElementById('submitBtn').innerText = "Menyimpan...";
-      google.script.run.withSuccessHandler(() => showResult(winner, scores, roleMap)).saveToSheet({
-        name: user.name, status: user.status,
-        result: roleMap[winner], scores: scores
-      });
-    }
-
-    function showResult(winner, scores, roleMap) {
-      document.getElementById('quiz-section').style.display = 'none';
-      document.getElementById('result-container').style.display = 'block';
-      document.getElementById('display-name').innerText = user.name;
-      document.getElementById('display-details').innerText = `${user.status}`;
-      document.getElementById('final-role').innerText = roleMap[winner];
-      
-      const max = user.totalQ || 1; 
-      ['p','c','a','i','par'].forEach(k => {
-         document.getElementById(`bar-${k}`).style.width = (scores[k]/max*100*3) + '%';
-         document.getElementById(`val-${k}`).innerText = scores[k];
-      });
-      
-      let txt = "";
-      if(winner === 'p') txt = "Anda seorang PEJUANG. Fokus pada kemenangan diri sendiri.";
-      else if(winner === 'c') txt = "Anda seorang STRATEGIST. Suka melihat orang lain faham.";
-      else if(winner === 'a') txt = "Anda PENJAGA UNDANG-UNDANG. Teliti dan objektif.";
-      else if(winner === 'i') txt = "Anda PENGGERAK. Suka memupuk minat akar umbi.";
-      else txt = "Anda PENYOKONG SETIA. Tulang belakang kejayaan orang lain.";
-      document.getElementById('analysis-text').innerText = txt;
-    }
-
-    function downloadPDF() {
-      const el = document.getElementById('result-container');
-      html2pdf().set({ margin:0.5, filename:`Personaliti_${user.name}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter'} }).from(el).save();
-    }
-  </script>
-</body>
-</html>
+    // Simpan data
+    sheet.appendRow([
+      new Date(),
+      data.name,
+      data.status, // Data baru
+      data.dob,    // Data baru
+      data.result,
+      data.scores.p,
+      data.scores.c,
+      data.scores.a,
+      data.scores.i,
+      data.scores.par
+    ]);
+    
+    return "Success";
+  } catch (e) {
+    return "Error: " + e.toString();
+  }
+}
