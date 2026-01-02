@@ -1,143 +1,515 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root { --primary: #ff9800; --dark: #e65100; --bg: #fff3e0; }
-    body { background-color: var(--bg); font-family: 'Poppins', sans-serif; padding-bottom: 50px; }
-    .main-container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
-    .custom-card { background: white; border-radius: 15px; border-top: 5px solid var(--primary); padding: 30px; margin-bottom: 20px; }
-    .btn-theme { background-color: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 50px; width: 100%; font-weight: 600; }
-    .cat-box { background: #fff; border-left: 5px solid var(--primary); padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-    .likert-opt { text-align: center; margin: 0 5px; flex: 1; }
-    .likert-opt input { transform: scale(1.3); accent-color: var(--dark); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Psikometrik Ibubapa Catur</title>
+    <style>
+        /* --- GLOBAL STYLES --- */
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #fdf6f0; /* Latar belakang krim lembut */
+            color: #444; 
+            line-height: 1.6; 
+            padding: 20px; 
+            margin: 0;
+        }
+
+        .container { 
+            max-width: 700px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(230, 126, 34, 0.15); 
+            border-top: 6px solid #e67e22; 
+        }
+
+        /* --- LOGO & HEADER --- */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo-container img {
+            max-width: 160px; 
+            height: auto;
+        }
+        h1 { 
+            text-align: center; 
+            color: #d35400; 
+            font-size: 26px;
+            margin-bottom: 10px;
+            margin-top: 0;
+        }
+        .intro { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            color: #666;
+            font-size: 15px;
+        }
+
+        /* --- FORM STYLES --- */
+        .section-header {
+            background-color: #fff3e0;
+            color: #d35400;
+            padding: 12px 20px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: 700;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .question-block { 
+            margin-bottom: 25px; 
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .question-block:last-child {
+            border-bottom: none;
+        }
+        .question-text { 
+            font-weight: 600; 
+            margin-bottom: 12px; 
+            display: block; 
+            color: #2c3e50;
+            font-size: 1.05em;
+        }
+        
+        /* Custom Radio Buttons Clean Look */
+        .options {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .options label { 
+            cursor: pointer; 
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            color: #555;
+        }
+        input[type="radio"] {
+            accent-color: #e67e22; 
+            width: 20px;
+            height: 20px;
+            margin-right: 6px;
+            cursor: pointer;
+        }
+
+        /* Input Name */
+        input[type="text"] {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            width: 80%;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            outline: none;
+            text-align: center;
+        }
+        input[type="text"]:focus {
+            border-color: #e67e22;
+        }
+
+        /* Action Button */
+        button { 
+            display: block; 
+            width: 100%; 
+            padding: 16px; 
+            background-color: #e67e22; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            font-weight: 700;
+            cursor: pointer; 
+            margin-top: 40px; 
+            transition: transform 0.2s, background 0.3s; 
+            box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2);
+        }
+        button:hover { 
+            background-color: #d35400; 
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* --- REPORT CLEAN DESIGN --- */
+        #report { 
+            display: none; 
+            margin-top: 40px; 
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .report-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .report-header-bg {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .report-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        .report-user-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .result-section {
+            padding: 30px;
+        }
+        
+        .result-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .result-main-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: #e67e22;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .result-desc {
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .tips-container {
+            background-color: #fcf8e3; /* Kuning lembut */
+            border-left: 4px solid #f1c40f;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+        }
+        
+        .tips-title {
+            font-weight: bold;
+            color: #d35400;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tips-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .tips-list li {
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        .screenshot-alert { 
+            text-align: center; 
+            background: #34495e; 
+            color: white; 
+            padding: 12px; 
+            margin-top: 20px; 
+            font-size: 14px;
+            font-weight: 600; 
+            border-radius: 8px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="main-container">
-    <h2 class="text-center mb-4 fw-bold" style="color:var(--dark)">INVENTORI IBU BAPA</h2>
+
+<div class="container">
     
-    <div id="formCard" class="custom-card">
-      <form id="quizForm">
-        <div class="row g-3 mb-4">
-          <div class="col-md-6"><label class="fw-bold">Nama Ibu/Bapa</label><input type="text" name="nama" class="form-control" required placeholder="Cth: Puan Siti"></div>
-          <div class="col-md-6"><label class="fw-bold">Nama Pelajar</label><input type="text" name="anak" class="form-control" required placeholder="Cth: Aiman"></div>
+    <div class="logo-container">
+        <img src="https://github.com/luqmanjuhar/kamus-catur-portal/blob/ab56b3622a58a8296f96c0527aa430f64cf093fa/Asset%2028.png?raw=true" alt="Logo Kamus Catur">
+    </div>
+
+    <div id="intro-section">
+        <h1>Profil Ibubapa Catur</h1>
+        <p class="intro">Ketahui gaya keibubapaan anda (Parenting Style) & tahap evolusi dalam dunia catur.<br>Pilih: <strong>1 (Tidak Setuju)</strong> hingga <strong>5 (Setuju)</strong>.</p>
+    </div>
+
+    <div id="quiz-form">
+        <div style="margin-bottom: 40px; text-align: center;">
+            <input type="text" id="parentName" placeholder="Masukkan Nama Penuh Anda...">
         </div>
-        <div id="soalanContainer"></div>
-        <button type="submit" id="submitBtn" class="btn-theme mt-5">ANALISIS & SIMPAN</button>
-      </form>
+
+        <div id="questions-container"></div>
+
+        <button onclick="calculateAndSubmit()">DAPATKAN ANALISIS</button>
     </div>
 
-    <div id="resultBox" class="custom-card text-center" style="display:none;">
-      <h4 id="resTitle" style="color:var(--dark); font-weight:800;">TITLE</h4>
-      <div id="resBadge" class="badge bg-secondary mb-3">ZONE</div>
-      <div style="font-size:3em; font-weight:800; color:var(--primary); line-height:1;"><span id="resTotal">0</span>/200</div>
-      
-      <div class="bg-light p-4 rounded mt-3 text-start border-start border-4 border-warning">
-        <h6 class="fw-bold text-dark">Ulasan Psikologi:</h6>
-        <p id="resReview" class="small mb-3" style="line-height:1.6;"></p>
-        <h6 class="fw-bold text-dark mt-3">Langkah Seterusnya:</h6>
-        <ul id="resTips" class="small mb-0 ps-3"></ul>
-      </div>
+    <div id="report">
+        <div class="report-card">
+            <div class="report-header-bg">
+                <div class="report-title">LAPORAN ANALISIS PSIKOMETRIK</div>
+                <div class="report-user-name" id="display-name">Nama Pengguna</div>
+            </div>
 
-      <div class="text-start mt-4">
-         <div class="cat-box d-flex justify-content-between"><span>🧠 A. Emosi</span><span id="sA" class="fw-bold"></span></div>
-         <div class="cat-box d-flex justify-content-between"><span>📊 B. Data</span><span id="sB" class="fw-bold"></span></div>
-         <div class="cat-box d-flex justify-content-between"><span>🎮 C. Control</span><span id="sC" class="fw-bold"></span></div>
-         <div class="cat-box d-flex justify-content-between"><span>⚖️ D. Balance</span><span id="sD" class="fw-bold"></span></div>
-         
-         <div class="alert alert-warning mt-3">
-           <b>⚠️ Diagnosis Utama:</b> <span id="domType"></span><br>
-           <small id="domProb" class="d-block mt-1"></small>
-           <hr>
-           <small id="domRx" class="text-danger fst-italic fw-bold"></small>
-         </div>
-      </div>
-      <button onclick="downloadPDF()" class="btn btn-success mt-4 rounded-pill px-4">📥 Muat Turun PDF</button>
+            <div class="result-section">
+                <div class="result-label">GAYA KEIBUBAPAAN (STYLE)</div>
+                <div class="result-main-text" id="result-type">...</div>
+                <div class="result-desc" id="desc-type">...</div>
+
+                <div class="result-label">TAHAP EVOLUSI (STAGE)</div>
+                <div class="result-main-text" id="result-stage">...</div>
+                <div class="result-desc" id="desc-stage">...</div>
+
+                <div class="tips-container">
+                    <div class="tips-title">💡 CADANGAN & TIPS</div>
+                    <ul class="tips-list" id="tips-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="screenshot-alert">
+            <span>📸</span> Sila Screenshot (Tangkap Layar) Laporan Ini Untuk Simpanan.
+        </div>
     </div>
-  </div>
 
-  <script>
-    const qs = [
-      "Fizikal tertekan bila anak kalah.", "Sukar cakap lembut lepas blunder.", "Malu jumpa parent lain.", "Mood ikut prestasi anak.", "Salahkan faktor luar.", "Tunjuk silap segera.", "Menang anak = kejayaan saya.", "Sukar tidur lepas kalah.", "Marah anak dalam kereta.", "Fokus kenapa kalah.", 
-      "Semak chess-results kerap.", "Tahu rating lawan dulu.", "Kira rating changes.", "Kecewa rating drop.", "Banding graf anak.", "Target rating wajib.", "Stalk lawan.", "Main sebab rating.", "Hafal rating orang.", "Rating = kepintaran.", 
-      "Bagi arahan teknikal.", "Lebih tahu dari coach.", "Tukar coach kerap.", "Pantau training ketat.", "Guna engine buktikan coach salah.", "Paksa latih masa sakit.", "Rungut pasal arbiter.", "Duduk dekat papan.", "Suruh draw/tulis.", "Soal coach depan anak.", 
-      "Cuti = Tournament.", "Belanja lebih mampu.", "Bual catur 90%.", "Ponteng sekolah.", "Harap pulangan duit.", "Tiada hobi lain.", "Ungkit duit.", "Gaduh suami isteri.", "Catur satu-satunya jalan.", "Kawan parent catur je."
+</div>
+
+<script>
+    // =========================================================
+    // PASTE URL GOOGLE APPS SCRIPT ANDA DI BAWAH (ANTARA " ")
+    // =========================================================
+    const GOOGLE_SCRIPT_URL = "MASUKKAN_WEB_APP_URL_ANDA_DI_SINI"; 
+    // =========================================================
+
+    const questions = [
+        // BAHAGIAN 1: EMOSI & REAKSI
+        { section: "Bahagian A: Emosi & Reaksi", t: "B", q: "Saya rasa sangat kecewa atau marah jika anak saya kalah kepada pemain yang ratingnya lebih rendah." },
+        { t: "A", q: "Saya selalu berkata 'Seronok tak main tadi?' sebelum bertanya tentang keputusan menang/kalah." },
+        { t: "B", q: "Saya berasa stres apabila melihat 'pairing' (undian lawan) anak saya sebelum pusingan bermula." },
+        { t: "B", q: "Kekalahan anak mempengaruhi mood saya sepanjang hari." },
+        { t: "A", q: "Saya percaya kekalahan adalah sebahagian daripada proses pembelajaran yang penting." },
+        { t: "B", q: "Saya selalu membandingkan prestasi anak saya dengan anak orang lain di media sosial." },
+        { t: "A", q: "Saya memastikan anak saya mempunyai masa rehat dan hobi lain selain catur." },
+        { t: "B", q: "Saya memeriksa rating anak saya (FIDE/National) hampir setiap hari atau setiap minggu." },
+        { t: "A", q: "Saya gembira melihat anak mendapat kawan baru di kejohanan, tanpa mengira keputusan game." },
+        { t: "B", q: "Saya rasa pelaburan wang saya sia-sia jika anak tidak membawa pulang pingat." },
+
+        // BAHAGIAN 2: LATIHAN
+        { section: "Bahagian B: Penglibatan Latihan", t: "C", q: "Saya sering memberi arahan teknikal (cth: 'Kenapa tak makan Bishop?') sejurus selepas game tamat." },
+        { t: "C", q: "Saya duduk di sebelah anak semasa mereka berlatih di rumah untuk memastikan mereka buat dengan betul." },
+        { t: "C", q: "Saya rasa saya lebih tahu apa yang anak saya perlu latih berbanding jurulatihnya." },
+        { t: "C", q: "Saya sering mengganggu sesi latihan untuk membetulkan apa yang jurulatih katakan." },
+        { t: "C", q: "Saya membeli berpuluh buku catur dan mengharapkan anak menghabiskannya." },
+        { t: "C", q: "Saya cuba menjadi pengurus, jurulatih, dan ahli psikologi anak serentak." },
+        { t: "C", q: "Saya sering menganalisis game anak guna komputer (Stockfish) dan mengkritik kesilapan mereka." },
+        { t: "D", q: "Saya membayar yuran jurulatih tetapi tidak tahu apa topik yang sedang mereka pelajari." },
+        { t: "D", q: "Saya menghantar anak ke pertandingan tetapi jarang masuk ke dewan untuk melihat mereka." },
+        { t: "A", q: "Saya menyokong minat anak, tetapi inisiatif untuk berlatih datang daripada mereka sendiri." },
+
+        // BAHAGIAN 3: FASA (STAGE)
+        { section: "Bahagian C: Komitmen & Fasa", t: "Stage", q: "Saya baru sahaja membeli set catur kejohanan pertama untuk anak saya." }, 
+        { t: "Stage", q: "Kami baru mula menyertai pertandingan di peringkat daerah/negeri." },
+        { t: "Stage", q: "Saya mula menyedari bahawa menjadi juara sekolah tidak bermakna hebat di peringkat kebangsaan." },
+        { t: "Stage", q: "Saya terkejut melihat betapa kompetitifnya dunia catur sebenar berbanding main suka-suka." },
+        { t: "Stage", q: "Saya membelanjakan ribuan ringgit setahun untuk perjalanan, penginapan dan yuran jurulatih." },
+        { t: "Stage", q: "Cuti tahunan saya dihabiskan semata-mata untuk menemani anak ke kejohanan catur." },
+        { t: "Stage", q: "Saya sedang mencari jurulatih Grandmaster atau Master Antarabangsa untuk anak." },
+        { t: "Stage", q: "Saya merasakan komuniti catur kini adalah keluarga kedua saya." },
+        { t: "Stage", q: "Anak saya sudah main catur lebih 5 tahun dan saya sudah faham 'pasang surut' permainan ini." },
+        { t: "Stage", q: "Saya sudah lali dengan kekalahan dan tidak lagi melenting." },
+
+        // BAHAGIAN 4: FALSAFAH
+        { section: "Bahagian D: Falsafah", t: "B", q: "Saya memaksa anak berlatih catur walaupun mereka nampak letih atau tidak berminat pada hari itu." },
+        { t: "B", q: "Saya merasakan prestasi catur anak saya mencerminkan maruah saya sebagai ibubapa." },
+        { t: "D", q: "Bagi saya, catur hanyalah aktiviti untuk mengisi masa lapang anak supaya tidak main gajet." },
+        { t: "D", q: "Saya tidak tahu beza antara rating Rapid dan Standard." },
+        { t: "B", q: "Saya risau anak saya ketinggalan berbanding rakan sebayanya yang lain dalam catur." },
+        { t: "A", q: "Saya menyediakan persekitaran yang tenang untuk anak belajar tanpa tekanan." },
+        { t: "A", q: "Saya sentiasa mengingatkan anak bahawa 'Catur adalah maraton, bukan lari pecut'." },
+        { t: "A", q: "Fokus utama saya adalah pembentukan karakter (disiplin, sabar) melalui catur, bukan pingat." },
+        { t: "B", q: "Saya merancang jadual hidup keluarga sepenuhnya mengikut jadual pertandingan catur." },
+        { t: "Stage", q: "Saya tidak lagi kisah sangat tentang keputusan, asalkan anak kekal aktif dan positif." } 
     ];
 
-    const cont = document.getElementById('soalanContainer');
-    qs.forEach((q, i) => {
-      let sec = i<10?"A: EMOSI":i<20?"B: DATA":i<30?"C: CONTROL":"D: BALANCE";
-      if(i%10===0) cont.innerHTML += `<div class="badge bg-secondary mt-4 mb-2">${sec}</div>`;
-      cont.innerHTML += `<div class="border-bottom py-2"><p class="mb-1 small fw-bold">${i+1}. ${q}</p><div class="d-flex justify-content-center">${[1,2,3,4,5].map(v=>`<div class="likert-opt"><input type="radio" name="q${i+1}" value="${v}" required><div style="font-size:9px">${v}</div></div>`).join('')}</div></div>`;
+    // Render Soalan
+    const container = document.getElementById("questions-container");
+    questions.forEach((item, index) => {
+        if (item.section) {
+            const sectionHeader = document.createElement("div");
+            sectionHeader.className = "section-header";
+            sectionHeader.innerText = item.section;
+            container.appendChild(sectionHeader);
+        }
+
+        const div = document.createElement("div");
+        div.className = "question-block";
+        div.innerHTML = `
+            <span class="question-text">${index + 1}. ${item.q}</span>
+            <div class="options">
+                <label><input type="radio" name="q${index}" value="1"> 1</label>
+                <label><input type="radio" name="q${index}" value="2"> 2</label>
+                <label><input type="radio" name="q${index}" value="3"> 3</label>
+                <label><input type="radio" name="q${index}" value="4"> 4</label>
+                <label><input type="radio" name="q${index}" value="5"> 5</label>
+            </div>
+        `;
+        container.appendChild(div);
     });
 
-    document.getElementById('quizForm').onsubmit = function(e) {
-      e.preventDefault();
-      document.getElementById('submitBtn').innerText = "MENYIMPAN...";
-      
-      const fd = new FormData(this);
-      let t=0, sA=0, sB=0, sC=0, sD=0;
-      for(let i=1; i<=40; i++) {
-        let v = parseInt(fd.get('q'+i));
-        t+=v; if(i<=10)sA+=v; else if(i<=20)sB+=v; else if(i<=30)sC+=v; else sD+=v;
-      }
-      
-      let prof = {};
-      if(t<=80) {
-         prof.title="THE SUPPORTIVE GARDENER"; prof.badge="IBU BAPA IDEAL";
-         prof.rev="Tahniah. Anda berada di zon yang sangat sihat. Anda menganggap catur sebagai alat pendidikan, bukan alat untuk memuaskan ego sendiri. Anda menyiram 'bunga' (anak) dan membiarkannya tumbuh mengikut kadarnya sendiri."; 
-         prof.tips=["Teruskan memberi sokongan tanpa syarat (Unconditional Love).", "Fokus kepada keseronokan bermain, bukan keputusan.", "Kekalkan jarak yang sihat dengan jurulatih."];
-      } else if(t<=120) {
-         prof.title="THE ENTHUSIASTIC MANAGER"; prof.badge="ZON BERHATI-HATI";
-         prof.rev="Anda sangat komited dan mahukan yang terbaik, tetapi kadangkala semangat anda memberi tekanan tidak sedar kepada anak. Anda mungkin mula terlalu memandang nombor dan ranking."; 
-         prof.tips=["Kurangkan melihat chess-results semasa kejohanan.", "Jangan bincang pasal catur dalam perjalanan pulang jika anak kalah.", "Berikan anak ruang untuk bernafas selepas game."];
-      } else if(t<=160) {
-         prof.title="THE HELICOPTER TIGER"; prof.badge="ZON BAHAYA";
-         prof.rev="Amaran. Penglibatan anda terlalu tinggi (over-involved). Identiti diri anda mula terikat dengan prestasi anak. Anak mungkin bermain kerana takut mengecewakan anda, bukan kerana minat."; 
-         prof.tips=["Wajibkan 'Zon Bebas Catur' di rumah.", "Berhenti menganalisis game anak. Serahkan 100% pada coach.", "Pertimbangkan untuk tidak hadir ke beberapa kejohanan kecil."];
-      } else {
-         prof.title="THE OBSESSIVE PARENT"; prof.badge="ZON TOKSIK";
-         prof.rev="Situasi ini kritikal. Obsesi anda sedang merosakkan minat anak dan hubungan kekeluargaan. Risiko 'burnout' anak sangat tinggi. Catur bukan lagi permainan, tetapi bebanan hutang emosi."; 
-         prof.tips=["Anda memerlukan 'Detox Catur' segera (rehat 1-2 bulan).", "Dapatkan kaunseling atau nasihat profesional.", "Refleksi semula: Adakah ini impian anda atau impian anak?"];
-      }
+    function calculateAndSubmit() {
+        const name = document.getElementById("parentName").value.trim();
+        if (!name) { alert("Sila masukkan Nama Penuh anda."); return; }
 
-      let max = Math.max(sA,sB,sC,sD);
-      let dom="", prob="", rx="";
-      if(max===sA){ dom="Emotional Rollercoaster"; prob="Emosi tidak stabil. Anak takut memberitahu keputusan game."; rx="Amalkan teknik pernafasan 4-7-8. 'No Post-Mortem' 2 jam lepas game."; }
-      else if(max===sB){ dom="The Rating Slave"; prob="Melihat anak sebagai nombor. Anak takut ambil risiko."; rx="Padam app Elo Calculator. Fokus performance, bukan result."; }
-      else if(max===sC){ dom="The Sideline Coach"; prob="Mengelirukan anak dan merosakkan autoriti coach."; rx="Perjanjian bisu: Anda hanya 'Pemandu & Penaja Makanan'."; }
-      else { dom="The All-In Gambler"; prob="Menuntut pulangan pelaburan kewangan melalui kemenangan."; rx="Cari hobi lain. Tetapkan bajet ketat. Hujung minggu tanpa catur."; }
+        let scores = { A: 0, B: 0, C: 0, D: 0 };
+        let answeredCount = 0;
+        let rawAnswers = [];
 
-      const payload = { nama: fd.get('nama'), anak: fd.get('anak'), total: t, profil: prof.title, skorA: sA, skorB: sB, skorC: sC, skorD: sD, dominan: dom };
-      
-      google.script.run.withSuccessHandler(() => {
-         document.getElementById('formCard').style.display = 'none';
-         document.getElementById('resultBox').style.display = 'block';
-         document.getElementById('resTotal').innerText = t;
-         document.getElementById('resTitle').innerText = prof.title;
-         
-         let bg = t<=80?"bg-success":t<=120?"bg-warning text-dark":t<=160?"bg-orange":"bg-danger";
-         document.getElementById('resBadge').className = `badge ${bg} mb-3 fs-6`;
-         document.getElementById('resBadge').innerText = prof.badge;
-         
-         document.getElementById('resReview').innerText = prof.rev;
-         let ul = document.getElementById('resTips'); ul.innerHTML="";
-         prof.tips.forEach(x => ul.innerHTML+=`<li>${x}</li>`);
+        questions.forEach((item, index) => {
+            const radios = document.getElementsByName(`q${index}`);
+            let val = 0;
+            for (const radio of radios) {
+                if (radio.checked) { val = parseInt(radio.value); break; }
+            }
+            if (val > 0) {
+                answeredCount++;
+                rawAnswers.push(val);
+                if (item.t !== "Stage") scores[item.t] += val;
+            } else {
+                rawAnswers.push(0);
+            }
+        });
 
-         document.getElementById('sA').innerText = sA+"/50"; document.getElementById('sB').innerText = sB+"/50";
-         document.getElementById('sC').innerText = sC+"/50"; document.getElementById('sD').innerText = sD+"/50";
-         document.getElementById('domType').innerText = dom; document.getElementById('domProb').innerText = prob; document.getElementById('domRx').innerText = rx;
-      }).simpanIbuBapa(payload);
-    };
+        if (answeredCount < 40) {
+            alert("Sila jawab semua 40 soalan. Anda baru menjawab " + answeredCount + " soalan.");
+            return;
+        }
 
-    function downloadPDF() {
-      html2pdf().set({ margin:0.4, filename:`Parent_${document.getElementById('resTotal').innerText}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'letter'} }).from(document.getElementById('resultBox')).save();
+        // Logic
+        let maxScore = 0;
+        let type = "";
+        for (const [key, value] of Object.entries(scores)) {
+            if (value > maxScore) { maxScore = value; type = key; }
+        }
+
+        let stage = "Tahap 2: Kejutan Realiti"; 
+        const s1Score = rawAnswers[20] + rawAnswers[21];
+        const s2Score = rawAnswers[22] + rawAnswers[23];
+        const s3Score = rawAnswers[24] + rawAnswers[25] + rawAnswers[26] + rawAnswers[27];
+        const s4Score = rawAnswers[28] + rawAnswers[29] + rawAnswers[39];
+        const avgS1 = s1Score / 2;
+        const avgS2 = s2Score / 2;
+        const avgS3 = s3Score / 4;
+        const avgS4 = s4Score / 3;
+        const maxStageAvg = Math.max(avgS1, avgS2, avgS3, avgS4);
+        
+        if (maxStageAvg === avgS1) stage = "Tahap 1: Fasa Penemuan (Honeymoon)";
+        else if (maxStageAvg === avgS2) stage = "Tahap 2: Kejutan Realiti";
+        else if (maxStageAvg === avgS3) stage = "Tahap 3: Komitmen Tinggi (Deep Dive)";
+        else if (maxStageAvg === avgS4) stage = "Tahap 4: Kematangan (Acceptance)";
+
+        // Generate clean report
+        generateCleanReport(type, stage, name);
+
+        // Send to GS
+        if(GOOGLE_SCRIPT_URL !== "MASUKKAN_WEB_APP_URL_ANDA_DI_SINI") {
+            const btn = document.querySelector("button");
+            const originalText = btn.innerText;
+            btn.innerText = "Menganalisis...";
+            btn.disabled = true;
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nama: name,
+                    skor_jenis: mapTypeToName(type),
+                    skor_tahap: stage,
+                    jawapan_mentah: rawAnswers.join(",")
+                })
+            }).then(() => {
+                console.log("Data dihantar");
+                btn.innerText = originalText;
+            }).catch(e => {
+                console.error(e);
+                btn.innerText = originalText;
+            });
+        }
     }
-  </script>
+
+    function mapTypeToName(type) {
+        if (type === 'A') return "Penyokong Seimbang (The Supportive)";
+        if (type === 'B') return "Ibubapa Helikopter/Obses (The Obsessed)";
+        if (type === 'C') return "Jurulatih Sampingan (The Coach-Parent)";
+        if (type === 'D') return "Pelabur Pasif (The Passive Investor)";
+        return "Tidak Pasti";
+    }
+
+    function generateCleanReport(type, stage, name) {
+        const reportDiv = document.getElementById("report");
+        
+        // Isi Data
+        document.getElementById("display-name").innerText = name;
+        document.getElementById("result-type").innerText = mapTypeToName(type);
+        document.getElementById("result-stage").innerText = stage;
+
+        let descType = "";
+        let tipsHTML = "";
+
+        if (type === 'A') {
+            descType = "Anda adalah ibubapa ideal yang mengutamakan kesihatan mental anak. Anak berasa selamat bermain tanpa tekanan.";
+            tipsHTML = `<li>Kekalkan keseimbangan ini apabila anak naik level lebih tinggi.</li><li>Teruskan bertanya 'Apa yang awak belajar?' berbanding 'Awak menang tak?'.</li>`;
+        } else if (type === 'B') {
+            descType = "Anda sangat mengambil berat, tetapi berisiko memberi tekanan tinggi. Jika anak stres, ia mungkin kerana harapan terlalu tinggi.";
+            tipsHTML = `<li>Berhenti periksa rating anak setiap hari. Ia hanyalah nombor.</li><li>Jangan tunjuk muka kecewa bila anak kalah. Senyum & peluk mereka.</li><li>Elak membandingkan anak dengan orang lain.</li>`;
+        } else if (type === 'C') {
+            descType = "Anda banyak terlibat secara teknikal. Niat baik, tetapi boleh mengelirukan anak atau bertentangan dengan jurulatih sebenar.";
+            tipsHTML = `<li>Serahkan tugas teknikal 100% kepada jurulatih.</li><li>Fokus tugas anda sebagai penyokong moral dan logistik sahaja.</li><li>Hanya beri nasihat jika diminta.</li>`;
+        } else if (type === 'D') {
+            descType = "Anda penyumbang dana yang baik, tetapi mungkin kurang terlibat secara emosi. Anak mungkin rasa catur hanyalah 'kerja'.";
+            tipsHTML = `<li>Cuba hadir ke dewan kejohanan dan tonton 1 pusingan penuh.</li><li>Belajar sedikit asas catur untuk berbual dengan anak.</li>`;
+        }
+
+        let descStage = "";
+        if (stage.includes("Tahap 1")) descStage = "Fasa seronok. Baru menang peringkat sekolah. Nikmati masa ini, cabaran sebenar bakal tiba.";
+        if (stage.includes("Tahap 2")) descStage = "Fasa kritikal. Mula kalah di level tinggi. Ramai berhenti di sini. Anda perlu kuat semangat.";
+        if (stage.includes("Tahap 3")) descStage = "Fasa komitmen tinggi. Catur jadi gaya hidup. Kos tinggi & masa banyak dikorbankan.";
+        if (stage.includes("Tahap 4")) descStage = "Fasa matang. Anda tenang, faham adat permainan, dan serah tanggungjawab pada anak.";
+
+        document.getElementById("desc-type").innerText = descType;
+        document.getElementById("desc-stage").innerText = descStage;
+        document.getElementById("tips-list").innerHTML = tipsHTML;
+
+        // Show Report
+        document.getElementById("quiz-form").style.display = "none"; 
+        document.getElementById("intro-section").style.display = "none";
+        reportDiv.style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
 </body>
 </html>
